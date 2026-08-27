@@ -1,0 +1,3 @@
+[submodule "dizzy"]
+	path = dizzy
+	url = git@github.com:ConradMearns/dizzy.git

@@ -1,0 +1,1099 @@
+<title>Dizzy Engine Ledger</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--bg:#F5F7F4;--ink:#1B1F23;--mute:#5F6B74;--rule:#D6DCD8;--panel:#FFFFFF;--accent:#2F5D8A;--accent-ink:#1F4266;
+--pass:#2E7D4F;--pass-bg:#E4F2E9;--fail:#B3261E;--fail-bg:#F9E3E1;--code-bg:#EEF1EE;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#151A1E;--ink:#E6EAE7;--mute:#98A3AB;--rule:#2C353C;--panel:#1C2328;--accent:#7FB0E0;--accent-ink:#A9CBEE;
+--pass:#7ED3A0;--pass-bg:#1C3527;--fail:#F19A93;--fail-bg:#43201D;--code-bg:#232B31;}}
+:root[data-theme="dark"]{--bg:#151A1E;--ink:#E6EAE7;--mute:#98A3AB;--rule:#2C353C;--panel:#1C2328;--accent:#7FB0E0;--accent-ink:#A9CBEE;
+--pass:#7ED3A0;--pass-bg:#1C3527;--fail:#F19A93;--fail-bg:#43201D;--code-bg:#232B31;}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans",system-ui,sans-serif;margin:0;padding:2.5rem 1.25rem 5rem}
+main{max-width:72rem;margin:0 auto}
+h1,h2,h3{font-family:"Source Serif 4",Georgia,serif;font-weight:600;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:2.4rem;line-height:1.1;margin:0 0 .5rem} h2{font-size:1.6rem;margin:3rem 0 .5rem;padding-top:1.5rem;border-top:1px solid var(--rule)}
+h3{font-size:1.15rem;margin:2rem 0 .25rem} h4{font:500 .8rem/1 "IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin:1.5rem 0 .5rem}
+code,pre{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.88em}
+code{background:var(--code-bg);padding:.1em .35em;border-radius:3px}
+pre{background:var(--code-bg);padding:1rem;overflow-x:auto;line-height:1.4;font-size:.8rem;margin:.5rem 0 0}
+.lede{max-width:65ch;color:var(--mute);margin:0 0 1.5rem} .intro{max-width:70ch}
+.strip{display:flex;gap:2.5rem;flex-wrap:wrap;padding:1rem 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);margin:1.5rem 0}
+.strip div{display:flex;flex-direction:column} .strip b{font:600 1.7rem/1.1 "Source Serif 4",serif;font-variant-numeric:tabular-nums}
+.strip span{font:500 .72rem/1.4 "IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}
+.count{font:500 .9rem "IBM Plex Mono",monospace;color:var(--mute);margin-left:.5rem}
+.tbl{overflow-x:auto;background:var(--panel);border:1px solid var(--rule);border-radius:4px}
+table{border-collapse:collapse;width:100%;font-size:.92rem} th{text-align:left;font:500 .72rem/1.4 "IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);padding:.7rem .9rem;border-bottom:1px solid var(--rule)}
+td{padding:.6rem .9rem;border-bottom:1px solid var(--rule);vertical-align:top} tr:last-child td{border-bottom:0}
+td.kind{color:var(--mute);white-space:nowrap;font-size:.85rem} .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{display:inline-block;font:500 .72rem/1 "IBM Plex Mono",monospace;letter-spacing:.04em;padding:.35em .6em;border-radius:999px;white-space:nowrap}
+.pill.pass{color:var(--pass);background:var(--pass-bg)} .pill.fail{color:var(--fail);background:var(--fail-bg)}
+details{margin:.4rem 0} summary{cursor:pointer;color:var(--accent-ink)} summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+details.src{margin-top:1.5rem} details.src pre{max-height:32rem}
+.finding{background:var(--panel);border:1px solid var(--rule);border-left:3px solid var(--accent);padding:.5rem .9rem;border-radius:3px}
+.finding.contested{border-left-color:var(--mute)} .finding p{max-width:75ch;margin:.5rem 0}
+.sev{font:500 .7rem "IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--fail);margin-right:.5rem}
+.lens{font:.75rem "IBM Plex Mono",monospace;color:var(--mute);margin-left:.5rem} .ref{color:var(--mute);font-size:.85rem}
+.votes{font-size:.88rem;padding-left:1.2rem} .muted{color:var(--mute)}
+.method{max-width:70ch} .method dt{font-weight:500;margin-top:.6rem} .method dd{margin:0;color:var(--mute)}
+</style>
+<main>
+<h1>Dizzy Engine Ledger</h1>
+<p class="lede">Every check run against the Quint engine specifications: what was asked, how it was checked, and what came back.
+Generated 2026-08-27 12:33:40 · quint 0.32.0 · dizzy @ <code>7f66a31</code> · 8000 samples × 20 steps per simulation.</p>
+<div class="strip"><div><b>46/46</b><span>checks as expected</span></div>
+<div><b>22</b><span>invariants holding</span></div>
+<div><b>22</b><span>witnesses reachable</span></div>
+<div><b>2/2</b><span>bounded proofs</span></div></div>
+<dl class="method">
+<dt>invariant · simulation</dt><dd>Random traces from the nondeterministic step relation; a violation prints a concrete counterexample.</dd>
+<dt>witness · reachability</dt><dd>Runs <code>--invariant=not(X)</code>. A violation is the desired outcome: it is a trace that reaches X, proving the invariants are not vacuous.</dd>
+<dt>Apalache · bounded</dt><dd>Symbolic model checking of every behaviour up to the stated depth, across every graph (and placement) the <code>init</code> can draw.</dd>
+</dl>
+<section>
+<h2>Spec 1 — single-threaded engine <span class="count">21/21</span></h2>
+<p class="intro">One hybrid group, one lane, one cursor. <code>run_command</code> is a single atomic step: claim → run procedure → append → fold → commit → run policies → dispatch. The feature graph is drawn nondeterministically at <code>init</code>, so every check ranges over every feature of the bounded size (2 procedures, 1 policy, 2 models, 2 event kinds ≈ 10⁶ graphs).</p>
+<div class="tbl"><table><thead><tr><th>check</th><th>method</th><th>what it says</th><th class="num">time</th><th>result</th></tr></thead>
+<tbody><tr>
+<td><code>zeroLag</code></td>
+<td class="kind">invariant · simulation</td>
+<td>I1 no lag: cursor == log.length()</td>
+<td class="num">5.4s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>modelsAreFold</code></td>
+<td class="kind">invariant · simulation</td>
+<td>I2 carried models are a refold of the log (the rebuild guarantee)</td>
+<td class="num">6.6s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>blocksWellFormed</code></td>
+<td class="kind">invariant · simulation</td>
+<td>I3 every run leaves one complete, contiguous, ordered block</td>
+<td class="num">10.3s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>effectsOnce</code></td>
+<td class="kind">invariant · simulation</td>
+<td>I3&#x27; exactly-once effects for GUARDABLE procedures, when the application guards</td>
+<td class="num">8.1s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>causal</code></td>
+<td class="kind">invariant · simulation</td>
+<td>I4 policy-dispatched effects follow a trigger the policy reacts to</td>
+<td class="num">6.3s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>freshReads</code></td>
+<td class="kind">invariant · simulation</td>
+<td>I5 every procedure read the fold of everything before its block</td>
+<td class="num">10.0s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>freshDispatch</code></td>
+<td class="kind">invariant · simulation</td>
+<td>I6 every dispatching policy read the fold through its trigger</td>
+<td class="num">6.2s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>freshQueue</code></td>
+<td class="kind">invariant · simulation</td>
+<td>I6&#x27; the same, for commands still queued</td>
+<td class="num">9.4s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>dispatchComplete</code></td>
+<td class="kind">invariant · simulation</td>
+<td>I7 every reacting policy of every event has dispatched</td>
+<td class="num">8.7s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>emitComplete</code></td>
+<td class="kind">invariant · simulation</td>
+<td>I7&#x27; every command that ran left its block</td>
+<td class="num">7.3s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>queueIdsDistinct</code></td>
+<td class="kind">invariant · simulation</td>
+<td>I8 one DB row per command</td>
+<td class="num">9.8s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>witnessCascade</code></td>
+<td class="kind">witness · reachability</td>
+<td>a policy-dispatched command ran</td>
+<td class="num">2.8s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessReader</code></td>
+<td class="kind">witness · reachability</td>
+<td>a procedure observed a non-empty model</td>
+<td class="num">2.7s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessPolicyReader</code></td>
+<td class="kind">witness · reachability</td>
+<td>a policy observed a non-empty model</td>
+<td class="num">2.8s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessPriority</code></td>
+<td class="kind">witness · reachability</td>
+<td>an interactive command was claimed ahead of the queue head</td>
+<td class="num">2.5s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessBound</code></td>
+<td class="kind">witness · reachability</td>
+<td>the log bound was reached (cascades are bounded, not absent)</td>
+<td class="num">2.5s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessRedelivered</code></td>
+<td class="kind">witness · reachability</td>
+<td>a claimed row was recovered and re-queued</td>
+<td class="num">2.4s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessGuardNoop</code></td>
+<td class="kind">witness · reachability</td>
+<td>a guarding procedure saw its own block and no-op&#x27;d its redelivery</td>
+<td class="num">2.4s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessUnguardable</code></td>
+<td class="kind">witness · reachability</td>
+<td>a guarding application still double-appended: the procedure was not guardable</td>
+<td class="num">2.5s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessDoubleAppend</code></td>
+<td class="kind">witness · reachability</td>
+<td>an unguarded redelivery appended a second block (executor.py:49-56)</td>
+<td class="num">2.3s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>allInvariants</code></td>
+<td class="kind">Apalache · bounded</td>
+<td>Apalache: all invariants, every graph × guard, 4 steps</td>
+<td class="num">315.8s</td>
+<td><span class="pill pass">holds</span></td></tr></tbody></table></div>
+<section class="review">
+<h3>Adversarial review</h3>
+
+<h4>Accepted — fixed in this revision (18)</h4><details class="finding confirmed"><summary><span class="sev">minor</span> Crash between append and fold, and rebuild/refold, are covered only implicitly; the spec should say that I2 *is* the rebuild guarantee and that its positions are the local watermark
+<span class="lens"></span></summary>
+<p>In the code, append (loop.py:333) precedes fold (:345); a crash between them leaves the log one entry ahead of the models with the row still `running`. On restart models.db is disposable (command_queue.py:10-11) and `rebuild` refolds `store.iterate()` (rebuild.py:54), then the row replays (finding 1). The spec has no such window — `zeroLag` and `modelsAreFold` are invariants — and that is defensible for st because `modelsAreFold` is exactly what rebuild recomputes: models == foldPrefix(g, log, |log|). But nothing says so, and the spec&#x27;s `cursor`/positions are silently the local insertion watermark that topology.md:361-366 distinguishes from canonical order; rebuild iterates canonical order, which coincides with insertion order only while no replicated fact has entered the store.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/st.qnt:32, :121-125; /home/conrad/dizzy-quint/specs/graph.qnt:77-79</code> · <code>/home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/loop.py:333-345; rebuild.py:31-54; st/command_queue.py:10-11; docs/explanation/topology.md:361-366</code></p>
+<p><em>suggested fix:</em> Nowhere as a new action for st (I2 already carries it), but add two comments: on I2, &#x27;this is the rebuild post-condition: a refold from zero equals the carried models, so a crash between append and fold is repaired by rebuild + replay (see crash action)&#x27;; on `var cursor`, &#x27;positions are the local insertion watermark (topology.md), valid only because st never calls add_replicated — see the replication note&#x27;. If a crash action is added per finding 1, let it optionally set `models&#x27; = emptyView; cursor&#x27; = 0` followed by a `rebuild` action that restores `foldPrefix`, so zeroLag becomes a post-rebuild property rather than a global invariant.</p><ul class="votes"><li><strong>accepted (documented)</strong> — I2 is stated as the rebuild guarantee.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">minor</span> Externally-originated commands lost before `put` need no action, but the spec should say why
+<span class="lens"></span></summary>
+<p>topology.md:423-426 lists as an open hazard that an API call dying before its `put` commits is gone with no log entry to re-derive it. The spec&#x27;s `submit` always lands atomically (st.qnt:51-59), matching the single-lock `put` (command_queue.py:189-200). This is correctly absent as a behaviour: the host script is already an unconstrained nondet choice (st.qnt:14), so &#x27;the submission was lost&#x27; is just a different script, and no invariant quantifies over submissions. But the header lists the nondeterminism deliberately and does not mention that lost external commands are absorbed into it, so a reader checking the doc&#x27;s open items against the spec cannot tell whether it was considered.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/st.qnt:12-16, :51-59</code> · <code>/home/conrad/dizzy-quint/docs/explanation/topology.md:423-426; dizzy/dizzy/src/dizzy/engine/st/command_queue.py:179-201</code></p>
+<p><em>suggested fix:</em> Nowhere as behaviour. Add one line under &#x27;Nondeterminism, deliberately&#x27; in st.qnt: &#x27;a host command lost before put is indistinguishable from a script that never submitted it; the log&#x27;s genesis is not always an event (topology.md), and no invariant here depends on what the host intended&#x27;. If a liveness property over submissions is ever added (e.g. every submitted command eventually has a block), it must be stated over `queue`-landed commands only.</p><ul class="votes"><li><strong>accepted (documented)</strong> — No action needed; header says why.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">blocker</span> Redelivery guard is dead code and asserts a dedupe the engine does not have; at-least-once replay is not modelled
+<span class="lens"></span></summary>
+<p>st.qnt:93-95 says a redelivered command is a no-op because of &#x27;deterministic id + guarded procedure&#x27;. Neither half is in the engine: DurableCommandQueue ids are AUTOINCREMENT rows (command_queue.py:58) and `put` never dedupes; Engine.run_procedure (loop.py:289-305) runs the registered runner unconditionally; and executor.py:49-56 states outright that a replay after a crash between ingest and ack &#x27;APPENDS THE FACT AGAIN ... nothing dedups it ... every projection folds it twice&#x27;. The guard is an app-level promise topology.md:347-351 and :395-397 say &#x27;needs a test, not a paragraph&#x27;. Worse, the branch is unreachable in the spec: host ids are numbered by `submitted`, policy ids are (policy, pos, target) with pos unique per event, and there is no crash/re-queue action, so `ran` never intersects the queue (probe witness never fires over 3000 runs). Consequently effectsOnce (I3) and queueIdsDistinct (I7) hold by construction, not by checking, and the spec cannot serve as the harness for the dedupe property that rule 2 (topology.md:158-160) and cursor disposability rest on. It also cannot be the reference behaviour every topology must refine, because the reference silently assumes exactly-once while the code guarantees at-least-once.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/st.qnt:93-95 (guard), :34 (ran), :127-137 (effectsOnce), :173-175 (queueIdsDistinct)</code> · <code>/home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/st/executor.py:49-56; /home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/st/command_queue.py:13-16, 409-414; /home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/loop.py:289-305; quint run: quint run probe.qnt --main=probe --init=init --step=step --invariant=&#x27;not(witnessRedelivery)&#x27; --max-samples=3000 --max-steps=16 (no violation)</code></p>
+<p><em>suggested fix:</em> Add a `redeliver` action modelling the code&#x27;s crash window: after runCommand has ingested but before the ack, the claimed command is re-queued (command_queue.py:409-414 keeps the row id, so it re-enters at the FRONT of its priority level, not the tail). Then decide which world st is specifying: (a) engine-as-built — remove the `ran` guard, let the replay append a second block, and weaken I3 to &#x27;every block of the same cause has identical kinds/views&#x27; (models confluent, log not); or (b) engine-plus-guarded-procedures — keep the guard but make it a named assumption (e.g. `pure val GUARDED = true`) and add a witness proving the branch is reachable. Either way effectsOnce/queueIdsDistinct stop being vacuous.</p><ul class="votes"><li><strong>accepted</strong> — Modelled as the code has it: `redeliver` re-queues the recovered row at the front; `guarded` is a nondet named assumption; `effectsOnce` is conditional on it; `witnessDoubleAppend` shows the unguarded replay.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">major</span> Host submissions are atomic with respect to a whole unit of work; the code serializes only per `put`, so st admits interleavings the spec forbids and the cited `deterministic` value does not exist
+<span class="lens"></span></summary>
+<p>In the code a host&#x27;s `put` takes `_cond` for one INSERT and releases it (command_queue.py:189-200); the unit of work on the pump thread (executor.py:558-563 -&gt; loop.py:266) holds no lock across run_procedure + ingest. Policies dispatch per event inside the drain (loop.py:396-402), each dispatch being its own INSERT, so a host command submitted from another thread can obtain an id between two dispatches of the same unit and will be claimed in that FIFO position. st.qnt:103 appends all of a unit&#x27;s dispatches as one block and `submit` is a separate atomic step, and the probe shows no reachable state has a host command between two same-`at` dispatches. So the queue orders st actually produces are a strict superset of what the spec admits; a trace-refinement check of the real st against this spec would reject legal executions. The header&#x27;s stronger claim — &#x27;given a graph and a host script, st is a deterministic function; `deterministic` below states that&#x27; — is not stated: no `deterministic` definition exists in st.qnt or any spec file.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/st.qnt:12-16 (determinism claim, references undefined `deterministic`), :51-59 (submit), :103 (rest.concat(r.dispatched))</code> · <code>/home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/st/command_queue.py:177-201 (put is called by &#x27;engine policies + HTTP endpoints&#x27;, lock held per call); /home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/loop.py:396-402 (dispatch per event, mid-drain); /home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/st/executor.py:541-563; quint run: --invariant=&#x27;not(witnessHostBetweenDispatches)&#x27; --max-samples=3000 (no violation); grep -n deterministic specs/*.qnt</code></p>
+<p><em>suggested fix:</em> Either (a) make the atomicity an explicit named assumption in the spec (&#x27;the host submits only between pumps, from the pump thread&#x27; — the conformance-test shape) and delete or write the promised `deterministic` property; or (b) let `submit` insert at any index within the dispatched tail of the most recent unit (equivalently: split runCommand into claim + per-event ingest steps and let submit interleave), which models what LaneExecutor actually permits and makes the determinism claim honestly conditional on the host script including those interleavings.</p><ul class="votes"><li><strong>accepted</strong> — Header rewritten; no such invariant is promised.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">major</span> Intra-command emit order and multiplicity are fixed (one event per kind, KIND_LIST order), so the &#x27;every feature of the bounded size&#x27; claim does not hold and I3 partly restates the abstraction
+<span class="lens"></span></summary>
+<p>The engine preserves the procedure&#x27;s own emit order (loop.py:152-154 appends to a deque; :303 returns it as emitted) and places no constraint on count — a procedure may emit e2 then e1, emit e1 twice, or emit nothing on some inputs. runProcedure fixes exactly one event per declared kind in KIND_LIST order. Because policies run per event with the model folded through that event (st.qnt:76-84), the view a policy is tagged with at e1 differs depending on whether e2 preceded it, and log positions differ — so the order is semantically visible to I5/I6 and to any topology refinement. The bounded check therefore never explores &#x27;e2 before e1&#x27; or duplicate-kind blocks, contradicting graph.qnt:22-24 / st.qnt:13, and the second conjunct of effectsOnce (|block| == |emits(proc)|) checks the modelling choice rather than the engine.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/graph.qnt:85-92 (runProcedure), :22-24 (every feature claim); /home/conrad/dizzy-quint/specs/st.qnt:13, :128-129, :135-137</code> · <code>/home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/loop.py:152-154, 303-305 (emits are a FIFO in whatever order and count the procedure chose); /home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/st/command_queue.py:30-32</code></p>
+<p><em>suggested fix:</em> Make `emits` a list per procedure drawn from short sequences over KINDS (e.g. all lists of length &lt;= 2, allowing repeats), or keep the set and add a nondet permutation/subset choice inside runCommand (recorded in the event so determinism can still be stated relative to it). Drop the |block| == |emits| clause from I3, or replace it with &#x27;the block&#x27;s kinds equal the recorded emit list for that attempt&#x27;.</p><ul class="votes"><li><strong>accepted (documented)</strong> — One event per kind in KIND_LIST order is a stated abstraction; multiplicity/order variation is a Spec 3 item.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">minor</span> Claim models one global (priority, FIFO) lane; LaneExecutor.pump with more than one inline lane claims in LANES order, and the priority citation points to the wrong line
+<span class="lens"></span></summary>
+<p>claimIndex is faithful to `ORDER BY priority DESC, id` (command_queue.py:248-252, not :78, which is the PRIORITY_BATCH constant) for the DEFAULT_LANES topology (executor.py:107). But executor.py:558-563 iterates `inline_lanes` in LANES order and takes the first lane with any queued row, so with two inline lanes a batch command on lane A is claimed before an interactive command on lane B — priority is per lane, not global, and lane order is a second scheduling input the spec has no place for. The spec header says &#x27;one lane&#x27;, so this is a scope statement to make explicit rather than a bug, but the LaneExecutor that topology.md:285-292 says implements st is not &#x27;one lane&#x27; in general.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/st.qnt:4-5, :61-67 (claimIndex, cites st/command_queue.py:78)</code> · <code>/home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/st/executor.py:558-563, 419-421, 107-110; /home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/st/command_queue.py:248-252</code></p>
+<p><em>suggested fix:</em> State in the header that st.qnt models LANES == DEFAULT_LANES (one inline lane) and that multi-inline-lane executors are outside it (or belong to groups.qnt with a lane-order parameter). Fix the citation to command_queue.py:248-252.</p><ul class="votes"><li><strong>accepted (documented)</strong> — Single inline lane is the scope of st.qnt.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">blocker</span> No completeness invariant: an engine that never dispatches, or drops every emitted event, satisfies allInvariants
+<span class="lens"></span></summary>
+<p>Every invariant is universally quantified over what IS in the log or queue, so they only constrain things that happened; nothing says that everything that should happen did. `causal` says each non-host event has a legitimate trigger, never that each trigger produced its (y,pos,p) command; `effectsOnce` counts the block only for causes that have at least one entry, so a command whose output is dropped entirely is invisible (`ran` is never related to `log`). The exact failure topology.md wants a rule-6 check to expose — a cascade silently dying — is therefore undetectable by this invariant set, and a distributed topology that refines these invariants could still lose work. The witnesses do not repair this: `witnessCascade` shows that some run dispatches, not that every reacting policy does.</p><p class="ref"><code>specs/st.qnt:177-179 (allInvariants), specs/st.qnt:141-149 (causal), specs/st.qnt:130-137 (effectsOnce)</code> · <code>quint run: three mutants of st.qnt in the scratchpad — (a) `queue&#x27; = rest` instead of `rest.concat(r.dispatched)`, (b) `val emitted = []`, (c) `runPolicies` only when `pos % 2 == 0` — each gives `[ok] No violation found` for --invariant=allInvariants (1500 samples, 16 steps, seed 3). Contrast: dizzy/docs/explanation/topology.md:326-328 names the failure to detect as &#x27;reading an empty model, dispatching nothing, and killing a cascade permanently&#x27;; loop.py:254-258 promises &#x27;every event that cascades from it&#x27;.</code></p>
+<p><em>suggested fix:</em> Add two state invariants that st satisfies and the mutants violate: (1) cascadeComplete — for every log position i, every policy y with log[i].kind ∈ reacts(y) and every p ∈ dispatches(y), the id {origin:y, at:i, target:p} is in `ran` or among `queue` ids; (2) effectsPresent — for every c ∈ ran, the number of log entries with cause c equals |emits(c.target)| (move the second conjunct of effectsOnce to range over `ran` rather than over `log`). Re-run the three mutants to confirm they are now caught.</p><ul class="votes"><li><strong>accepted</strong> — Added `dispatchComplete` and `emitComplete`.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">major</span> A policy&#x27;s read view is discarded by runProcedure, so the log-level invariants (the refinement target) cannot see a policy reading before the fold
+<span class="lens"></span></summary>
+<p>The spec&#x27;s own framing (graph.qnt:15-20, topology.md:314-330) is that two topologies are compared by their logs. But a policy&#x27;s decision is modelled only as a tag on the Command, and runProcedure drops that tag: the event a dispatched command produces carries the procedure&#x27;s view and nothing of the policy&#x27;s. So a topology whose policies read stale models produces a log byte-identical to st&#x27;s, and `freshReads` — the property advertised as the sequential-consistency check that a rule-6-violating layout breaks — passes. Only `freshPolicyReads` catches it, and only transiently, on the queue, which is not a log-level artefact any other topology can be compared on. Additionally, a real policy that reads stale state dispatches a different command or none; the spec dispatches unconditionally, which is why finding 1 and this one compound.</p><p class="ref"><code>specs/graph.qnt:88-92 (runProcedure ignores cmd.view; event.view = restrict(proc, v) only), specs/st.qnt:151-154 (freshReads called &#x27;THE sequential-consistency property&#x27;), specs/st.qnt:161-168 (freshPolicyReads is checked on `queue` only)</code> · <code>quint run: mutant with `runPolicies(gr, e, pos, acc.models)` (pre-fold view) in ingest — allInvariants: [violation] (caught only via freshPolicyReads while the command sits in the queue); logOnly = {zeroLag, modelsAreFold, effectsOnce, causal, freshReads}: [ok] after 1500 samples. Reference: loop.py:30-34, 392-400 (fold → commit → policies is THE ordering rule); topology.md:160-162 (&#x27;a policy declaring queries: decides on a model exactly as a procedure does&#x27;).</code></p>
+<p><em>suggested fix:</em> Make the command&#x27;s provenance part of the event: either put the dispatching policy&#x27;s view into CmdId/Event (e.g. `cause: { id: CmdId, view: View }` or add `dispatchView: View` to Event, copied from cmd.view in runProcedure), and extend freshReads with `log[i].dispatchView == restrict(g, cause.origin, foldPrefix(g, log, cause.at + 1))` for non-host causes. Then freshPolicyReads becomes a log property and the m3 mutant fails logOnly.</p><ul class="votes"><li><strong>accepted</strong> — Events now carry `dispatchView`; `freshDispatch` checks it at log level.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">major</span> The &#x27;redelivered ⇒ no-op&#x27; branch is unreachable, queueIdsDistinct is true by construction, and the modelled dedupe contradicts what the executor documents
+<span class="lens"></span></summary>
+<p>There is no action that redelivers a command (no crash/recover step), so the dedupe branch, the `ran` set as a dedupe set, and the at-least-once caveat on I7 are all vacuous — the spec would pass identically with the branch deleted. Worse, the branch encodes the topology.md:348-350 story (&#x27;procedures guard, so … every one no-ops&#x27;), whereas the shipped st executor explicitly states the opposite: a redelivered command re-runs and appends its facts again under a new content address. So if a redelivery action were added, the spec as written would model a guarantee the reference implementation disclaims, and `effectsOnce` (which the run-twice mutant correctly violates) would be false of the real engine. As the reference behaviour every topology must refine, this either over-promises (idempotent replay) or under-models (no replay at all).</p><p class="ref"><code>specs/st.qnt:93-95 (ran.contains branch), specs/st.qnt:170-175 (queueIdsDistinct, &#x27;a redelivery is allowed (at-least-once)&#x27;), specs/st.qnt:34 (ran &#x27;dedupe set&#x27;)</code> · <code>quint run: witness `queue.indices().exists(i =&gt; ran.contains(queue[i].id))` with --invariant=&#x27;not(w)&#x27; — [ok] No violation in 4000 traces × 16 steps, i.e. never reachable (host ids are numbered by `submitted`, dispatched ids are keyed by a log position that is appended exactly once). dizzy/src/dizzy/engine/st/executor.py:49-56: &#x27;A replay APPENDS THE FACT AGAIN … nothing dedups it … every projection folds it twice&#x27;; command_queue.py:13-14, 409-414 (_recover re-queues running rows).</code></p>
+<p><em>suggested fix:</em> Decide which engine is the reference. Either (a) add a `redeliver` action (move a command from `ran` back to the queue, mirroring _recover) and model the code honestly — the events are appended again — then weaken effectsOnce to &#x27;per attempt&#x27; and state the dedupe as a separate, currently-false invariant that the code must earn; or (b) keep the no-op semantics but add the redeliver action so the branch is exercised, and cite the guard the code will need (executor.py:49-56 says it does not exist today). In both cases delete the dead comment at st.qnt:94 or make it reachable.</p><ul class="votes"><li><strong>accepted</strong> — Same fix as above.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">minor</span> `deterministic` is referenced as an invariant but is not defined anywhere
+<span class="lens"></span></summary>
+<p>The header promises a determinism statement that does not exist, and none of the seven invariants expresses it (they are all state predicates; determinism of the step relation given the host&#x27;s choices is a property of `runCommand` having no `nondet`, which is true but unstated and unchecked). A reader relying on the header will believe determinism is being checked.</p><p class="ref"><code>specs/st.qnt:15-16 (&#x27;st is a deterministic function; `deterministic` below states that&#x27;)</code> · <code>quint run: `grep -n deterministic specs/st.qnt` finds only the comment lines 15-16 and 94; `quint typecheck st.qnt` succeeds because nothing uses the name.</code></p>
+<p><em>suggested fix:</em> Either delete the sentence, or add a checkable form: e.g. a `run` (quint 0.32 supports `run`s) that fixes a graph and a submit script and asserts the final log equals a fixed expected list, or a temporal/step property that `runCommand` is functional — simplest is a comment noting that `runCommand` contains no `nondet` so determinism holds by inspection.</p><ul class="votes"><li><strong>accepted</strong> — Header rewritten; no such invariant is promised.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">blocker</span> `quint verify` is infeasible at the header&#x27;s recommended depth (blows up between step 3 and step 5)
+<span class="lens"></span></summary>
+<p>The header documents `quint verify st.qnt --invariant=allInvariants --max-steps=8` as the intended exhaustive check, but measured cost is roughly exponential in depth: depth 1 = 3s, depth 3 = 18s, depth 5 did not finish in 9.5 minutes, and the earlier session&#x27;s own run was cancelled at step 5. The depth-4/5 cost is in the *transition* (SeqModelChecker &#x27;Is it enabled?&#x27;), not the invariants, which points at the symbolic-index list surgery in `runCommand`: `claimIndex` is a set fold returning a symbolic index, `queue[i]` and `without(queue, i)` then slice/concat the list at that symbolic index, and `rest.concat(r.dispatched)` re-grows it each step. On top of that, every log entry carries a `View` (map to Set[int]) that `freshReads` recomputes via `foldPrefix` per index plus a `firstOf` set fold, so the invariant side grows as O(MAX_LOG^2) set constructions. As written, the &#x27;bounded check over EVERY graph&#x27; promise in graph.qnt:22-24 is only delivered by random simulation, never by the checker.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/st.qnt:20 (also st.qnt:63-69 `claimIndex`/`without`, st.qnt:155-159 `firstOf`/`freshReads`)</code> · <code>quint run: `quint verify st.qnt --invariant=allInvariants --max-steps={1,3,5}` -&gt; 3s, 18s, killed at 570s (exit 143); prior killed run in specs/_apalache-out/server/2026-08-27T06-39-43_*/detailed.log shows step 4&#x27;s transition-enabled check alone took 06:39:59 -&gt; 06:42:11</code></p>
+<p><em>suggested fix:</em> Make the queue Apalache-friendly: represent it as `Set[Command]` (ids are already unique per I7) and define the claim as the unique minimum under an explicit total order `(interactive? 0:1, arrivalSeq)` using `exists/forall` instead of a fold + slice/concat; add an `arrival: int` counter to Command in place of list position. Record `readAt: CmdId -&gt; int` (log length at claim) as a history variable so `freshReads` becomes `log[i].view == restrict(g, target, foldPrefix(g, log, readAt.get(log[i].cause)))` with no `firstOf` fold. For verify, shrink MAX_LOG/MAX_SUBMISSIONS via `--main`-selectable constants or a second module instance. Then re-measure and put the *achieved* depth in the header comment, not the aspirational one.</p><ul class="votes"><li><strong>accepted</strong> — Measured: depth 2/3/4 = 4s/17s/5min. Suite runs depth 4; header says so.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">major</span> Redelivery branch and `ran` are dead code; I7 is weakened for an at-least-once path the spec can never take, and the real queue has no id dedupe
+<span class="lens"></span></summary>
+<p>The header (st.qnt:12-16) says the only nondeterminism is the graph and the host script, and ids are unique by construction (host: submission counter; policy: (policy, pos, target) with each policy dispatching each target at most once per event). So `ran.contains(cmd.id)` is never true: 3000 random traces never put a ran id back in the queue. The branch, the `ran` variable, and the deliberate weakening of I7 to &#x27;no two queued commands share an id&#x27; therefore test nothing, while the comment &#x27;deterministic id + guarded procedure =&gt; no-op&#x27; asserts a property of the *application* (procedure guards) that the engine does not implement: `DurableCommandQueue` has no UNIQUE constraint or id-based dedupe, and the only redelivery mechanism is crash recovery in `_recover()`, which the spec does not model. topology.md:346-351 says this exact property &#x27;needs a test, not a paragraph&#x27;, and this spec is where that test was supposed to live.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/st.qnt:93-95 (branch), st.qnt:34 (`ran`), st.qnt:170-175 (I7 comment &#x27;a redelivery is *allowed*&#x27;)</code> · <code>quint run: `quint run st.qnt --invariant=&#x27;not(queue.indices().exists(i =&gt; ran.contains(queue[i].id)))&#x27; --max-samples=3000 --max-steps=14` -&gt; [ok] (never reachable); /home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/st/command_queue.py:174 (`_recover()` is the only requeue path), grep for UNIQUE/dedupe in command_queue.py and executor.py returns nothing</code></p>
+<p><em>suggested fix:</em> Either (a) add a `redeliver` action modelling `_recover()`: pick `c` from `ran` and re-append it to `queue` (bounded by a counter), keep I7 as-is, and add an invariant that the log has no second block for any cause (already implied by `effectsOnce`) so the no-op branch is actually exercised and `not(witnessRedelivery)` is a documented reachable witness; or (b) delete `ran` and the branch, and strengthen I7 to &#x27;no queued command&#x27;s id appears as a cause in the log&#x27;. In both cases, change the comment to say the no-op relies on procedure-level guards, not on the engine, since command_queue.py provides none.</p><ul class="votes"><li><strong>accepted</strong> — Same fix as above.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">major</span> Header promises a `deterministic` definition that does not exist
+<span class="lens"></span></summary>
+<p>st.qnt:16 says &#x27;Given a graph and a host script, st is a deterministic function; `deterministic` below states that.&#x27; No definition, invariant, run, or temporal property named `deterministic` exists in either module. Determinism of the st shell is the property the whole refinement story rests on (topology.md:463 and the conformance suite reference it), so a reader who trusts the header believes it is checked when nothing checks it. In Quint the property is not expressible as a state invariant anyway; it is a syntactic fact about `runCommand` (no `nondet` inside it) that the header should state as such or witness differently.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/st.qnt:15-16</code> · <code>grep for `deterministic` across st.qnt and graph.qnt finds only comments; /home/conrad/dizzy-quint/dizzy/docs/explanation/topology.md:463 names `test_the_sequential_shell_is_deterministic` as the property this depends on</code></p>
+<p><em>suggested fix:</em> Either add `pure def engineStep(s) : ...` as a total function over a state record and an invariant-style check inside `runCommand` that the primed state equals `engineStep(current)`, or replace the sentence with &#x27;runCommand contains no `nondet`, so for a fixed graph and host script the successor is unique; determinism is syntactic here and is tested by test_the_sequential_shell_is_deterministic in the Python suite.&#x27; Do not leave a dangling name.</p><ul class="votes"><li><strong>accepted</strong> — Header rewritten; no such invariant is promised.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">minor</span> MAX_LOG is not a bound: the log reaches MAX_LOG+1, and `witnessBound` tests the wrong number
+<span class="lens"></span></summary>
+<p>`runCommand` is enabled whenever `log.length() &lt; MAX_LOG`, and one procedure appends up to |KINDS| = 2 events (graph.qnt:88-92), so the log grows to MAX_LOG + |KINDS| - 1 = 7. The comment says the constant bounds the log and `witnessBound` checks equality with 6, so both the state-space size and the documented witness are off by one. Harmless for the simulator, but for Apalache every extra log slot is another `View` cell in the sequence and `effectsOnce`/`freshReads` are cubic/quadratic in that length, so the actual verify bound is larger than the constant suggests.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/st.qnt:26 (`MAX_LOG = 6 ... bound it`), st.qnt:89 (guard `log.length() &lt; MAX_LOG`), st.qnt:185 (`witnessBound = log.length() == MAX_LOG`)</code> · <code>quint run: `quint run st.qnt --invariant=&#x27;log.length() &lt;= MAX_LOG&#x27; --max-samples=2000 --max-steps=14 --backend=rust` -&gt; [violation]</code></p>
+<p><em>suggested fix:</em> Guard on the post-condition rather than the pre-condition: `log.length() + g.emits.get(cmd.proc).size() &lt;= MAX_LOG` (compute `cmd` before the guard), and make `quiescent` enable when no command can be run under that guard. Then `log.length() &lt;= MAX_LOG` becomes a true invariant and `witnessBound` is the real ceiling.</p><ul class="votes"><li><strong>accepted</strong> — `witnessBound` now tests `&gt;= MAX_LOG`; the overshoot by one block is documented.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">minor</span> Claim-order comment cites the wrong source line
+<span class="lens"></span></summary>
+<p>The spec&#x27;s `claimIndex` (&#x27;earliest interactive wins, otherwise earliest&#x27;) correctly mirrors `ORDER BY priority DESC, id`, but the citation points at the constant definition rather than the SELECT that implements the order, so a reviewer checking the refinement lands on the wrong code. The docstring at 211-226 also states the unbounded-starvation caveat that the spec relies on (and that `witnessPriority` at st.qnt:184 exercises), which is worth citing since it is the sentence the spec is refining.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/st.qnt:61 (&#x27;st/command_queue.py:78&#x27;)</code> · <code>/home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/st/command_queue.py:78 is `PRIORITY_BATCH = 0`; the actual claim order is command_queue.py:249-250 (`ORDER BY priority DESC, id LIMIT 1`) and the two-level semantics are documented at command_queue.py:211-226</code></p>
+<p><em>suggested fix:</em> Change the reference to `st/command_queue.py:249-250` (claim SQL) and cite `:211-226` for the stated policy; optionally add a witness `witnessStarve = queue.indices().exists(i =&gt; not(g.interactive.contains(queue[i].proc))) and ran.size() &gt; 2` or similar to document that batch deferral is reachable, matching the docstring&#x27;s &#x27;deferred, never skipped&#x27; claim.</p><ul class="votes"><li><strong>accepted</strong> — Citation corrected to command_queue.py:248-251.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">major</span> `guarded` models an omniscient guard; the implementable guard makes effectsOnce false for non-guardable procedures
+<span class="lens">re-review</span></summary>
+<p>`guarded` models an omniscient guard; the implementable guard makes effectsOnce false for non-guardable procedures</p><p class="ref"><code>specs/st.qnt</code> · <code>post-fix re-review</code></p>
+<p><em>suggested fix:</em> Guard is now `seesOwnBlock` (my earlier block is in a model I read). New graph rule `guardable(g,p)`: exactly-once is only claimable for procedures that read a model folding one of their own emits. `witnessUnguardable` shows a guarding app still double-appending. This belongs next to &#x27;procedures guard&#x27; in topology.md.</p><ul class="votes"><li><strong>accepted</strong> — Guard is now `seesOwnBlock` (my earlier block is in a model I read). New graph rule `guardable(g,p)`: exactly-once is only claimable for procedures that read a model folding one of their own emits. `witnessUnguardable` shows a guarding app still double-appending. This belongs next to &#x27;procedures guard&#x27; in topology.md.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">minor</span> `at` is stamped by the caller of runProcedure, not by ingest at append time as graph.qnt claims
+<span class="lens">re-review</span></summary>
+<p>`at` is stamped by the caller of runProcedure, not by ingest at append time as graph.qnt claims</p><p class="ref"><code>specs/st.qnt</code> · <code>post-fix re-review</code></p>
+<p><em>suggested fix:</em> Comment now says the engine stamps it at run time; in st the step is atomic so it equals the append position.</p><ul class="votes"><li><strong>accepted (documented)</strong> — Comment now says the engine stamps it at run time; in st the step is atomic so it equals the append position.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">minor</span> witnessGuardNoop does not witness a guard no-op; mid-block crash not covered
+<span class="lens">re-review</span></summary>
+<p>witnessGuardNoop does not witness a guard no-op; mid-block crash not covered</p><p class="ref"><code>specs/st.qnt</code> · <code>post-fix re-review</code></p>
+<p><em>suggested fix:</em> `noops` ghost counter added; mid-block crash is seed Spec 3c.</p><ul class="votes"><li><strong>accepted / deferred</strong> — `noops` ghost counter added; mid-block crash is seed Spec 3c.</li></ul></details>
+<h4>Deferred or rejected (10)</h4><details class="finding contested"><summary><span class="sev">blocker</span> At-least-once redelivery is modelled as a no-op the code does not provide, and the branch is unreachable anyway
+<span class="lens"></span></summary>
+<p>st.qnt keeps a `ran` set and says a redelivered command is a no-op because of a &#x27;deterministic id + guarded procedure&#x27;. Two problems. (a) Nothing in the spec ever redelivers: every id is minted once (host counter, or (policy,pos,target) with pos appended once), so a scratch run of `not(queue.indices().exists(i =&gt; ran.contains(queue[i].id)))` finds no violation — the dedupe branch is dead and `ran` is state that never influences a trace. (b) The real st engine does the opposite of what the branch says: a crash between `ingest` and the ack leaves the row `running`, `_recover` re-queues it, and executor.py:49-56 states plainly that the replay APPENDS THE FACT AGAIN — `ingested_at` is in the hash, nothing dedups, every projection folds it twice. The engine has no `ran` set; &#x27;procedures guard&#x27; (topology.md:348-350) is a per-app obligation, not an engine guarantee, and graph.qnt&#x27;s runProcedure is total and unguarded. Adding a `crashAfterIngest` action to a scratch copy (cmd stays queued, dispatches already put) violates both `effectsOnce` and `freshReads` (the replayed block reads a model already containing its first block). This matters for the reference claim: the distributed design explicitly re-runs a policy whose cursor did not advance (topology.md:414-419) and will produce exactly these duplicate blocks, so a distributed topology cannot refine an st spec in which effects happen exactly once.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/st.qnt:93-95 (and :34, :171-175)</code> · <code>/home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/st/executor.py:49-56; command_queue.py:409-414; quint run: probe not(witnessRedelivery) 3000 samples, no violation</code></p>
+<p><em>suggested fix:</em> Belongs in st.qnt. Either (1) drop `ran` and the dead branch, add a nondet `recover` action that re-queues the just-claimed command after a full ingest, and weaken I3 to &#x27;every block of one cause is complete and contiguous; a cause may have several blocks&#x27; plus an at-least-once liveness/witness (`witnessReplay`); make `freshReads` per-block (view == fold before *that block&#x27;s* first event) — or (2) if the intended semantics is &#x27;procedures guard&#x27;, make the guard explicit in the graph (`guarded: Set[str] ⊆ PROCS`, drawn nondet) and have runProcedure emit [] when the cause already has a block in the log, keeping the crash action so the unguarded case is checked. Either way, add the crash action so the branch is reachable, and cite executor.py:49-56 rather than &#x27;guarded procedure&#x27;.</p><ul class="votes"><li><strong>unreviewed</strong> — No disposition recorded.</li></ul></details>
+<details class="finding contested"><summary><span class="sev">major</span> No element can fail: a raise mid-ingest leaves a partial block, kills the cascade, and is exactly the case where the cursor-based topology is NOT a refinement of st
+<span class="lens"></span></summary>
+<p>runProcedure and ingest are total. In the code a procedure, projection or policy may raise. loop.py:320-324 documents the consequence: ingest is at-most-once per list and not retryable — the prefix of events already appended stays in the log, the tail is discarded (`discard_pending_events`, executor.py:681), the row is marked `error` and never re-queued unless a human calls `retry`. A policy raising after `commit()` (loop.py:392-401) means later policies for that event never run, so the commands they would have dispatched are simply gone — st has no cursor to re-derive them. A scratch `raiseMidIngest` action (append 1 of ≥2 emitted events) violates `effectsOnce` (|block| != |emits(proc)|). More important for the reference claim: topology.md:414-419 says a cursor-driven policy group saves its cursor only after the put commits, so on the same failure it re-runs the policy and re-dispatches. That is a trace the distributed spec will contain and st will not — the distributed topology is strictly stronger than st here, so &#x27;every topology refines st&#x27; is false unless st either models the failure or scopes itself to exception-free runs.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/graph.qnt:88-92; /home/conrad/dizzy-quint/specs/st.qnt:74-84, :129-137</code> · <code>/home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/loop.py:320-324, :399-401; st/executor.py:678-687; docs/explanation/topology.md:414-419</code></p>
+<p><em>suggested fix:</em> Belongs in st.qnt (as a nondet failure), with the failure vocabulary (which element raised, how many events landed) defined in graph.qnt so groups.qnt can reuse it. Add `action failAt` that ingests a nondet prefix `k &lt; emitted.length()` (element raised) and marks the command errored (removed from queue, no dispatches beyond those already put). Weaken I3 to &#x27;each cause&#x27;s events are a prefix of runProcedure&#x27;s emission list, contiguous&#x27;, and add a witness `witnessPartialBlock`. If the authors prefer to keep st as the exception-free reference, say so at the top of st.qnt and state that the distributed spec&#x27;s refinement obligation is over exception-free traces only — but then topology.md:414-419&#x27;s re-dispatch behaviour needs its own spec, because it is a behaviour st cannot exhibit.</p><ul class="votes"><li><strong>deferred</strong> — A raise mid-emission (partial block) — Spec 3.</li></ul></details>
+<details class="finding contested"><summary><span class="sev">major</span> `executor: pool` lives in dizzy.engine.st but is absent from st.qnt, which claims to be the spec of that package
+<span class="lens"></span></summary>
+<p>st.qnt models exactly DEFAULT_LANES (executor.py:107): one lane, claim over the whole queue, run+ingest atomic. But the same `st` shell, with a topology declaring `executor: pool`, runs procedures concurrently in spawned children (executor.py:768-786) on a model the child refreshed itself (`runtime.refresh()`, :226) while the main lane keeps ingesting; completions are drained ahead of the inline claim in `pump` (:551-563); and the module docstring says outright that log order is then a race and &#x27;not the sequential consistency inline st claims&#x27; (:58-65). Also `claim` is per-lane (`WHERE ... lane=?`, command_queue.py:249-251), which the spec&#x27;s claimIndex ignores. Because rule 3 keeps readers out of pool groups, freshReads would hold trivially for pool commands (restrict gives emptyView), so the interesting deviation is log order and the interleaving of completions with inline commands — but none of it is stated, and st.qnt line 16 refers to a `deterministic` invariant that is not defined anywhere in the file.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/st.qnt:1-10, :16, :61-67, :90-92</code> · <code>/home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/st/executor.py:58-65, :107, :226-227, :551-563, :768-786; st/command_queue.py:249-251</code></p>
+<p><em>suggested fix:</em> Scope, don&#x27;t extend: put a sentence in st.qnt&#x27;s header that it specifies `LANES == DEFAULT_LANES` (inline only) and that `executor: pool` is the first topology of the distributed spec, not part of st. Model pool lanes in groups.qnt as a second lane whose run_procedure step is separate from its ingest step (the child&#x27;s view is a nondet earlier fold, restricted to reads — which rule 3 makes empty), with the drain-then-claim order of `pump`. Either define `deterministic` (e.g. a temporal/pair-trace statement, or drop the sentence) or remove the reference at line 16.</p><ul class="votes"><li><strong>deferred</strong> — Pool lanes are a concurrency claim; groups.qnt + Spec 3.</li></ul></details>
+<details class="finding contested"><summary><span class="sev">minor</span> Replication (add_replicated) breaks the prefix-position assumption every fold in the spec rests on; must be excluded from st and owned by the distributed spec
+<span class="lens"></span></summary>
+<p>`add_replicated` inserts a peer-minted fact keeping the peer&#x27;s id and parents (store.py:250-263), delivered parents-first by `pull` (replicate.py:50-57). topology.md:353-360 measured that such a fact splices into the *middle* of canonical order, renumbering 196 of 200 positions. The spec&#x27;s View is a set of integer positions and foldPrefix folds `log[0, upto)`, i.e. it assumes positions are a stable prefix order. That is true for st only because st never replicates; a distributed spec that includes replication cannot reuse `foldPrefix`/`applyEvent` as written, and a cursor there must be a frontier (set of ids) as the doc says. Neither file states the assumption.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/graph.qnt:59-60, :77-79; /home/conrad/dizzy-quint/specs/st.qnt:31-32</code> · <code>/home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/store.py:250-263; replicate.py:29-58; docs/explanation/topology.md:353-360</code></p>
+<p><em>suggested fix:</em> Nowhere in st.qnt as behaviour, but state the exclusion: &#x27;st&#x27;s log is append-only in local insertion order; add_replicated is out of scope and would invalidate foldPrefix&#x27;. In the distributed spec, give Event an id and parents, make View a set of event ids rather than positions, define fold over a topological order of a set, and prove the st View is the image of that under the insertion-order enumeration. That is also the shape needed to state the &#x27;parents must be a function of the consumed entry&#x27; residual in topology.md:511-521.</p><ul class="votes"><li><strong>deferred</strong> — `add_replicated` breaks prefix positions; excluded by header.</li></ul></details>
+<details class="finding contested"><summary><span class="sev">major</span> Procedure/ingest failure paths are omitted; effectsOnce&#x27;s cardinality clause is false for the code
+<span class="lens"></span></summary>
+<p>loop.py:320-324 documents that an element raising part-way through ingest &#x27;leaves the prefix already in the log — appended first, by design&#x27;, and executor.py:678-685 then discards the tail, rolls back, and marks the row error. command_queue.py:334-348 lets a host `retry` that row, which re-runs the procedure and appends a second (possibly complete) block under the same cause. So the log can contain a partial block for a cause, and later a second block, which violates both conjuncts of effectsOnce (contiguity and |block| == |emits(proc)|). The spec has no failure transition at all, so I3 is an invariant of a world the engine does not promise. Note also the retry keeps the original row id, so a retried command is claimed ahead of everything enqueued since (ORDER BY priority DESC, id at command_queue.py:248-252), which the spec&#x27;s tail-append cannot express.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/st.qnt:96-106 (runCommand), :135-137 (|block| == |emits|)</code> · <code>/home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/loop.py:320-324; /home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/st/executor.py:678-687; /home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/st/command_queue.py:334-348</code></p>
+<p><em>suggested fix:</em> Add a `fail` action: nondet k in 0..|emitted|, ingest only the first k events (folding and running policies for those), mark the command errored (not in `ran`), optionally followed by a `retry` action that re-inserts the command at its original queue index. Restate I3 as a per-attempt property (each attempt&#x27;s events are contiguous; the fold of what was appended is still a prefix-fold) rather than a per-command count.</p><ul class="votes"><li><strong>deferred</strong> — Same.</li></ul></details>
+<details class="finding contested"><summary><span class="sev">minor</span> `cursor` and I1 (zeroLag) are true by assignment and model a component st does not have
+<span class="lens"></span></summary>
+<p>Neither LaneExecutor nor DurableCommandQueue holds a cursor; the only position state in st is Engine.applied_positions (loop.py:97-105), a per-unit skip-list drained by take_applied, and topology.md:407-413 says explicitly that a procedure group has no cursor. In st.qnt `cursor` is set to `r.log.length()` in the same step that sets `log`, so zeroLag (I1) can never fail and checks nothing about the engine. Harmless, but it presents as one of seven invariants while being a definition, and it invites a reader to look for a cursor in st/ that is not there.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/st.qnt:32, :102, :121-122</code> · <code>/home/conrad/dizzy-quint/dizzy/docs/explanation/topology.md:407-413 (a procedure group has no cursor); /home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/st/executor.py:10-14 (the writer thread; no cursor state); /home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/loop.py:97-105 (applied_positions is the only position bookkeeping)</code></p>
+<p><em>suggested fix:</em> Either delete `cursor`/zeroLag from st.qnt (the fact that st reads the whole log is already captured by runProcedure reading `models` == foldPrefix(log, log.length()) via I2), or keep it but label it as the definition that groups.qnt relaxes rather than as an invariant, and mention applied_positions as the st-side artefact it corresponds to.</p><ul class="votes"><li><strong>rejected</strong> — Kept deliberately: I1 is the statement that becomes a choice in groups.qnt.</li></ul></details>
+<details class="finding contested"><summary><span class="sev">major</span> Host submission cannot interleave with a cascade&#x27;s dispatches, so the modelled queue orders are a strict subset of the real st&#x27;s
+<span class="lens"></span></summary>
+<p>In the code, run_command is atomic with respect to the log (one writer) but not with respect to the command queue: each policy dispatch is its own `put`, and a host thread&#x27;s `put` can obtain an autoincrement id between two dispatches of the same ingest, or between the dispatches of two events of one command. Since claim order is by id, such a host command is claimed before later dispatches of that cascade, producing a log order the spec can never generate (the spec appends the whole `r.dispatched` block after `rest`, and `submit` only ever appends to the tail between steps). The invariants would still hold on those runs, but the set of reference behaviours is smaller than the implementation&#x27;s — a topology that reproduces one of these real-st interleavings would be judged non-refining, and the &#x27;deterministic function of the host script&#x27; claim silently assumes a host script that never submits mid-cascade.</p><p class="ref"><code>specs/st.qnt:51-59 (submit is a separate step), specs/st.qnt:103 (`queue&#x27; = rest.concat(r.dispatched)`), specs/st.qnt:5-8 and 14-16 (&#x27;run_command … is ONE atomic step&#x27;; &#x27;given a graph and a host script, st is a deterministic function&#x27;)</code> · <code>dizzy/src/dizzy/engine/st/command_queue.py:177-201 (put: one INSERT+commit per call, lock held per call only; docstring: &#x27;engine policies + HTTP endpoints call this&#x27;); loop.py:156-158 (dispatch_command → command_queue.put per policy, inside ingest); command_queue.py:248-252 (claim order is ORDER BY priority DESC, id).</code></p>
+<p><em>suggested fix:</em> Either state the assumption explicitly (host submits only between units of work — and enforce it in the code by having the executor hold the queue lock across ingest, or batch dispatches into one transaction), or make the spec&#x27;s `submit` able to fire inside runCommand: e.g. let `runCommand` nondeterministically choose an insertion index for any pending host command among `r.dispatched`. The former is the smaller change and matches the &#x27;one atomic step&#x27; claim at st.qnt:5-8.</p><ul class="votes"><li><strong>deferred</strong> — Host `put` between two dispatches of one cascade — Spec 3.</li></ul></details>
+<details class="finding contested"><summary><span class="sev">minor</span> `-1` sentinel folds in `claimIndex` and `firstOf`: sound today, but `firstOf` silently yields emptyView for an absent cause and both are needless set-folds for Apalache
+<span class="lens"></span></summary>
+<p>Both folds compute a minimum, which is commutative/associative, so the set-fold is order-independent and the simulator result is sound (confirmed: claimIndex always returns a valid index). Two language-level weaknesses remain. First, `firstOf` returns -1 when the cause is not in `l`, and `foldPrefix(g, log, -1)` then returns `emptyView` rather than failing, so if `freshReads` is reused for a command not yet in the log (the natural thing to do in groups.qnt) a stale-read violation is masked as &#x27;view == empty&#x27; for a reader that reads nothing, or reported for the wrong reason for one that does. Second, `Set.fold` with a branching accumulator is one of the more expensive shapes for Apalache and is executed inside a transition (`claimIndex`) and per-log-index inside an invariant (`firstOf`), contributing to finding 1.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/st.qnt:65 and st.qnt:156 (both `fold(-1, (a, i) =&gt; if (a == -1 or i &lt; a) i else a)`), st.qnt:79 (`i &lt; upto` with upto = -1 gives empty)</code> · <code>quint run: `quint run st.qnt --invariant=&#x27;queue.length() == 0 or (val i = claimIndex(g, queue) i &gt;= 0 and i &lt; queue.length())&#x27;` -&gt; [ok]; command_queue.py:249-250 (`ORDER BY priority DESC, id LIMIT 1`)</code></p>
+<p><em>suggested fix:</em> Replace both folds with explicit min-by-quantifier: `val urgent = ...; val i = urgent.filter(i =&gt; urgent.forall(j =&gt; i &lt;= j)).oneOf()`-style selection is not allowed in a pure def, so instead write `pure def minOf(s: Set[int], dflt: int): int = if (s == Set()) dflt else s.fold(s.oneOf()...)` is also not pure-safe; the clean option is: `urgent.forall(j =&gt; i &lt;= j) and urgent.contains(i)` as a predicate and select `i` via `q.indices().filter(...)` then `foldPrefix` over it. Simpler still: keep `firstOf` but make it total by construction, storing `readAt: CmdId -&gt; int` at claim time (see finding 1) so no min is ever computed inside an invariant, and use `q.length()` rather than `-1` as the sentinel so an absent cause is an index that `foldPrefix` treats as &#x27;whole log&#x27;, which is at least conservative.</p><ul class="votes"><li><strong>rejected</strong> — Sound: both folds run over non-empty filtered sets or return the documented default.</li></ul></details>
+<details class="finding contested"><summary><span class="sev">minor</span> `redeliver` over-approximates queue recovery: any acked command, at any time
+<span class="lens">re-review</span></summary>
+<p>`redeliver` over-approximates queue recovery: any acked command, at any time</p><p class="ref"><code>specs/st.qnt</code> · <code>post-fix re-review</code></p>
+<p><em>suggested fix:</em> Over-approximation is safe for safety properties; the ack/crash pair is a Spec 3 refinement.</p><ul class="votes"><li><strong>rejected</strong> — Over-approximation is safe for safety properties; the ack/crash pair is a Spec 3 refinement.</li></ul></details>
+<details class="finding contested"><summary><span class="sev">minor</span> emitComplete requires only the first block per cause
+<span class="lens">re-review</span></summary>
+<p>emitComplete requires only the first block per cause</p><p class="ref"><code>specs/st.qnt</code> · <code>post-fix re-review</code></p>
+<p><em>suggested fix:</em> Dropped replay blocks are caught by the witness protocol (`witnessDoubleAppend` reachable); strengthening emitComplete would need per-run ghosts.</p><ul class="votes"><li><strong>rejected</strong> — Dropped replay blocks are caught by the witness protocol (`witnessDoubleAppend` reachable); strengthening emitComplete would need per-run ghosts.</li></ul></details>
+<h4>Disposition</h4><p>Findings came from four reviewer lenses (fidelity, soundness, Quint correctness, missing behaviours / refinement / distributed), each judged by a skeptic and a does-it-matter agent. The session limit interrupted roughly half the votes; every finding was then dispositioned by hand against the code and the design notes. <em>accepted</em> = fixed in the revised spec; <em>deferred</em> = a Spec 3 fault-model item tracked in <code>.seeds/</code>; <em>rejected</em> = kept as is, with the reason.</p><p>A second, post-fix workflow re-read the revised specs against every prior finding (12 agents, all completed): all prior findings were judged fixed or deferred-by-design; its five new findings per spec are listed above with lens <em>re-review</em>. One was a genuine invariant violation my 3 000-sample runs had missed (cursor rewind vs. freshDispatch) — the suite now runs 8 000 samples and both bounded proofs.</p>
+</section>
+<details class="src"><summary>source · <code>specs/st.qnt</code></summary><pre>// specs/st.qnt — Spec 1: the single-threaded engine (dizzy.engine.st), over an
+// ARBITRARY feature graph.
+//
+// One hybrid consumer group: one inline lane over the durable command queue,
+// one cursor over the log, both served by one thread. Engine.run_command —
+// claim → run_procedure → ingest(append → fold → commit → run policies →
+// dispatch) — is ONE atomic step (engine/loop.py:254-402). That atomicity is
+// what &quot;sequentially consistent&quot; means for Dizzy; lag is zero by construction
+// (`cursor == log.length()` is an invariant here and a *choice* in groups.qnt).
+//
+// Nondeterminism, deliberately:
+//   • the feature graph (init)                — every feature of the bounded size
+//   • `guarded` (init)                        — whether the application bothers to
+//                                                dedupe redeliveries. The ENGINE does
+//                                                not (st/executor.py:49-56: a replay
+//                                                &quot;appends the fact again ... nothing
+//                                                dedups it&quot;); topology.md:347-351 asks
+//                                                it of the application. The guard is
+//                                                modelled as the only one a procedure
+//                                                CAN implement — &quot;my own block is
+//                                                already in a model I read&quot; — so
+//                                                exactly-once holds only for
+//                                                `guardable` procedures (graph.qnt).
+//   • which command the host submits, and when
+//   • redelivery: a crash between ingest and ack re-queues the claimed row at
+//     the FRONT of its priority level (command_queue.py:409-414, claim order
+//     `priority DESC, id`)
+//
+// Out of scope here, by design (see groups.qnt / Spec 3 seeds): `executor: pool`
+// lanes, an element raising mid-emission (a partial block), replication
+// (`add_replicated`, which breaks prefix positions), host `put` interleaving
+// between two dispatches of one cascade.
+//
+//   quint run    st.qnt --invariant=allInvariants --max-samples=3000 --max-steps=20
+//   quint run    st.qnt --invariant=&#x27;not(witnessDoubleAppend)&#x27;   # expect violation = reachable
+//   quint verify st.qnt --invariant=allInvariants --max-steps=3  # Apalache; deeper is infeasible today
+
+module st {
+  import graph.* from &quot;./graph&quot;
+
+  pure val MAX_SUBMISSIONS = 2   // host-originated commands
+  pure val MAX_LOG = 6           // a policy cycle can be genuinely infinite; bound it
+
+  // --- State -------------------------------------------------------------
+  var g: Graph               // the feature (fixed after init)
+  var guarded: bool          // application-level dedupe assumption (fixed after init)
+  var queue: List[Command]   // st.DurableCommandQueue — one lane
+  var log: List[Event]       // EventStore, the only shared truth
+  var cursor: int            // folded prefix length
+  var models: View           // read models (positions folded per model)
+  var ran: Set[Command]      // commands whose procedure has run (a redelivery replays the row verbatim)
+  var submitted: int
+  var noops: int             // ghost: redeliveries the application guard absorbed
+
+  action init = {
+    nondet reads = READS.oneOf()
+    nondet emits = EMITS.oneOf()
+    nondet folds = FOLDS.oneOf()
+    nondet reacts = REACTS.oneOf()
+    nondet dispatches = DISPATCHES.oneOf()
+    nondet interactive = INTERACTIVE.oneOf()
+    nondet gd = Set(true, false).oneOf()
+    all {
+      g&#x27; = { reads: reads, emits: emits, folds: folds, reacts: reacts, dispatches: dispatches, interactive: interactive },
+      guarded&#x27; = gd,
+      queue&#x27; = [], log&#x27; = [], cursor&#x27; = 0, models&#x27; = emptyView, ran&#x27; = Set(), submitted&#x27; = 0, noops&#x27; = 0,
+    }
+  }
+
+  // --- Host submits a command ------------------------------------------------
+  action submit = {
+    nondet p = PROCS.oneOf()
+    all {
+      submitted &lt; MAX_SUBMISSIONS,
+      queue&#x27; = queue.append({ id: { origin: &quot;host&quot;, at: submitted, target: p }, proc: p, view: emptyView }),
+      submitted&#x27; = submitted + 1,
+      g&#x27; = g, guarded&#x27; = guarded, log&#x27; = log, cursor&#x27; = cursor, models&#x27; = models, ran&#x27; = ran, noops&#x27; = noops,
+    }
+  }
+
+  // --- Claim: LaneExecutor&#x27;s two-level priority (command_queue.py:248-251) ---
+  // The earliest interactive command wins; otherwise the earliest command.
+  pure def claimIndex(gr: Graph, q: List[Command]): int = {
+    val urgent = q.indices().filter(i =&gt; gr.interactive.contains(q[i].proc))
+    if (urgent != Set()) urgent.fold(-1, (a, i) =&gt; if (a == -1 or i &lt; a) i else a)
+    else 0
+  }
+  pure def without(q: List[Command], i: int): List[Command] =
+    q.slice(0, i).concat(q.slice(i + 1, q.length()))
+
+  // --- ingest: append, fold, commit, run policies — per event, in order ------
+  // Mirrors Engine.apply_event exactly; the policies&#x27; view is the models
+  // as folded *through this event* (fold → commit → policies).
+  pure def ingest(gr: Graph, l: List[Event], v: View, events: List[Event]):
+      { log: List[Event], models: View, dispatched: List[Command] } =
+    events.foldl({ log: l, models: v, dispatched: [] }, (acc, e) =&gt; {
+      val pos = acc.log.length()
+      val v2 = applyEvent(gr, acc.models, e, pos)
+      {
+        log: acc.log.append(e),
+        models: v2,
+        dispatched: acc.dispatched.concat(runPolicies(gr, e, pos, v2)),
+      }
+    })
+
+  // --- The engine step -----------------------------------------------------
+  action runCommand = all {
+    queue.length() &gt; 0,
+    log.length() &lt; MAX_LOG,
+    val i = claimIndex(g, queue)
+    val cmd = queue[i]
+    val rest = without(queue, i)
+    if (guarded and seesOwnBlock(g, log, models, cmd))
+      // application-level guard: the procedure sees its own earlier block in a model it reads
+      all { queue&#x27; = rest, log&#x27; = log, cursor&#x27; = cursor, models&#x27; = models, ran&#x27; = ran, noops&#x27; = noops + 1 }
+    else {
+      val emitted = runProcedure(g, cmd, models, log.length())
+      val r = ingest(g, log, models, emitted)
+      all {
+        log&#x27; = r.log,
+        models&#x27; = r.models,
+        cursor&#x27; = r.log.length(),
+        queue&#x27; = rest.concat(r.dispatched),  // dispatch is to the external queue (loop.py:152-158)
+        ran&#x27; = ran.union(Set(cmd)),
+        noops&#x27; = noops,
+      }
+    },
+    g&#x27; = g, guarded&#x27; = guarded, submitted&#x27; = submitted,
+  }
+
+  // --- At-least-once: a crash between ingest and ack recovers the row --------
+  // The row keeps its id, so it re-enters at the front of its priority level.
+  action redeliver = {
+    nondet c = ran.oneOf()
+    all {
+      ran != Set(),
+      not(queue.indices().exists(i =&gt; queue[i].id == c.id)),   // one DB row: cannot be queued twice
+      queue&#x27; = [c].concat(queue),
+      g&#x27; = g, guarded&#x27; = guarded, log&#x27; = log, cursor&#x27; = cursor, models&#x27; = models, ran&#x27; = ran, submitted&#x27; = submitted, noops&#x27; = noops,
+    }
+  }
+
+  // End of run: explicit so the checker does not call it a deadlock.
+  action quiescent = all {
+    queue.length() == 0 or log.length() &gt;= MAX_LOG,
+    submitted == MAX_SUBMISSIONS,
+    g&#x27; = g, guarded&#x27; = guarded, queue&#x27; = queue, log&#x27; = log, cursor&#x27; = cursor, models&#x27; = models, ran&#x27; = ran, submitted&#x27; = submitted, noops&#x27; = noops,
+  }
+
+  action step = any { submit, runCommand, redeliver, quiescent }
+
+  // --- Invariants ----------------------------------------------------------
+
+  // I1. No lag.
+  val zeroLag = cursor == log.length()
+
+  // I2. Convergence: carried models are a refold of the log (this IS the rebuild guarantee).
+  val modelsAreFold = models == foldPrefix(g, log, log.length())
+
+  // I3. Every block is a complete run of its procedure, in emit order.
+  val blocksWellFormed = blocksWellFormedOf(g, log)
+
+  // I3&#x27;. Exactly-once effects — for GUARDABLE procedures, when the application
+  //      guards. A procedure that reads no model folding its own emits cannot
+  //      recognise its replay; nothing in the engine helps it (executor.py:49-56).
+  val effectsOnce = guarded implies effectsOnceGuardableOf(g, log)
+
+  // I4. Causality of ids.
+  val causal = causalOf(g, log)
+
+  // I5. Fresh reads — THE sequential-consistency property, per block.
+  val freshReads = freshReadsOf(g, log)
+
+  // I6. Policies read fresh too, visible at log level via dispatchView …
+  val freshDispatch = freshDispatchOf(g, log)
+  // … and in the queue, for commands not yet run.
+  val freshQueue =
+    queue.indices().forall(i =&gt; {
+      val c = queue[i]
+      c.id.origin != &quot;host&quot; implies
+        c.view == restrict(g, c.id.origin, foldPrefix(g, log, c.id.at + 1))
+    })
+
+  // I7. Completeness — an engine that drops work must FAIL these:
+  //   every reacting policy of every folded event has dispatched its command …
+  val dispatchComplete =
+    log.indices().forall(pos =&gt;
+      POLICIES.forall(y =&gt; g.reacts.get(y).contains(log[pos].kind) implies
+        PROCS.forall(p =&gt; g.dispatches.get(y).contains(p) implies {
+          val id = { origin: y, at: pos, target: p }
+          queue.indices().exists(i =&gt; queue[i].id == id) or ran.exists(c =&gt; c.id == id)
+        })))
+  //   … and every command that ran left its block in the log.
+  val emitComplete =
+    ran.forall(c =&gt; g.emits.get(c.proc) == Set() or log.indices().exists(i =&gt; log[i].cause == c.id))
+
+  // I8. One DB row per command: no two queued commands share an id.
+  val queueIdsDistinct =
+    queue.indices().forall(i =&gt; queue.indices().forall(j =&gt;
+      i != j implies queue[i].id != queue[j].id))
+
+  val allInvariants = all {
+    zeroLag, modelsAreFold, blocksWellFormed, effectsOnce, causal,
+    freshReads, freshDispatch, freshQueue, dispatchComplete, emitComplete, queueIdsDistinct
+  }
+
+  // --- Witnesses (should be REACHABLE: `--invariant=not(w)` must violate) ---
+  val witnessCascade      = log.indices().exists(i =&gt; log[i].cause.origin != &quot;host&quot;)
+  val witnessReader       = log.indices().exists(i =&gt; log[i].view != emptyView)
+  val witnessPolicyReader = log.indices().exists(i =&gt; log[i].dispatchView != emptyView)
+  val witnessPriority     = queue.length() &gt;= 2 and claimIndex(g, queue) != 0
+  val witnessBound        = log.length() &gt;= MAX_LOG
+  val witnessRedelivered  = queue.indices().exists(i =&gt; ran.exists(c =&gt; c.id == queue[i].id))
+  val witnessGuardNoop    = noops &gt; 0
+  val witnessDoubleAppend = not(effectsOnceOf(log))
+  // Even a guarding application double-appends when the procedure is not guardable.
+  val witnessUnguardable  = guarded and not(effectsOnceOf(log))
+}
+</pre></details>
+</section><section>
+<h2>Spec 2 — consumer groups (distributed) <span class="count">25/25</span></h2>
+<p class="intro">The same graph split across two groups, each with its own cursor over the shared log and its own command lane; the read substrate is shared but each model is folded only by its owner. Placement is drawn nondeterministically with the graph. The claim under test is <code>rule6 ⇒ freshReads ∧ freshPolicyReads</code>: a reader that shares a group with every model it reads observes exactly what the single-threaded engine would.</p>
+<div class="tbl"><table><thead><tr><th>check</th><th>method</th><th>what it says</th><th class="num">time</th><th>result</th></tr></thead>
+<tbody><tr>
+<td><code>substrateIsFold</code></td>
+<td class="kind">invariant · simulation</td>
+<td>each model == its owner&#x27;s fold up to the owner&#x27;s high-water mark</td>
+<td class="num">8.8s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>cursorBelowHwm</code></td>
+<td class="kind">invariant · simulation</td>
+<td>a rewound cursor never exceeds what was folded</td>
+<td class="num">8.1s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>blocksWellFormed</code></td>
+<td class="kind">invariant · simulation</td>
+<td>as st, under any topology</td>
+<td class="num">9.5s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>effectsOnce</code></td>
+<td class="kind">invariant · simulation</td>
+<td>exactly-once for guardable procedures needs the guard AND rule 6</td>
+<td class="num">8.0s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>causal</code></td>
+<td class="kind">invariant · simulation</td>
+<td>as st, under any topology</td>
+<td class="num">8.0s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>routed</code></td>
+<td class="kind">invariant · simulation</td>
+<td>a command sits only in its procedure&#x27;s owner lane / pending slot</td>
+<td class="num">8.4s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>dispatchComplete</code></td>
+<td class="kind">invariant · simulation</td>
+<td>every folded event&#x27;s reacting policies have dispatched</td>
+<td class="num">8.2s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>emitComplete</code></td>
+<td class="kind">invariant · simulation</td>
+<td>every command that ran left its block</td>
+<td class="num">8.7s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>rule6Guarantee</code></td>
+<td class="kind">invariant · simulation</td>
+<td>T1: rule 6 ⇒ model committed through the cause before the run; no policy dispatched behind its trigger</td>
+<td class="num">8.2s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>noFaultFreshDispatch</code></td>
+<td class="kind">invariant · simulation</td>
+<td>T1&#x27;: with rule 6 and no cursor loss, policies read exactly the fold through their trigger</td>
+<td class="num">8.2s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>singleGroupIsSt</code></td>
+<td class="kind">invariant · simulation</td>
+<td>T2: one group ⇒ st&#x27;s fresh reads</td>
+<td class="num">8.2s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>witnessClaimWindow</code></td>
+<td class="kind">witness · reachability</td>
+<td>a rule-6-LEGAL split read behind the tail (the claim→execute window, groups.py:44-50)</td>
+<td class="num">3.3s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessWriteSkew</code></td>
+<td class="kind">witness · reachability</td>
+<td>WRITE SKEW under rule 6: two decisions, neither saw the other — no serial order explains both</td>
+<td class="num">8.4s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessStaleRead</code></td>
+<td class="kind">witness · reachability</td>
+<td>a rule-6-violating split broke even the weak guarantee</td>
+<td class="num">3.8s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessStalePolicy</code></td>
+<td class="kind">witness · reachability</td>
+<td>a rule-6-violating policy read stale or ahead</td>
+<td class="num">2.8s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessLegalLag</code></td>
+<td class="kind">witness · reachability</td>
+<td>a legal multi-group split with real inter-group lag</td>
+<td class="num">2.6s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessCrossGroup</code></td>
+<td class="kind">witness · reachability</td>
+<td>a policy in one group dispatched to a procedure in another</td>
+<td class="num">2.6s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessRedelivered</code></td>
+<td class="kind">witness · reachability</td>
+<td>an at-least-once redelivery occurred</td>
+<td class="num">2.6s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessRewound</code></td>
+<td class="kind">witness · reachability</td>
+<td>a cursor was lost and rewound</td>
+<td class="num">2.6s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessRedispatch</code></td>
+<td class="kind">witness · reachability</td>
+<td>a rewound cursor re-dispatched an already-run command</td>
+<td class="num">2.6s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessDoubleAppend</code></td>
+<td class="kind">witness · reachability</td>
+<td>an unguarded replay appended a second block</td>
+<td class="num">2.7s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessUnguardable</code></td>
+<td class="kind">witness · reachability</td>
+<td>a guarding application still double-appended: procedure not guardable</td>
+<td class="num">2.6s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessGuardMissed</code></td>
+<td class="kind">witness · reachability</td>
+<td>a guarding, guardable procedure double-appended because rule 6 was broken</td>
+<td class="num">2.6s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessOneGroupRun</code></td>
+<td class="kind">witness · reachability</td>
+<td>the one-group (st) topology was exercised</td>
+<td class="num">2.6s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>allInvariants</code></td>
+<td class="kind">Apalache · bounded</td>
+<td>Apalache: all invariants, every graph × placement × guard, 3 steps</td>
+<td class="num">9.7s</td>
+<td><span class="pill pass">holds</span></td></tr></tbody></table></div>
+<section class="review">
+<h3>Adversarial review</h3>
+
+<h4>Accepted — fixed in this revision (21)</h4><details class="finding confirmed"><summary><span class="sev">blocker</span> Atomic claimRun erases the claim→run window groups.py names; rule6Refines fails under a faithful split
+<span class="lens"></span></summary>
+<p>claimRun fuses claim, middle fold and run into one step guarded by cursor-at-tail, so a procedure always reads the tail. The implementation&#x27;s step() is fold_to_tail(); claim(); fold_to_tail(); execute(); with no lock, so between the middle fold returning and the procedure&#x27;s first read another group may append (groups.py:44-50). I reproduced this in a scratchpad copy (groups_split.qnt: `claim` moves lane[h][i] to pending[h] under the cursor==tail guard; `runPending` runs it later with no guard, everything else unchanged). `quint run groups_split.qnt --invariant=rule6Refines --max-samples=2000 --max-steps=20` violates in &lt;1s (seed 0x89f0): owner={p2,m1,y1→g2; p1→g1}, reads(p2)={m1}, folds(m1)={e2} — rule 6 holds — g2 claims p2&#x27;s host command at tail 0, g1 runs p1 appending e1,e2 at 0,1, g2 then runs p2 reading m1=∅ while foldPrefix(log,2).m1={1}. freshReads fails in a rule-6-legal topology, i.e. the theorem the spec proves is a property of the abstraction&#x27;s atomicity, not of the worker. The weaker property groups.py:28-29 states — view ⊇ restrict(fold through the command&#x27;s cause) — holds under the split (`rule6Weak`, 2000 samples, no violation), as do substrateIsFold/effectsOnce/causal/routed.</p><p class="ref"><code>specs/groups.qnt:24-27 (cycle comment), :119-139 claimRun, esp. :125 `cursor.get(h) == log.length()` and :134 `runProcedure(g, cmd, substrate)` in the same atomic step; :209-210 rule6Refines</code> · <code>dizzy/src/dizzy/engine/groups.py:44-50 (&quot;The fold is taken when the claim RETURNS, so an event appended in the instant between that fold and the procedure&#x27;s first read is not in the model&quot;), :28-29 (the guarantee actually stated: &quot;the read model commits before the dispatched command runs&quot;), :419-426 step(); docs/explanation/topology.md:313-321 (&quot;two topologies&#x27; logs need not agree entry for entry&quot;)</code></p>
+<p><em>suggested fix:</em> Model the seam as the code has it: a `pending: str -&gt; List[Command]` slot; `claim` guarded by `cursor[h]==log.length()` (the middle fold has returned) moving lane→pending; `run` with no cursor guard reading `substrate` at that later instant. Then either (a) restate the rule-6 theorem as groups.py:28-29 does — for every event, restrict(g, target, foldPrefix(log, cause.at+1)) ⊆ view (causeFolded) — and keep freshReads only as the zero-window strengthening, stating explicitly that the atomic claimRun is that assumption; or (b) keep claimRun atomic but add a header sentence that the spec assumes no cross-group append between the middle fold&#x27;s return and the first read, and point at topology.md:317-321 as the residual that is NOT covered. Do not leave the file claiming rule6 ⇒ freshReads without one of these.</p><ul class="votes"><li><strong>accepted</strong> — Split into `claim` (cursor-at-tail guard) and `execute` (unguarded). Theorem restated as rule6 ⇒ causeFolded ∧ freshDispatch (groups.py:27-29). `witnessClaimWindow` proves the window is real.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">major</span> No entry-redelivery (cursor rewind) action, though the crash rule and disposability are the documented at-least-once direction; substrateIsFold and freshPolicyReads are not robust to it
+<span class="lens"></span></summary>
+<p>The only recovery the spec models is a command being redelivered after its procedure ran. The recovery the cursor design is built around — the entry re-applied because the crash landed between apply_event (commit + dispatch) and cursors.save, or the cursor file being lost outright — has no action. I added `rewindOne` (cursor[h]&#x27; = cursor[h]-1, nothing else) to a scratchpad copy: substrateIsFold is violated immediately (substrate holds positions ≥ cursor), `rule6 implies freshReads` still holds (the `ran` dedupe absorbs the re-dispatch), but `rule6 implies freshPolicyReads` is violated — the re-run policy at pos tags the same deterministic id with a LARGER view (the owner&#x27;s models are now ahead of pos), and the lane holds two commands with one id (st&#x27;s queueIdsDistinct analogue fails). The sandwich `foldPrefix(cursor) ⊆ substrate ⊆ foldPrefix(tail)` holds (1500 samples). So the invariants as written are only true because the spec omits the crash the docs say the system must absorb, and the doc&#x27;s untested disposability claim is exactly what this spec could check for free.</p><p class="ref"><code>specs/groups.qnt:141-150 redeliver (command-queue side only); :168-169 substrateIsFold (`substrate == foldPrefix(cursor)`); :202-207 freshPolicyReads over lane contents; header :13-22 (no mention of cursor loss)</code> · <code>dizzy/src/dizzy/engine/groups.py:342-345 (&quot;apply ... and only THEN save. A crash between the two re-delivers the entry&quot;), cursors.py:32-42 (&quot;At-least-once in that direction; never at-most-once&quot;), docs/explanation/topology.md:346-351 (&quot;losing one must be safe ... it needs a test, not a paragraph&quot;)</code></p>
+<p><em>suggested fix:</em> Add a `rewind` action (one entry, or to 0 for cursor loss) with only cursor&#x27; changed. Weaken substrateIsFold to the sandwich foldPrefix(g,log,cursor[owner(m)]).m ⊆ substrate.m ⊆ foldPrefix(g,log,log.length()).m (verified). Restate freshPolicyReads over the dispatch that actually runs (the command in `ran`, or the earliest lane entry per id) rather than over every lane row, and add a witness that a rewind re-dispatches a duplicate id which claimRun no-ops — that is the disposability test topology.md:349-351 asks for.</p><ul class="votes"><li><strong>accepted</strong> — Added `rewind` with `hwm` ghost; `substrateIsFold` now keyed on hwm.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">minor</span> redeliver models the wrong recovery case: only already-run commands, never a claimed-but-unrun row, and only into an idle lane
+<span class="lens"></span></summary>
+<p>The recovery the docstring names is a row claimed (status running) whose procedure never ran — the middle fold raised or the worker died. Because the spec&#x27;s claim+run is one atomic step, that case is unrepresentable; the only redelivery it can express is a duplicate of a command whose effects are already in the log, which claimRun then no-ops via `ran`. That is the st.qnt case, not the new one this module introduces: a redelivered unrun command runs LATER, against a substrate that has moved, which is exactly where the cause-folded guarantee needs re-checking. Restricting redelivery to an idle lane also means a redelivered row never contends with queued commands under claimIndex (an interactive queued command should still win over a redelivered batch one).</p><p class="ref"><code>specs/groups.qnt:141-150 (`nondet c = ran.oneOf()`, guard `lane.get(owner.get(c.proc)).length() == 0`), :50 comment &quot;a redelivery replays the row verbatim&quot;</code> · <code>dizzy/src/dizzy/engine/groups.py:50-55 (&quot;fold_to_tail can itself raise, which leaves a claimed command run by nobody ... a row left running is recovered and re-delivered&quot;), :199-206 (claim returns a fenced `(job_id, attempt, command)`; execute is `run_command -&gt; ack`)</code></p>
+<p><em>suggested fix:</em> Once claim/run are split (finding 1), add a `recover` action: pending[h] non-empty → move it back to lane[owner(proc)] (any lane state, appended), pending[h]&#x27; = []. Keep the existing redeliver for the ran-then-crashed-before-ack case but drop the idle-lane guard or justify it as a state-space bound rather than a semantic restriction.</p><ul class="votes"><li><strong>accepted</strong> — Redelivery now re-queues any ran row at the front; claimed-but-unrun rows are the `pending` slot.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">minor</span> Header overstates what rule6Refines shows: a per-trace sequential-consistency property, not st-equivalence or cross-topology byte-identity
+<span class="lens"></span></summary>
+<p>freshReads compares each event&#x27;s view to the fold of THIS trace&#x27;s log before its first event. With two groups running host commands concurrently, the append order of independent procedures is itself nondeterministic, so even with rule 6 and a zero window the log — and therefore the models as sets of positions — differs between this spec&#x27;s traces and st&#x27;s for the same host script; nothing in groups.qnt relates a trace to an st trace. What is proven is that every read is sequentially consistent with the log it ended up in, which is the doc&#x27;s stronger-than-mp claim only after the DagStore change topology.md:516-521 calls out as unfinished. The header line &quot;reads exactly what st reads&quot; and the comment at :194 (&quot;The refinement property&quot;) should not be read as a refinement mapping.</p><p class="ref"><code>specs/groups.qnt:209 (&quot;THE claim of topology.md: a rule-6-legal split reads exactly what st reads&quot;), :194-207; specs/graph.qnt:18-20</code> · <code>docs/explanation/topology.md:505-509 (&quot;same log, same feature-file, any valid topology, byte-identical models&quot;), :313-321 (hybrid group folds entries a sequential run would have ordered later), :516-521 (the DagStore parent residual)</code></p>
+<p><em>suggested fix:</em> Reword :194 and :209 to state the property proven — every event&#x27;s view equals the fold of its own log&#x27;s prefix (the same local invariant st.qnt proves) — and add one sentence that cross-topology byte-identity additionally needs (i) the append-order/parents residual (topology.md:516-521) and (ii) the window of finding 1, neither of which this spec discharges. If an actual refinement is wanted, compose st and groups in one module driven by the same host script and compare final models restricted to a canonical order.</p><ul class="votes"><li><strong>accepted</strong> — Same.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">minor</span> Procedure-only groups are given a cursor and a fold-to-tail gate the implementation does not have
+<span class="lens"></span></summary>
+<p>A group owning no model and no policy has no event intake in the code and runs commands whenever the lane has one. In the spec such a group must first take foldOne steps to the tail (which change nothing but its cursor) before claimRun is enabled, so its command runs are artificially delayed relative to other groups&#x27; appends. It does not affect substrate contents (its cursor folds nothing), so the invariants are unaffected, but it skews the interleavings the simulator explores toward runs where a procedure-only group happens to run at a tail, which is the direction that hides stale reads in rule-6-violating topologies; witnessStaleRead is still reachable, so this is a coverage rather than a soundness issue.</p><p class="ref"><code>specs/groups.qnt:48 (`cursor: str -&gt; int` for every group), :125 (claimRun gated on cursor[h]==tail regardless of what h owns), :152 allIdle</code> · <code>dizzy/src/dizzy/engine/groups.py:311-319 reads_log (&quot;False for a procedure-only group, and then no cursor is ever loaded or saved&quot;), :359-360 (fold_to_tail returns 0 without walking); docs/explanation/topology.md:408-413 (&quot;a procedure group has no cursor&quot;)</code></p>
+<p><em>suggested fix:</em> Define `readsLog(h) = MODELS.exists(m =&gt; owner.get(m)==h) or POLICIES.exists(y =&gt; owner.get(y)==h)` and make claimRun&#x27;s guard `not(readsLog(h)) or cursor.get(h) == log.length()`; likewise exclude such groups from allIdle&#x27;s cursor clause (or make foldOne a no-op for them).</p><ul class="votes"><li><strong>accepted</strong> — `consumesLog(h)` exempts them from the cursor gate.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">blocker</span> rule6Refines is an intra-run sequential-consistency property, not a refinement of st; it does not establish byte-identical models across topologies
+<span class="lens"></span></summary>
+<p>freshReads and freshPolicyReads compare each reader&#x27;s view against a fold of THIS run&#x27;s own log; nothing in the property mentions st or another topology. The run above is rule-6 legal (reads p1-&gt;m1, p2-&gt;m2, y1-&gt;m2; owner m1,p1-&gt;g1 and m2,p2,y1-&gt;g2), the host submits c0-&gt;p1 then c1-&gt;p2, and g2 claims first: log = [e1(c1), e2(c1), e1(c0)], p1 reads m1={0,1}, p2 reads m2={}. st on the same script is forced by claimIndex (groups.qnt:72-76 / st.qnt:63-67, earliest batch command first) to produce [e1(c0), e1(c1), e2(c1)] with p1 reading m1={} and p2 reading m2={0}. Both executions satisfy rule6Refines, yet every reader saw a different view, so by graph.qnt:18-20&#x27;s own definition the models are NOT byte-identical. Rule 6 removes stale reads within a run; it cannot remove the race between independent commands in different lanes, which is exactly what topology.md:25-26 says groups do (&#x27;observe each other&#x27;s effects out of order&#x27;). The spec therefore proves less than the comment at groups.qnt:209 and topology.md:325/506 claim. Note also that the groups log is not always realisable by st under ANY host script: two commands dispatched by one policy run (PROC_LIST order, graph.qnt:96-103) land in st&#x27;s queue adjacently and run in that order, but routed to two lanes (groups.qnt:81-82) they may run in either order.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/groups.qnt:198-210 (freshReads, freshPolicyReads, rule6Refines and the comment &#x27;a rule-6-legal split reads exactly what st reads&#x27;); /home/conrad/dizzy-quint/specs/graph.qnt:18-20 (&#x27;Two topologies produce byte-identical models iff every reader saw the same view&#x27;)</code> · <code>/home/conrad/dizzy-quint/dizzy/docs/explanation/topology.md:323-326 (&#x27;a rule-6-legal split should diverge in neither&#x27; models nor stream entry for entry) and :506-507 (&#x27;same log, same feature-file, any valid topology, byte-identical models&#x27;); quint run on scratch copy: `quint run groups_lens.qnt --invariant=&#x27;not(witnessReorderObserved)&#x27; --max-samples=30000 --max-steps=20 --seed=0xc08fd --backend=rust` -&gt; violation</code></p>
+<p><em>suggested fix:</em> Rename and re-document the property as what it is: under rule 6 the groups history is sequentially consistent (every read is the fold of a prefix of the group log ending at the reader&#x27;s own first append), i.e. &#x27;linearisable reads&#x27;, not &#x27;reads exactly what st reads&#x27;. Add an explicit reachable witness like witnessReorder (rule6 and two same-priority host commands out of submission order in the log) to the Witnesses block so the spec states the reorder race that survives rule 6, and cross-reference topology.md:313-321. Then state the cross-topology theorem honestly: models agree across rule-6-legal topologies only modulo the order of causally independent commands, and st is the special case where that order is fixed by one lane. Change topology.md:325-326 and :506-507 to say &#x27;diverge in no read that is causally ordered&#x27; rather than &#x27;diverge in neither&#x27;.</p><ul class="votes"><li><strong>accepted</strong> — Renamed `rule6Guarantee`; header no longer claims st-equivalence or byte-identical models across topologies.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">major</span> claimRun fuses fold-to-tail and run atomically, so freshReads is stronger than what GroupWorker.step actually guarantees
+<span class="lens"></span></summary>
+<p>In the implementation another group may append between h&#x27;s middle fold_to_tail and h&#x27;s execute, so the procedure&#x27;s view can be a strict subset of foldPrefix(log, firstOf(log, cause)) even under rule 6. The docstring at groups.py:44-50 explicitly retreats to the weaker guarantee &#x27;the model has folded past the command&#x27;s cause&#x27;. The spec cannot exhibit this window because claimRun makes fold+run atomic (no other action can interleave between the guard at :125 and the concat at :134), so freshReads (an EQUALITY, groups.qnt:198-200) holds vacuously by construction rather than because the design guarantees it. st&#x27;s freshReads is justified by run_command being one locked step (st.qnt:6-9); the same justification is absent for groups. The spec therefore over-approximates the implementation&#x27;s atomicity and &#x27;proves&#x27; a property the code does not deliver.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/groups.qnt:120-139 (claimRun: guard `cursor.get(h) == log.length()` at :125 and the append at :134 are one atomic step); :24-27 (comment equating the two leading folds with the guard)</code> · <code>/home/conrad/dizzy-quint/dizzy/dizzy/src/dizzy/engine/groups.py:419-426 (step: fold_to_tail(); claim(); fold_to_tail(); execute(command)) and :44-50 (&#x27;an event appended in the instant between that fold and the procedure&#x27;s first read is not in the model ... &quot;folded past the command&#x27;s cause&quot; is the property, not &quot;folded past wall clock&quot;&#x27;); loop.py:355-402 apply_event has no global lock across groups</code></p>
+<p><em>suggested fix:</em> Split claimRun into two actions: `claim` (h with cursor==log.length() removes the command from its lane and records (cmd, snapshotView) in an in-flight variable) and `run` (appends runProcedure(g, cmd, snapshotView) later). Allow foldOne/claimRun of other groups between them. Then check which property survives: expect freshReads to FAIL and replace rule6Refines with the per-cause statement the code actually promises: for every event, `restrict(fold through c.id.at+1) ⊆ view ⊆ restrict(foldPrefix(log, firstOf(log, cause)))` (view covers the trigger; view never exceeds what preceded the append), plus the policy analogue. If the design intends the stronger equality, the doc at groups.py:44-50 is wrong and the implementation needs a fence; either way the spec and code must agree on which.</p><ul class="votes"><li><strong>accepted</strong> — Same fix.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">major</span> Position-tagged views cannot express any cross-topology or cross-run comparison, so the doc&#x27;s claim (and its DagStore residual) is unstatable in this abstraction
+<span class="lens"></span></summary>
+<p>Log positions are relative to the run&#x27;s own append order, so the view {0,1} in one topology and {1,2} in another can denote the same event contents or different ones; the abstraction has no notion of an event&#x27;s identity across runs. Consequently (a) the spec cannot even formulate &#x27;the same host script under two topologies yields equal models&#x27;, (b) the reorder race in finding 1 is invisible as a property because both runs are individually self-consistent, and (c) the residual topology.md:514-521 names (parents/ids) is below the abstraction, so the spec neither models nor rules it out and should say so. The cause ids ARE run-independent (host-numbered or (policy, trigger, target), graph.qnt:63-65), and a procedure emits exactly one event per kind, so (cause, kind) is a content identity the spec already has but does not use.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/graph.qnt:59-67 (View = str -&gt; Set[int], positions; Event.view tagged with positions) and :15-20 (claim that view-equality captures byte-identical models); /home/conrad/dizzy-quint/specs/groups.qnt:194-210 (no reference to st anywhere)</code> · <code>/home/conrad/dizzy-quint/dizzy/docs/explanation/topology.md:513-521 (residual: DagStore.append parents / content-hash ids differ across concurrent appenders; &#x27;given the same DAG, every topology folds byte-identical models&#x27; is the convergence half); :523-525 (&#x27;random valid topologies, random interleavings, replay, compare&#x27;)</code></p>
+<p><em>suggested fix:</em> Re-key views by (cause, kind) instead of position: `type View = str -&gt; Set[{cause: CmdId, kind: str}]` with applyEvent/foldPrefix adjusted. Keep positions for cursors. Then write a small harness module that instantiates st and groups side by side, feeds both the same submit sequence (one `submitBoth` action), lets each step freely, and checks at joint quiescence: `groups.substrate == st.models` and `log-as-set(groups) == log-as-set(st)`. That harness will refute the doc&#x27;s unconditional claim (finding 1) and pin down the exact conditional under which it holds (e.g. single-group placement, or graphs with at most one reader chain). Also note in graph.qnt:15-20 that parent/id divergence from DagStore.append is out of scope of this abstraction.</p><ul class="votes"><li><strong>accepted (documented)</strong> — Cross-topology comparison needs a per-run trace pair; the T2 single-group check is the in-spec form. Trace validation seed covers the rest.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">minor</span> Rule 6 also prevents a policy reading AHEAD of its cursor; the spec covers it but names it &#x27;stale&#x27;, and the doc argues only the &#x27;trails&#x27; direction
+<span class="lens"></span></summary>
+<p>In the spec a policy in group h reacting at position pos reads models owned by a faster group h&#x27; at cursor[h&#x27;] &gt; pos+1, giving a view strictly larger than st&#x27;s fold-through-trigger; this is reachable and is a second, distinct way freshPolicyReads breaks. Procedures cannot read ahead in the spec because claimRun folds to tail first (procNeverAhead holds), which contradicts the doc&#x27;s framing at topology.md:316-319 that a hybrid procedure &#x27;reads a model further ahead than st would have handed it&#x27; — that sentence actually describes the cross-run reorder of finding 1, not an intra-run ahead read. Rule 6 handles both directions because co-location makes cursor[owner(m)] == cursor[owner(reader)], but neither the doc&#x27;s rule 6 rationale nor the spec&#x27;s witness names the ahead case.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/groups.qnt:96-117 (foldOne: policies read `sub2`, in which models owned by OTHER groups reflect cursor[owner(m)], which may exceed pos+1); :216-217 (witnessStaleRead/witnessStalePolicy named for the lagging direction only); :163 (rule6 is symmetric co-location, so it does cover both)</code> · <code>/home/conrad/dizzy-quint/dizzy/docs/explanation/topology.md:188-192 (&#x27;A reader whose group TRAILS the group folding a model it reads ... emits a different event&#x27;) and :316-319 (the only mention of reading ahead, framed for a hybrid procedure folding to tail); quint run: `quint run groups_lens.qnt --invariant=&#x27;not(witnessPolicyAhead)&#x27;` (not(rule6) and lane command view a strict superset of restrict(foldPrefix(log, at+1))) -&gt; violation; `procNeverAhead` holds for 2000 samples</code></p>
+<p><em>suggested fix:</em> Add `witnessAheadPolicy` (strict superset) alongside witnessStalePolicy in groups.qnt and a one-line comment at :162 that rule 6 pins the reader&#x27;s cursor to the model&#x27;s cursor in BOTH directions. In topology.md:188-192 extend the rationale: a reader whose group LEADS the folding group reads a model containing entries st would have folded only after the reader ran. Reword :316-319 to say the &#x27;further ahead than st&#x27; effect is a consequence of lane reordering across topologies, not of the fold itself.</p><ul class="votes"><li><strong>accepted (documented)</strong> — Witness renamed; header says &#x27;stale or ahead&#x27;.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">major</span> The single-group degenerate case (the doc&#x27;s anchor that &#x27;st falls out as a topology&#x27;) is never checked against st
+<span class="lens"></span></summary>
+<p>The doc&#x27;s confidence in the distributed loop rests on the single-group topology being observably identical to st, and this is the one cross-topology statement that is actually TRUE in the spec&#x27;s own abstraction (one lane =&gt; same claimIndex order; foldOne appends dispatches in the same (policy, target) order ingest does; positions coincide). Yet the spec states no such property: rule6Refines is checked for all placements uniformly, and nothing compares a constant-owner run to st.log / st.queue. So the strongest true refinement statement — &#x27;placement constant =&gt; groups trace equals the (unique) st trace on the same host script&#x27; — is missing, while a weaker-than-claimed one is presented as THE claim.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/groups.qnt:36 (GROUPS = Set(&quot;g1&quot;,&quot;g2&quot;)), :60-63 (placement drawn from all maps, including the constant ones), :212 (allInvariants has no property that relates a constant placement to st); /home/conrad/dizzy-quint/specs/st.qnt:12-16 (st is deterministic given graph and host script)</code> · <code>/home/conrad/dizzy-quint/dizzy/docs/explanation/topology.md:489-493 (&#x27;st falls out as a topology: one group ... the degenerate case of the loop above and not a special one, which is the whole reason to believe it&#x27;) and :323-326 (&#x27;one hybrid group should reproduce st&#x27;s read models and its stream entry for entry&#x27;); groups.py:9-13 (worker is ingest&#x27;s body with append removed, &#x27;so the sequence survives the split verbatim&#x27;)</code></p>
+<p><em>suggested fix:</em> Add a composed harness (see finding 3 for the key change) or, without changing the view encoding, a cheaper version inside groups.qnt: a pure function `stRun(g, script)` is not available, but you can add an st instance via `import st(...) as ST` in a harness module, drive both with `submitBoth`, restrict groups to constant placements via a guard on init (`owner&#x27; = PLACEABLE.mapBy(_ =&gt; &quot;g1&quot;)`), and assert at joint quiescence `log == ST::log` and `lane.get(&quot;g1&quot;) == ST::queue`. This gives the spec an actual refinement of st for the case the doc leans on, and makes the two-group case&#x27;s residual (finding 1) visible as the difference between the two properties.</p><ul class="votes"><li><strong>accepted</strong> — Added `singleGroupIsSt` and `witnessOneGroupRun`.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">minor</span> Per-model fold equality at quiescence (the doc&#x27;s &#x27;second half&#x27;, convergence) is implied but never stated; stating it would separate the two halves of the claim
+<span class="lens"></span></summary>
+<p>topology.md splits the byte-identical claim into (1) same log content across topologies and (2) same log =&gt; same models. The spec&#x27;s substrateIsFold + allIdle together give (2) — `allIdle implies substrate == foldPrefix(g, log, log.length())` — but this is nowhere written down, so a reader of groups.qnt sees only rule6Refines and takes it for the whole claim. Making (2) explicit clarifies that rule6Refines is (at best) about (1), and that (1) is only partially delivered (findings 1-3).</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/groups.qnt:167-169 (substrateIsFold: each model equals its owner&#x27;s fold up to the owner&#x27;s cursor) and :152 (allIdle: every cursor == log.length()); no invariant combines them</code> · <code>/home/conrad/dizzy-quint/dizzy/docs/explanation/topology.md:516-518 (&#x27;given the same DAG, every topology folds byte-identical models — is already true and is the convergence invariant&#x27;); cursors.py:8-21 (deleting every cursor must reach the same state); groups.py:335-386 fold_to_tail (apply then save, per entry)</code></p>
+<p><em>suggested fix:</em> Add `val convergedAtQuiescence = allIdle implies MODELS.forall(m =&gt; substrate.get(m) == foldPrefix(g, log, log.length()).get(m))` (unconditional on rule 6, since it holds for every placement) to allInvariants, and a comment at groups.qnt:194 that rule6Refines addresses the CONTENT half of topology.md:511-521 while convergedAtQuiescence is the FOLD half. Optionally add a cursor-loss step (`cursor&#x27; = cursor.set(h, 0)` with substrate reset for h&#x27;s models) to model cursors.py&#x27;s disposability claim; substrateIsFold and convergedAtQuiescence should survive it, which is the test cursors.py:19-21 describes.</p><ul class="votes"><li><strong>accepted</strong> — `substrateIsFold` is that statement, now per hwm.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">blocker</span> claimRun fuses the middle fold with execute, excluding the real window in which a rule-6-legal group reads stale
+<span class="lens"></span></summary>
+<p>In the implementation the middle fold-to-tail and the procedure&#x27;s read are two steps, and another group&#x27;s append can land between them (groups.py:44-50 says so explicitly). The spec makes fold-check + run + append one atomic step, so that interleaving is unreachable and rule6Refines is proved only by the modelling choice. I built a scratch copy (/tmp/claude-1000/-home-conrad-dizzy-quint/230eeee0-0659-4147-afed-166fb60c474a/scratchpad/groups_split.qnt) that splits claimRun into `claim` (guard cursor==log.length, moves the command to a `held` slot) and `execute` (appends runProcedure(g, cmd, substrate) with no cursor guard). `quint run groups_split.qnt --invariant=rule6Refines --max-samples=3000 --max-steps=20 --seed=5` -&gt; [violation]. Trace: reads(p1)={m1,m2}, owner(m1)=owner(m2)=owner(p1)=g1, owner(p2)=g2, p2 emits e1, folds(m1)={e1} — rule 6 holds. g1 claims host p1 at cursor 0 == log.length 0; g2 executes p2 appending e1 at position 0; g1 executes p1 reading substrate m1={} and emits e2 at position 1 tagged view m1={}, but foldPrefix(log,1)[m1]={0}. st can never produce that event (p1 either runs before e1 or sees it). substrateIsFold/effectsOnce/causal/routed still hold on the split model, and the weaker property groups.py actually promises (reader folded through the command&#x27;s cause: foldPrefix(log, cause.at+1)[m] ⊆ view[m] for m in reads(target)) holds under rule 6 — so the spec proves st&#x27;s freshReads where the implementation only delivers cause-coverage.</p><p class="ref"><code>specs/groups.qnt:120-139 (guard `cursor.get(h) == log.length()` at :125 and the append at :134 in one atomic action); header comment :24-27</code> · <code>dizzy/dizzy/src/dizzy/engine/groups.py:419-426 (`command = self.claim(); ... self.fold_to_tail(); self.execute(command)`) and :44-50 (docstring: an event appended between that fold and the procedure&#x27;s first read is not in the model); topology.md:296-300</code></p>
+<p><em>suggested fix:</em> Model the worker&#x27;s seam faithfully: split claimRun into `claim` (guarded by cursor==log.length(), records the claimed command) and `execute` (appends, no fold guard), matching GroupWorker.step. Then either (a) downgrade the theorem to what the code guarantees — `rule6 implies causeCovered` (view ⊇ fold through cause.at for policy-dispatched commands; nothing for host commands) — and add a witness `rule6 and not(freshReads)` documented as reachable, or (b) keep freshReads as the target and record that it requires an implementation change (execute must re-verify cursor==tail under the append lock / CAS on log length, i.e. run-and-append atomic w.r.t. other groups&#x27; appends), which topology.md:505-521 currently does not list among the residuals.</p><ul class="votes"><li><strong>accepted</strong> — Same fix.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">major</span> &#x27;rule6Refines&#x27; is not a refinement of st: rule-6-legal runs produce log orders st never produces, so &#x27;byte-identical models&#x27; is not what is checked
+<span class="lens"></span></summary>
+<p>freshReads ∧ freshPolicyReads only says each topology&#x27;s own log is sequentially consistent; it never compares two topologies or maps a groups trace onto an st trace. I added `witnessReorder = rule6 and exists i&lt;j: log[i].cause=(y1,at,p2), log[j].cause=(y1,at,p1), p2 not interactive` (scratchpad/probe.qnt) and `quint run probe.qnt --invariant=&#x27;not(witnessReorder)&#x27; --max-samples=3000 --max-steps=20 --seed=3` -&gt; [violation], i.e. reachable. In st, a policy firing at `at` enqueues [p1,p2] and claimIndex always runs p1 first (no host script can reorder policy-dispatched commands), so this rule-6-legal groups log is outside st&#x27;s trace set. Because a view is a set of positions in a topology-specific order, &#x27;same view&#x27; in graph.qnt:18-20 cannot be compared across topologies either. The spec therefore establishes sequential consistency per log, which is what topology.md says was already true (line 517: convergence given the same DAG), not the entry-for-entry claim the header advertises.</p><p class="ref"><code>specs/groups.qnt:209-210 (&quot;a rule-6-legal split reads exactly what st reads&quot;), :198-207 freshReads/freshPolicyReads; specs/graph.qnt:18-20 (&quot;byte-identical models iff every reader saw the same view&quot;)</code> · <code>specs/st.qnt:63-67 claimIndex (earliest non-interactive wins) with graph.qnt:96-103 runPolicies dispatching in PROC_LIST order; topology.md:313-317 (&quot;two topologies&#x27; logs need not agree entry for entry&quot;) and :505-508 (the claim: same log, same feature-file, any valid topology, byte-identical models)</code></p>
+<p><em>suggested fix:</em> Rename `rule6Refines` to what it is (e.g. `rule6SeqConsistent`) and reword groups.qnt:209 and graph.qnt:18-20. If a cross-topology statement is wanted, state it as a determinism property that is order-insensitive: e.g. define an event&#x27;s identity as (cause, kind, view-mapped-to-causes) and check that the SET of such events at quiescence is the same function of the host script for every rule-6 placement — or explicitly scope the spec to per-log consistency and drop &#x27;byte-identical&#x27; from the comments.</p><ul class="votes"><li><strong>accepted</strong> — Same.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">major</span> effectsOnce&#x27;s contiguity conjunct is an artefact of the atomic append, not a property of the system
+<span class="lens"></span></summary>
+<p>In the implementation a procedure emitting two events appends them in two separate store.append calls with a fold/commit/policy run in between, and another group&#x27;s worker may append in that gap, so one cause&#x27;s events need not be contiguous in the shared log. The spec proves contiguity only because claimRun (and my split variant&#x27;s execute) concatenates the whole block in one step. freshReads is robust to this (it uses firstOf), but effectsOnce as stated is vacuously true of the model and false of the system, and the header presents it as the same invariant st has.</p><p class="ref"><code>specs/groups.qnt:134 (`log&#x27; = log.concat(runProcedure(...))` appends a whole block at once) and :171-179 effectsOnce (&quot;Same as st&quot;: events of one cause are contiguous)</code> · <code>dizzy/dizzy/src/dizzy/engine/loop.py:330-349 (ingest appends and applies one event at a time, with apply_event — projections, commit, policies — between successive appends); topology.md:513-514 (two groups appending concurrently to the shared DagStore)</code></p>
+<p><em>suggested fix:</em> Either append per event (execute loops: emit one event, then allow other actions, then the next — e.g. keep a per-group `pending: List[Event]` drained one entry per step) and weaken effectsOnce to the count clause plus &#x27;per cause, events appear in KIND_LIST order&#x27;, or keep the atomic append but annotate effectsOnce as a modelling assumption rather than an invariant &#x27;same as st&#x27;.</p><ul class="votes"><li><strong>accepted</strong> — Blocks are stamped with `at`; contiguity is now a checked property of the append, `blocksWellFormed`.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">blocker</span> Dedupe is a global oracle (`ran`) the real system does not have; effectsOnce holds only under rule 6 AND a guardable procedure
+<span class="lens"></span></summary>
+<p>The spec dedupes a redelivered command by consulting `ran`, a set shared by every group. Nothing in the deployment implements that set: the durable queue has no id and dedupes nothing at put, the store hashes the append time so a re-run procedure appends new rows, and the only guard the doc names is &#x27;procedures guard&#x27; — a procedure reading a model and finding its own prior effect. That guard exists only if the procedure reads a model that folds one of its own emitted kinds, AND that model is folded by the procedure&#x27;s own group (otherwise the guard reads a lagging owner&#x27;s fold). Rule 3 lets exactly the non-reading procedures partition freely — and those are precisely the ones with no guard at all. Quint run: replacing the check with `g.reads.get(cmd.proc).exists(m =&gt; substrate.get(m).exists(i =&gt; log[i].cause == cmd.id))` (scratchpad groupsB.qnt) makes `effectsOnce` violated by the existing `redeliver` action; `rule6 implies effectsOnce` and `guardable implies effectsOnce` are each violated; only `(rule6 and guardable) implies effectsOnce` survives 3000 samples. The trace with seed 0x12 shows p1 (reads m1, m1 folds e1, emits e1) appending its e1 block twice because m1&#x27;s owner cursor lagged. So the spec&#x27;s effectsOnce is proved against a mechanism the code lacks, and the doc&#x27;s &#x27;harmless redelivery&#x27; claim (rule 2, disposability) is unconditional where it must be conditional.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/groups.qnt:50 (`var ran: Set[Command]`), :130-131 (`if (ran.exists(c =&gt; c.id == cmd.id))` no-op), :171-179 (effectsOnce, &#x27;Same as st&#x27;); same oracle in st.qnt:34,93-95</code> · <code>topology.md:159-160 and :348-349 (&#x27;commands carry deterministic ids and procedures guard&#x27;); command_queue.py:55-73 schema has no command-id column and put() at :179-201 is a plain INSERT; store.py:157-163 wraps `ingested_at=now()` into the hashed payload so a re-emitted event gets a fresh content hash; groups.py:50-53 (a row left running is re-delivered, at-least-once)</code></p>
+<p><em>suggested fix:</em> Belongs in groups.qnt now. (1) Replace the `ran` branch in claimRun with the substrate-derived guard above; keep `ran` only as history for witnesses. (2) Add `pure def guardable(g) = PROCS.forall(p =&gt; g.reads.get(p).exists(m =&gt; g.folds.get(m).intersect(g.emits.get(p)) != Set()))` (or per-proc, restricted to procs appearing in the log). (3) Restate `effectsOnce` in allInvariants as `(rule6 and guardable(g)) implies effectsOnce`, and add witness `witnessDuplicateEffects = not(guardable(g)) and not(effectsOnce)` (expect reachable). (4) In topology.md, qualify rule 2 / &#x27;commands dedupe on deterministic ids&#x27; with the guardability precondition, or add a UNIQUE(command_id) column to the jobs table and a `put`-side dedupe — in which case the spec&#x27;s `ran` becomes an honest model of the queue and the guard condition disappears.</p><ul class="votes"><li><strong>accepted</strong> — `guarded` nondet assumption as in st; `ran` is only consulted when guarded.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">major</span> No cursor rewind / crash-between-put-and-save action; substrateIsFold and freshPolicyReads are stated too strongly to survive one
+<span class="lens"></span></summary>
+<p>The disposability contract — the one topology.md says has no test — is the only cursor behaviour the spec omits. Adding `rewind` (cursor[h] := k &lt; cursor[h]; scratchpad groupsA.qnt) and re-running: `substrateIsFold` is violated (the substrate stays folded ahead of the rewound cursor — the spec&#x27;s set-of-positions representation silently bakes in the idempotent fold cursors.py:38-39 demands, without stating it); `rule6Refines` is violated — but only its policy half: `rule6 implies freshReads` holds, while the re-run policy at pos reads a substrate already folded past pos and re-dispatches a same-id command carrying an &#x27;ahead&#x27; view. That duplicate sits in a lane alongside (or after) the original, so lane ids are no longer distinct (groups.qnt dropped st&#x27;s queueIdsDistinct, st.qnt:173-175). The weakened `freshPolicyReadsLive` (only the first lane copy of an id not already in `ran`) holds under rewind, and `substrate == foldPrefix(k)` for some `k &gt;= cursor` holds. So the refinement claim survives cursor loss, but the spec cannot say so with its present invariants, and the crash-window duplicate dispatch is exactly the case finding 1&#x27;s guard has to absorb.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/groups.qnt:96-117 (foldOne advances cursor atomically with dispatch), :159 (step has no rewind), :168-169 (substrateIsFold demands equality with the fold up to the CURRENT cursor), :202-207 (freshPolicyReads quantifies over every lane entry)</code> · <code>cursors.py:33-42 (commit then save; a crash between re-delivers the entry), groups.py:371-378 (apply_event dispatches via put, THEN cursors.save), groups.py:383-385 (a cursor past the tail is rewound to START and re-folded), cursors.py:343-359 (`rewind` is a public operator operation), topology.md:346-351 (&#x27;losing one must be safe ... needs a test, not a paragraph&#x27;)</code></p>
+<p><em>suggested fix:</em> Belongs in groups.qnt now (it is &#x27;losing a cursor must be safe&#x27;, the cheapest failure to model). Add `action rewind = { nondet h = GROUPS.oneOf() nondet k = 0.to(MAX_LOG).oneOf() all { k &lt; cursor.get(h), cursor&#x27; = cursor.set(h, k), ...unchanged } }` to `step`. Add `var folded: str -&gt; int` (high-water mark, set to max(folded[h], pos+1) in foldOne) and restate `substrateIsFold` as `substrate.get(m) == foldPrefix(g, log, folded.get(owner.get(m))).get(m)`, with a comment that equality relies on idempotent folds. Restate freshPolicyReads over live first copies: guard the implication with `not(ran.exists(r =&gt; r.id == c.id)) and lane.get(h).indices().forall(j =&gt; j &lt; i implies lane.get(h)[j].id != c.id)`. Add `witnessDuplicateDispatch` (two lane entries with one id) as a reachable witness, not an invariant. Add `witnessRewoundReplay = GROUPS.exists(h =&gt; cursor.get(h) &lt; folded.get(h))`.</p><ul class="votes"><li><strong>accepted</strong> — Same.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">major</span> Lane-file loss and lost host commands are invisible: the spec has no completeness property, so allInvariants passes with a cascade killed
+<span class="lens"></span></summary>
+<p>The doc&#x27;s named hazard is a liveness/completeness failure: a durable cursor asserting work that never happened. The spec has nothing that would notice it. Adding `loseLane` (lane[h] := []; scratchpad groupsC1.qnt): `allInvariants` still passes 2000 samples, while a new `cascadeComplete` — at quiescence, for every log entry i and every (policy y reacting to log[i].kind, target p it dispatches with emits(p) != Set()), some event has cause {y, i, p} unless MAX_LOG was hit — is violated. The same invariant holds on the unmodified spec (groupsC0.qnt, 3000 samples), so it is a true property of today&#x27;s actions that the spec fails to state, and the doc&#x27;s &#x27;killing a cascade permanently&#x27; (its stated symptom of a rule-6 violation) is likewise unstated. A host command lost before put is a different animal: `submit` is already nondeterministic, so the loss is indistinguishable from a host that never submitted — the spec cannot and should not see it.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/groups.qnt:212 (allInvariants are safety-only: substrateIsFold, effectsOnce, causal, routed, rule6Refines), :152-157 (quiescent accepts `allIdle` with no check that every dispatch ran), :85-94 (submit puts straight into a lane — atomic)</code> · <code>topology.md:426-434 (&#x27;A new hazard ... Lose [command_queue.db] and every queued, unclaimed command vanishes while the policy group&#x27;s cursor has already advanced ... dropping that file must be paired with rewinding every policy group&#x27;s cursor&#x27;); topology.md:423-425 (externally-originated command dying before its put &#x27;is gone, with no log entry to re-derive it&#x27;); topology.md:326-330 (rule-6 violation &#x27;killing a cascade permanently&#x27;)</code></p>
+<p><em>suggested fix:</em> cascadeComplete belongs in groups.qnt now: `val cascadeComplete = (submitted == MAX_SUBMISSIONS and allIdle) implies log.indices().forall(i =&gt; POLICIES.forall(y =&gt; PROCS.forall(p =&gt; (g.reacts.get(y).contains(log[i].kind) and g.dispatches.get(y).contains(p) and g.emits.get(p) != Set()) implies (log.length() &gt;= MAX_LOG or log.indices().exists(j =&gt; log[j].cause == {origin: y, at: i, target: p})))))` added to allInvariants (it is what the doc means by &#x27;convergent&#x27;). `loseLane` belongs in Spec 3 (failure model), paired with the doc&#x27;s repair as a checkable statement: `loseLane(h)` followed by `rewind(owner(y), 0)` for every policy y whose dispatches route to h restores cascadeComplete — i.e. the operational coupling in topology.md:431-433 becomes a theorem instead of a warning. Host-command loss: nowhere; one comment on `submit` saying it is subsumed by the host&#x27;s nondeterminism.</p><ul class="votes"><li><strong>partially</strong> — Completeness invariants added; lane-file loss is a Spec 3 fault.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">blocker</span> allInvariants is violated: rewind re-dispatches with a view ahead of its trigger, breaking freshDispatch and hence T1
+<span class="lens">re-review</span></summary>
+<p>allInvariants is violated: rewind re-dispatches with a view ahead of its trigger, breaking freshDispatch and hence T1</p><p class="ref"><code>specs/groups.qnt</code> · <code>post-fix re-review</code></p>
+<p><em>suggested fix:</em> Reproduced at 12 000 samples. T1 is now rule6 ⇒ causeFolded ∧ dispatchCauseFolded (the ⊇ form); the strong freshDispatch is T1&#x27;, conditional on rule 6 and no cursor loss (`rewound` ghost).</p><ul class="votes"><li><strong>accepted</strong> — Reproduced at 12 000 samples. T1 is now rule6 ⇒ causeFolded ∧ dispatchCauseFolded (the ⊇ form); the strong freshDispatch is T1&#x27;, conditional on rule 6 and no cursor loss (`rewound` ghost).</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">major</span> singleGroupIsSt is false, and it is not an st-equivalence check
+<span class="lens">re-review</span></summary>
+<p>singleGroupIsSt is false, and it is not an st-equivalence check</p><p class="ref"><code>specs/groups.qnt</code> · <code>post-fix re-review</code></p>
+<p><em>suggested fix:</em> Restated: oneGroup ⇒ freshReads ∧ dispatchCauseFolded ∧ (¬rewound ⇒ freshDispatch). True st-equivalence needs a trace pair — the trace-validation seed.</p><ul class="votes"><li><strong>accepted</strong> — Restated: oneGroup ⇒ freshReads ∧ dispatchCauseFolded ∧ (¬rewound ⇒ freshDispatch). True st-equivalence needs a trace pair — the trace-validation seed.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">major</span> T1&#x27;s freshDispatch conjunct is stronger than groups.py:27-29 and false for the worker even without rewind (inline cascade)
+<span class="lens">re-review</span></summary>
+<p>T1&#x27;s freshDispatch conjunct is stronger than groups.py:27-29 and false for the worker even without rewind (inline cascade)</p><p class="ref"><code>specs/groups.qnt</code> · <code>post-fix re-review</code></p>
+<p><em>suggested fix:</em> Removed from T1. The inline-cascade fold order is seed Spec 3a.</p><ul class="votes"><li><strong>accepted</strong> — Removed from T1. The inline-cascade fold order is seed Spec 3a.</li></ul></details>
+<details class="finding confirmed"><summary><span class="sev">minor</span> witnessClaimWindow proves &#x27;read behind the tail&#x27;, not the divergence the header claims; the real witness is write-skew
+<span class="lens">re-review</span></summary>
+<p>witnessClaimWindow proves &#x27;read behind the tail&#x27;, not the divergence the header claims; the real witness is write-skew</p><p class="ref"><code>specs/groups.qnt</code> · <code>post-fix re-review</code></p>
+<p><em>suggested fix:</em> Added `witnessWriteSkew` (rule 6 ∧ two decisions that never saw each other) — reachable. That is the counter-example to &#x27;byte-identical models&#x27;.</p><ul class="votes"><li><strong>accepted</strong> — Added `witnessWriteSkew` (rule 6 ∧ two decisions that never saw each other) — reachable. That is the counter-example to &#x27;byte-identical models&#x27;.</li></ul></details>
+<h4>Deferred or rejected (7)</h4><details class="finding contested"><summary><span class="sev">major</span> claimRun does not ingest its own events inline; the worker does, and folds out of log order in the window
+<span class="lens"></span></summary>
+<p>In the implementation execute() is run_command, whose ingest appends each own event and immediately runs apply_event (fold h&#x27;s projections, commit, run h&#x27;s policies) inline, then the trailing fold walks the rest of the log skipping those positions. Combined with the window of finding 1, if g2 appends at position n between h&#x27;s middle fold and h&#x27;s run, h applies its own n+1 (policies at n+1 read a model missing n) BEFORE walking n — the fold is not in log order and the policy view for n+1 is foldPrefix(n+2) minus {n}. The spec&#x27;s foldOne can only fold n then n+1, so this ordering and the resulting policy view are unrepresentable; freshPolicyReads for h&#x27;s own-event policies is proven only because the spec never lets those policies run before the concurrent entry is folded. As sets the final model coincides (confluence), but the tagged views — the thing the spec uses to state byte-identity — do not.</p><p class="ref"><code>specs/groups.qnt:96-117 foldOne (strictly cursor-ordered, one entry per step) and :132-136 claimRun (appends only; h&#x27;s own events are folded/policied later by foldOne)</code> · <code>dizzy/src/dizzy/engine/groups.py:392-399 and :426 (`self.fold_to_tail(skip=self.engine.take_applied())`); dizzy/src/dizzy/engine/loop.py:329-349 (ingest appends then apply_event inline per event, recording applied_positions) and :404-415 take_applied</code></p>
+<p><em>suggested fix:</em> Have the run step apply its own events inline in the same atomic step: fold them into the owner&#x27;s models, run h&#x27;s policies on them reading `substrate` as of that moment, route the dispatches, and record the positions in a per-group `skip[h]: Set[int]`; foldOne then advances over a position in skip[h] without applying (mirroring fold_to_tail&#x27;s `envelope.position not in skip`, groups.py:369). With that, check which of freshPolicyReads / causeFolded survives for own-event dispatches, and state the answer in the header.</p><ul class="votes"><li><strong>deferred</strong> — Own appends folded ahead of earlier foreign entries — Spec 3 (set semantics make it invisible to the current theorems).</li></ul></details>
+<details class="finding contested"><summary><span class="sev">minor</span> The spec runs a group&#x27;s own inline cascade lazily; the implementation folds and dispatches its own appends inside the same unit of work
+<span class="lens"></span></summary>
+<p>In the implementation the executing group&#x27;s projections fold and its policies dispatch atomically with the append (ingest calls apply_event per event; take_applied stops the cursor pass from re-running them). In the spec those effects happen in a separate, arbitrarily delayed foldOne. Because positions are fixed at append and the next claimRun forces the fold first, the tagged views are identical under rule 6 — so this does not break the theorem — but it lets the model interleave other groups&#x27; folds/redeliveries between h&#x27;s append and h&#x27;s own reaction, which the real worker never does, and it makes `witnessOwnLag` (rule6 and a group behind its own append; reachable in probe.qnt) a spec-only behaviour. It also means the spec has no counterpart to the constraint at groups.py:209-222 (one engine per command-running group, else other groups&#x27; handlers run inline).</p><p class="ref"><code>specs/groups.qnt:132-137 (claimRun appends but leaves cursor[h] &lt; log.length(); h&#x27;s own projections/policies run only in a later foldOne)</code> · <code>dizzy/dizzy/src/dizzy/engine/groups.py:425-426 (`self.execute(command)` = run_command -&gt; ingest -&gt; apply_event with the group&#x27;s registered handlers, then `fold_to_tail(skip=self.engine.take_applied())`); loop.py:254-266, :345-349</code></p>
+<p><em>suggested fix:</em> In claimRun (or execute), fold h&#x27;s own newly appended entries inline: set cursor[h] to the new log length, apply h&#x27;s projections, run h&#x27;s policies on each appended event, and route the dispatches — mirroring st.ingest restricted to h. Keep foldOne for entries appended by other groups.</p><ul class="votes"><li><strong>deferred</strong> — Same.</li></ul></details>
+<details class="finding contested"><summary><span class="sev">minor</span> Shared-substrate assumption changes what the rule-6 witnesses mean versus the per-process model topology.md describes
+<span class="lens"></span></summary>
+<p>The spec makes a rule-6-violating reader see the OTHER group&#x27;s fold of the model (stale only by lag), whereas topology.md says a reader whose group does not fold a model reads a model that group never folded at all. Under rule 6 the two coincide, so rule6Refines is unaffected; but witnessStaleRead documents lag-staleness, and the shared substrate also lets a rule-6-violating reader read fresh by luck whenever the owning group happens to be caught up, which is not a behaviour of separate-process deployments. The witness proves rule 6 is not pointless, but for a weaker reason than the design notes give.</p><p class="ref"><code>specs/groups.qnt:15-16 (substrate is shared; a model reflects cursor[owner(m)]), :109 and :134 (readers read the shared substrate), :216-217 witnessStaleRead/witnessStalePolicy</code> · <code>topology.md:323-328 (a rule-6-violating layout diverges by reading an EMPTY model); groups.py:1-13 (a group is a process or device with its own engine and read models)</code></p>
+<p><em>suggested fix:</em> Either state the shared-DB assumption in the header as a deliberate scope (single host, all groups over one sqla DB) or parameterise: give each group its own View and have readers read `substrate[owner(reader)]`, so a non-co-located model reads as never folded. Add a witness `not(rule6) and exists event with view = emptyView restricted to a non-empty read set while the log has a matching fold` to reproduce topology.md&#x27;s &#x27;empty model&#x27; divergence.</p><ul class="votes"><li><strong>deferred</strong> — Per-device replicas — Spec 3.</li></ul></details>
+<details class="finding contested"><summary><span class="sev">major</span> CmdId and causal/fresh reads are keyed on log position, which is node-local; a replicated per-device log breaks the dedupe key itself
+<span class="lens"></span></summary>
+<p>Every identity in the spec is a position in one shared list. That is correct for the shared-EventStore deployment the spec declares, but the code and doc are explicit that a real multi-device deployment has one DagStore per node with node-local positions, canonical order that renumbers on replication, and content-hash ids as the only portable identity. Under that deployment the spec&#x27;s dedupe key (y, pos, p) differs between two nodes that both react to the same replicated fact, so two distinct ids are dispatched for one trigger — and no procedure guard, keyed on cause id, can see them as one command. `causal` (c.at &lt; i) and `freshPolicyReads` (fold up to c.at+1) likewise stop meaning anything once `at` is a per-node number. The doc&#x27;s own &#x27;byte-identical models&#x27; claim is split into &#x27;same DAG =&gt; same models&#x27; (true, convergence) and &#x27;same DAG&#x27; (open, parent minting); the spec proves neither half in the replicated setting because it has no notion of a DAG or a second node at all.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/graph.qnt:63-65 (`CmdId = {origin, at: int, target}` — &#x27;policy-dispatched ids are (policy, trigger position, target)&#x27;), :101 (`id: {origin: y, at: pos, ...}`); groups.qnt:14 (&#x27;log — shared, append-only, totally ordered&#x27;), :185 (`c.at &lt; i`), :206 (`foldPrefix(g, log, c.id.at + 1)`)</code> · <code>cursors.py:23-30 (&#x27;a position is NODE-LOCAL (never replicate one, never compare one across peers) and it is NOT an index into canonical order&#x27;); groups.py:178-186 (`shard_for` hashes the event id &#x27;not on the position: a position is node-local, so two nodes would assign the same fact to different shards&#x27;); topology.md:353-371 (canonical order splices, &#x27;one peer fact ... renumbered 196 of 200 existing positions&#x27;); topology.md:503-510 (residual gap: parents minted from local heads give different DAGs per group)</code></p>
+<p><em>suggested fix:</em> Belongs in Spec 3 (replicated log), not groups.qnt — but graph.qnt should stop baking a position into the id now, because the change is cheap and position-free ids are what both specs need: `type EventId = {cause: CmdId, kind: str}` (deterministic in the spec since a procedure emits one event per kind), `CmdId = {origin: str, trigger: EventId | host-number, target: str}`, with `causal` stated as &#x27;trigger appears before i&#x27; and freshPolicyReads as &#x27;fold up to the trigger&#x27;s first occurrence&#x27;. Spec 3 then adds `var log: str -&gt; List[Event]` per node, an `addReplicated(h, e)` action that inserts a foreign event into node h&#x27;s list at any index (models the splice), per-node cursors over per-node lists, and states (a) convergence: `MODELS.forall(m =&gt; substrateIds(h1, m) == substrateIds(h2, m))` at quiescence where models are sets of EventIds rather than positions, and (b) the doc&#x27;s open half as a witness: two nodes whose logs contain the same set of EventIds but in different orders.</p><ul class="votes"><li><strong>deferred</strong> — Node-local positions vs replicated logs — Spec 3 / DagStore parent work in topology.md.</li></ul></details>
+<details class="finding contested"><summary><span class="sev">minor</span> Sharded event-only policy groups (k/N) are out of scope but the spec could state cheaply why they cannot affect rule6Refines and what they can break
+<span class="lens"></span></summary>
+<p>The only groups the code allows to shard hold non-reading policies. For those, `restrict(g, y, v)` is emptyView regardless of cursor, so `freshPolicyReads` is trivially true for every command they dispatch and sharding provably cannot touch `rule6Refines` — a one-line observation the spec should make instead of declaring the topic out of scope. What sharding CAN break is finding 3&#x27;s `cascadeComplete`: a reshard from N to N&#x27; without the documented rewind leaves entries between the shards&#x27; cursors that no shard now owns (or two own), i.e. a lost or duplicated dispatch — the untested property the doc names, and the duplicate is again absorbed only under finding 1&#x27;s guardability. Nothing in the present spec expresses ownership by content hash vs position, the same distinction as finding 4.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/groups.qnt:11 (&#x27;Rule 3 (worker counts) is out of scope here: every group is one lane&#x27;); graph.qnt:82-83 (`restrict` returns emptyView for a non-reader); groups.qnt:202-207 (freshPolicyReads)</code> · <code>groups.py:277-284 (shards&gt;1 refused for any group holding a projection), groups.py:321-322 + :369 (`owns(envelope.id)` — a shard applies an entry it owns and saves the cursor for every entry), groups.py:486-489 and topology.md:389-397 (&#x27;changing N invalidates every assignment: the only safe reshard is to rewind all N cursors to the lowest and replay ... the property this document now rests on twice and still has no test for&#x27;)</code></p>
+<p><em>suggested fix:</em> Nowhere for the refinement claim: add a comment at groups.qnt:11 stating the emptyView argument. Spec 3 for the reshard hazard: `var shards: str -&gt; int`, `pure def owns(h, k, pos)` (any deterministic hash of the position-free EventId from finding 4 mod shards[h]), cursors keyed by (h, k), a `reshard(h, n)` action that changes shards[h] without touching cursors, and a `rewindAllToLowest(h)` action; invariants: `cascadeComplete` violated after bare reshard (witness) and restored after rewindAllToLowest; duplicate dispatch after reshard reaches `effectsOnce` only via finding 1&#x27;s guard.</p><ul class="votes"><li><strong>deferred</strong> — Spec 3.</li></ul></details>
+<details class="finding contested"><summary><span class="sev">minor</span> The spec assumes a shared substrate; the doc describes the per-device failure mode — the refinement claim is substrate-agnostic under rule 6 and should say so
+<span class="lens"></span></summary>
+<p>With a shared DB a rule-6-violating reader sees the owner&#x27;s STALE fold; on a device with its own replica it sees an EMPTY model it never folds. The doc describes the second; the spec models the first. Changing `substrate` to `str -&gt; View` (one replica per group; foldOne writes only substrate[h], claimRun reads only substrate[h]; scratchpad groupsD.qnt) keeps `allInvariants` passing (2000 samples) and makes `witnessEmptyRead` (a reader whose tagged view is emptyView while the true fold is not) reachable. So rule 6 makes the refinement claim independent of whether the substrate is shared — a stronger and more deployment-honest statement than the spec makes, and the reason is one line: under rule 6 a reader touches only models its own group folds, so substrate[owner(e)][m] == shared substrate[m] for every m it reads.</p><p class="ref"><code>/home/conrad/dizzy-quint/specs/groups.qnt:15-16 (&#x27;substrate — shared read models (the sqla DB)&#x27;), :47 (`var substrate: View`), :134 (&#x27;reads the SHARED substrate&#x27;), :216 (witnessStaleRead)</code> · <code>topology.md:326-330 (a rule-6-violating layout diverges &#x27;by reading an EMPTY model, dispatching nothing, and killing a cascade&#x27;); loop.py:36-40 (across groups &#x27;the fold it sees committed is that group&#x27;s, not the log&#x27;s tail&#x27;); cursors.py:150-162 (MemoryCursorStore &#x27;deliberately NOT shared between processes&#x27;)</code></p>
+<p><em>suggested fix:</em> Belongs in groups.qnt now, as a comment plus the witness at minimum: state at :15-16 that the shared-DB assumption is not load-bearing under rule 6 and that the two deployments differ only in the not(rule6) witness (stale vs empty). Preferably switch to the per-group substrate (it is the more general model: `var substrate: str -&gt; View`, `substrate&#x27; = substrate.set(h, sub2)`, `runProcedure(g, cmd, substrate.get(h))`, `substrateIsFold` over `substrate.get(owner.get(m)).get(m)`) and add `witnessEmptyRead = not(rule6) and log.indices().exists(i =&gt; g.reads.get(log[i].cause.target) != Set() and log[i].view == emptyView and restrict(g, log[i].cause.target, foldPrefix(g, log, firstOf(log, log[i].cause))) != emptyView)`, so topology.md:328&#x27;s sentence has a reachable witness. Fix the doc to name both symptoms.</p><ul class="votes"><li><strong>deferred</strong> — Same.</li></ul></details>
+<details class="finding contested"><summary><span class="sev">minor</span> T1&#x27;s antecedent is weaker than the worker&#x27;s promise: the guarantee is per co-located pair, not conditional on global rule 6
+<span class="lens">re-review</span></summary>
+<p>T1&#x27;s antecedent is weaker than the worker&#x27;s promise: the guarantee is per co-located pair, not conditional on global rule 6</p><p class="ref"><code>specs/groups.qnt</code> · <code>post-fix re-review</code></p>
+<p><em>suggested fix:</em> Per-pair form (`causeFoldedLocal`) is a strict strengthening; noted for the next revision.</p><ul class="votes"><li><strong>deferred</strong> — Per-pair form (`causeFoldedLocal`) is a strict strengthening; noted for the next revision.</li></ul></details>
+<h4>Disposition</h4><p>Findings came from four reviewer lenses (fidelity, soundness, Quint correctness, missing behaviours / refinement / distributed), each judged by a skeptic and a does-it-matter agent. The session limit interrupted roughly half the votes; every finding was then dispositioned by hand against the code and the design notes. <em>accepted</em> = fixed in the revised spec; <em>deferred</em> = a Spec 3 fault-model item tracked in <code>.seeds/</code>; <em>rejected</em> = kept as is, with the reason.</p><p>A second, post-fix workflow re-read the revised specs against every prior finding (12 agents, all completed): all prior findings were judged fixed or deferred-by-design; its five new findings per spec are listed above with lens <em>re-review</em>. One was a genuine invariant violation my 3 000-sample runs had missed (cursor rewind vs. freshDispatch) — the suite now runs 8 000 samples and both bounded proofs.</p>
+</section>
+<details class="src"><summary>source · <code>specs/groups.qnt</code></summary><pre>// specs/groups.qnt — Spec 2: consumer groups, i.e. the distributed engine.
+//
+// The same feature graph, split across GROUPS — each a process (or device)
+// with ONE cursor over the shared log and ONE lane of the durable command
+// queue (dizzy/engine/groups.py, topology.md &quot;What a group worker does&quot;).
+//
+// Placement is a map `owner : PROCS ∪ POLICIES ∪ MODELS → GROUPS`, chosen
+// nondeterministically at init alongside the graph, so a bounded check ranges
+// over every (feature, topology) pair of the bounded size — including the
+// one-group placement, which must behave exactly like st (`singleGroupIsSt`).
+// Making the MODEL the unit of placement bakes in rule 1. Rule 3 (worker
+// counts) is out of scope: every group is one lane.
+//
+// Shared vs per-group:
+//   • log          shared, append-only, totally ordered (the EventStore)
+//   • substrate    shared read models (one sqla DB); model m is folded ONLY by
+//                  owner(m), so it reflects owner(m)&#x27;s progress, not the tail
+//   • cursor[h]    per group, durable; `foldOne` advances it by one entry,
+//                  running h&#x27;s projections then h&#x27;s policies on that entry
+//   • lane[h]      per group; commands whose procedure h owns
+//   • pending[h]   the command h has claimed and not yet run
+//   • transport    a doorbell only, so not modelled: a fold may happen at any
+//                  time (&quot;a dropped notification costs latency, never work&quot;)
+//
+// The worker&#x27;s cycle (groups.py:419-426) is
+//     fold_to_tail(); claim(); fold_to_tail(); execute(); fold_to_tail()
+// with NO lock between the middle fold returning and the procedure&#x27;s first
+// read (groups.py:44-50). So it is two steps here: `claim` (guarded by
+// cursor-at-tail: the middle fold has returned) and `execute` (unguarded: other
+// groups may have appended in between). That window is real, and it is why
+// the theorem below is NOT &quot;a rule-6-legal split reads what st reads&quot;:
+//
+//   what groups.py promises (:27-29): the read model has committed THROUGH
+//   THE COMMAND&#x27;S CAUSE before the procedure runs         → rule6 ⇒ causeFolded
+//   what st gives: the read model is folded to the tail   → freshReads
+//
+// `witnessClaimWindow` shows rule6 ∧ ¬freshReads is reachable: a rule-6-legal
+// deployment can still decide on a model that is behind the log, i.e. the
+// &quot;byte-identical models&quot; claim in topology.md:322-326 does not hold for the
+// worker as written. Closing the window (a lock, or re-checking the tail after
+// the claim) would make `freshReads` provable again — that is a design choice
+// for Dizzy, surfaced here rather than assumed away.
+//
+// Faults modelled: at-least-once command redelivery (`redeliver`) and cursor
+// loss (`rewind`: commit-then-save, cursors.py:33-46 — models keep their
+// committed state, the cursor goes back, entries are re-folded and policies
+// re-dispatch under the same deterministic ids).
+//
+// Deferred to Spec 3 (seeds): per-device substrate replicas, sharded
+// event-only policy groups (k/N), a group folding its own appends ahead of
+// earlier foreign entries, lane-file loss.
+//
+//   quint run    groups.qnt --invariant=allInvariants --max-samples=3000 --max-steps=20
+//   quint run    groups.qnt --invariant=&#x27;not(witnessClaimWindow)&#x27;  # expect violation = reachable
+//   quint verify groups.qnt --invariant=allInvariants --max-steps=3
+
+module groups {
+  import graph.* from &quot;./graph&quot;
+
+  pure val GROUPS = Set(&quot;g1&quot;, &quot;g2&quot;)
+  pure val PLACEABLE = ELEMS.union(MODELS)
+  pure val PLACEMENTS = PLACEABLE.setOfMaps(GROUPS)
+
+  pure val MAX_SUBMISSIONS = 2
+  pure val MAX_LOG = 6
+
+  // --- State -------------------------------------------------------------
+  var g: Graph
+  var guarded: bool
+  var owner: str -&gt; str        // the topology
+  var log: List[Event]
+  var substrate: View          // shared read models, each folded by its owner
+  var cursor: str -&gt; int       // per group, durable
+  var hwm: str -&gt; int          // high-water mark of cursor (what is really folded) — a ghost
+  var lane: str -&gt; List[Command]
+  var pending: str -&gt; List[Command]   // at most one: the claimed, not-yet-run command
+  var ran: Set[Command]
+  var submitted: int
+  var rewound: bool            // ghost: a cursor was lost at some point
+
+  action init = {
+    nondet reads = READS.oneOf()
+    nondet emits = EMITS.oneOf()
+    nondet folds = FOLDS.oneOf()
+    nondet reacts = REACTS.oneOf()
+    nondet dispatches = DISPATCHES.oneOf()
+    nondet interactive = INTERACTIVE.oneOf()
+    nondet gd = Set(true, false).oneOf()
+    nondet placement = PLACEMENTS.oneOf()
+    all {
+      g&#x27; = { reads: reads, emits: emits, folds: folds, reacts: reacts, dispatches: dispatches, interactive: interactive },
+      guarded&#x27; = gd,
+      owner&#x27; = placement,
+      log&#x27; = [], substrate&#x27; = emptyView,
+      cursor&#x27; = GROUPS.mapBy(h =&gt; 0), hwm&#x27; = GROUPS.mapBy(h =&gt; 0),
+      lane&#x27; = GROUPS.mapBy(h =&gt; []), pending&#x27; = GROUPS.mapBy(h =&gt; []),
+      ran&#x27; = Set(), submitted&#x27; = 0, rewound&#x27; = false,
+    }
+  }
+
+  // --- Helpers ---------------------------------------------------------------
+  pure def claimIndex(gr: Graph, q: List[Command]): int = {
+    val urgent = q.indices().filter(i =&gt; gr.interactive.contains(q[i].proc))
+    if (urgent != Set()) urgent.fold(-1, (a, i) =&gt; if (a == -1 or i &lt; a) i else a)
+    else 0
+  }
+  pure def without(q: List[Command], i: int): List[Command] =
+    q.slice(0, i).concat(q.slice(i + 1, q.length()))
+  pure def route(o: str -&gt; str, lanes: str -&gt; List[Command], cmds: List[Command]): str -&gt; List[Command] =
+    cmds.foldl(lanes, (ls, c) =&gt; ls.set(o.get(c.proc), ls.get(o.get(c.proc)).append(c)))
+
+  // A group with nothing that consumes the log holds no cursor (topology.md
+  // &quot;a procedure group has no cursor&quot;), so it is not gated on folding.
+  def consumesLog(h: str): bool =
+    MODELS.exists(m =&gt; owner.get(m) == h) or POLICIES.exists(y =&gt; owner.get(y) == h)
+
+  action fixedConfig = all {
+    g&#x27; = g, guarded&#x27; = guarded, owner&#x27; = owner, submitted&#x27; = submitted, rewound&#x27; = rewound,
+  }
+
+  // --- Host submits a command ------------------------------------------------
+  action submit = {
+    nondet p = PROCS.oneOf()
+    val c = { id: { origin: &quot;host&quot;, at: submitted, target: p }, proc: p, view: emptyView }
+    all {
+      submitted &lt; MAX_SUBMISSIONS,
+      lane&#x27; = lane.set(owner.get(p), lane.get(owner.get(p)).append(c)),
+      submitted&#x27; = submitted + 1,
+      g&#x27; = g, guarded&#x27; = guarded, owner&#x27; = owner, log&#x27; = log, substrate&#x27; = substrate,
+      cursor&#x27; = cursor, hwm&#x27; = hwm, pending&#x27; = pending, ran&#x27; = ran, rewound&#x27; = rewound,
+    }
+  }
+
+  // --- Event intake: group h folds ONE entry (Engine.apply_event, h&#x27;s subset)
+  // fold h&#x27;s projections → commit → run h&#x27;s policies on the entry → dispatch → save cursor.
+  action foldOne = {
+    nondet h = GROUPS.oneOf()
+    val pos = cursor.get(h)
+    all {
+      pos &lt; log.length(),
+      val e = log[pos]
+      val sub2 = MODELS.mapBy(m =&gt;
+        if (owner.get(m) == h and g.folds.get(m).contains(e.kind)) substrate.get(m).union(Set(pos))
+        else substrate.get(m))
+      val dispatched = runPolicies(g, e, pos, sub2).select(c =&gt; owner.get(c.id.origin) == h)
+      all {
+        substrate&#x27; = sub2,
+        lane&#x27; = route(owner, lane, dispatched),
+        cursor&#x27; = cursor.set(h, pos + 1),
+        hwm&#x27; = hwm.set(h, if (pos + 1 &gt; hwm.get(h)) pos + 1 else hwm.get(h)),
+      },
+      fixedConfig, log&#x27; = log, pending&#x27; = pending, ran&#x27; = ran,
+    }
+  }
+
+  // --- Command intake, step 1: claim (the middle fold has returned) ----------
+  action claim = {
+    nondet h = GROUPS.oneOf()
+    val q = lane.get(h)
+    all {
+      q.length() &gt; 0,
+      pending.get(h).length() == 0,
+      not(consumesLog(h)) or cursor.get(h) == log.length(),
+      val i = claimIndex(g, q)
+      all {
+        pending&#x27; = pending.set(h, [q[i]]),
+        lane&#x27; = lane.set(h, without(q, i)),
+      },
+      fixedConfig, log&#x27; = log, substrate&#x27; = substrate, cursor&#x27; = cursor, hwm&#x27; = hwm, ran&#x27; = ran,
+    }
+  }
+
+  // --- Command intake, step 2: run the claimed command (no cursor guard) -------
+  action execute = {
+    nondet h = GROUPS.oneOf()
+    all {
+      pending.get(h).length() == 1,
+      log.length() &lt; MAX_LOG,
+      val cmd = pending.get(h)[0]
+      if (guarded and seesOwnBlock(g, log, substrate, cmd))
+        all { log&#x27; = log, ran&#x27; = ran }
+      else all {
+        log&#x27; = log.concat(runProcedure(g, cmd, substrate, log.length())),   // reads the SHARED substrate, now
+        ran&#x27; = ran.union(Set(cmd)),
+      },
+      pending&#x27; = pending.set(h, []),
+      fixedConfig, lane&#x27; = lane, substrate&#x27; = substrate, cursor&#x27; = cursor, hwm&#x27; = hwm,
+    }
+  }
+
+  // --- Fault: at-least-once redelivery of a claimed row ----------------------
+  action redeliver = {
+    nondet c = ran.oneOf()
+    val h = owner.get(c.proc)
+    all {
+      ran != Set(),
+      not(lane.get(h).indices().exists(i =&gt; lane.get(h)[i].id == c.id)),
+      not(pending.get(h).indices().exists(i =&gt; pending.get(h)[i].id == c.id)),
+      lane&#x27; = lane.set(h, [c].concat(lane.get(h))),
+      fixedConfig, log&#x27; = log, substrate&#x27; = substrate, cursor&#x27; = cursor, hwm&#x27; = hwm, pending&#x27; = pending, ran&#x27; = ran,
+    }
+  }
+
+  // --- Fault: cursor loss (commit-then-save: models keep, position rewinds) ---
+  action rewind = {
+    nondet h = GROUPS.oneOf()
+    nondet back = 0.to(MAX_LOG).oneOf()
+    all {
+      back &lt; cursor.get(h),
+      cursor&#x27; = cursor.set(h, back),
+      g&#x27; = g, guarded&#x27; = guarded, owner&#x27; = owner, submitted&#x27; = submitted, rewound&#x27; = true,
+      log&#x27; = log, substrate&#x27; = substrate, hwm&#x27; = hwm, lane&#x27; = lane, pending&#x27; = pending, ran&#x27; = ran,
+    }
+  }
+
+  val allIdle = GROUPS.forall(h =&gt; lane.get(h).length() == 0 and pending.get(h).length() == 0 and cursor.get(h) == log.length())
+  action quiescent = all {
+    submitted == MAX_SUBMISSIONS,
+    allIdle or log.length() &gt;= MAX_LOG,
+    fixedConfig, log&#x27; = log, substrate&#x27; = substrate, cursor&#x27; = cursor, hwm&#x27; = hwm, lane&#x27; = lane, pending&#x27; = pending, ran&#x27; = ran,
+  }
+
+  action step = any { submit, foldOne, claim, execute, redeliver, rewind, quiescent }
+
+  // --- Placement predicates (topology.md) ------------------------------------
+  // Rule 6: a reader shares a group with every model it reads.
+  val rule6 = ELEMS.forall(e =&gt; g.reads.get(e).forall(m =&gt; owner.get(m) == owner.get(e)))
+  // The degenerate topology: everything in one group (st as a topology).
+  val oneGroup = GROUPS.exists(h =&gt; PLACEABLE.forall(x =&gt; owner.get(x) == h))
+
+  // --- Invariants for EVERY topology --------------------------------------------
+
+  // Each model is exactly its owner&#x27;s fold up to what the owner has really folded.
+  val substrateIsFold =
+    MODELS.forall(m =&gt; substrate.get(m) == foldPrefix(g, log, hwm.get(owner.get(m))).get(m))
+  val cursorBelowHwm = GROUPS.forall(h =&gt; cursor.get(h) &lt;= hwm.get(h))
+
+  val blocksWellFormed = blocksWellFormedOf(g, log)
+  // Exactly-once needs BOTH the application guard and rule 6: a guard sees its
+  // own block only through a model its own group folds before it claims.
+  val effectsOnce = (guarded and rule6) implies effectsOnceGuardableOf(g, log)
+  val causal = causalOf(g, log)
+
+  // A command only ever sits in the lane / pending slot of its procedure&#x27;s owner.
+  val routed = GROUPS.forall(h =&gt;
+    lane.get(h).indices().forall(i =&gt; owner.get(lane.get(h)[i].proc) == h)
+    and pending.get(h).indices().forall(i =&gt; owner.get(pending.get(h)[i].proc) == h))
+
+  // Completeness: every reacting policy of every entry its owner has folded
+  // has dispatched (queued, claimed, or run); every run left its block.
+  val dispatchComplete =
+    log.indices().forall(pos =&gt;
+      POLICIES.forall(y =&gt; (g.reacts.get(y).contains(log[pos].kind) and pos &lt; hwm.get(owner.get(y))) implies
+        PROCS.forall(p =&gt; g.dispatches.get(y).contains(p) implies {
+          val id = { origin: y, at: pos, target: p }
+          val h = owner.get(p)
+          lane.get(h).indices().exists(i =&gt; lane.get(h)[i].id == id)
+            or pending.get(h).indices().exists(i =&gt; pending.get(h)[i].id == id)
+            or ran.exists(c =&gt; c.id == id)
+        })))
+  val emitComplete =
+    ran.forall(c =&gt; g.emits.get(c.proc) == Set() or log.indices().exists(i =&gt; log[i].cause == c.id))
+
+  // --- The theorems ----------------------------------------------------------------
+  val freshReads          = freshReadsOf(g, log)
+  val freshDispatch       = freshDispatchOf(g, log)
+  val causeFolded         = causeFoldedOf(g, log)
+  val dispatchCauseFolded = dispatchCauseFoldedOf(g, log)
+
+  // (T1) What the worker promises, made conditional on rule 6: the model had
+  //      committed through the command&#x27;s cause before the run, and no policy
+  //      dispatched on a view behind its trigger. NOT freshDispatch: after a
+  //      cursor rewind a policy legitimately re-runs on a model that has
+  //      committed further (cursors.py commit-then-save), and its re-dispatch
+  //      only reaches the log when the application does not, or cannot, guard.
+  val rule6Guarantee = rule6 implies (causeFolded and dispatchCauseFolded)
+
+  // (T1&#x27;) In the no-fault world the strong form does hold.
+  val noFaultFreshDispatch = (rule6 and not(rewound)) implies freshDispatch
+
+  // (T2) st falls out as a topology: one group ⇒ st&#x27;s fresh reads.
+  val singleGroupIsSt = oneGroup implies (freshReads and dispatchCauseFolded and (not(rewound) implies freshDispatch))
+
+  val allInvariants = all {
+    substrateIsFold, cursorBelowHwm, blocksWellFormed, effectsOnce, causal, routed,
+    dispatchComplete, emitComplete, rule6Guarantee, noFaultFreshDispatch, singleGroupIsSt
+  }
+
+  // --- Witnesses ---------------------------------------------------------------------
+  // The claim→execute window: a rule-6-LEGAL split reads behind the tail.
+  // (May still be serializable — a block reorder between claim and execute.)
+  val witnessClaimWindow  = rule6 and not(freshReads)
+  // Write skew under rule 6: two decisions, neither saw the other, no serial
+  // order explains both. THE counter-example to &quot;byte-identical models&quot;.
+  val witnessWriteSkew    = rule6 and writeSkewOf(g, log)
+  // A rule-6-VIOLATING split breaks even the weak guarantee.
+  val witnessStaleRead    = not(rule6) and not(causeFolded)
+  val witnessStalePolicy  = not(rule6) and not(freshDispatch)
+  val witnessLegalLag     = rule6 and not(oneGroup) and GROUPS.exists(h =&gt; cursor.get(h) &lt; log.length()) and log.length() &gt;= 2
+  val witnessCrossGroup   = log.indices().exists(i =&gt; log[i].cause.origin != &quot;host&quot; and owner.get(log[i].cause.origin) != owner.get(log[i].cause.target))
+  val witnessRedelivered  = GROUPS.exists(h =&gt; lane.get(h).indices().exists(i =&gt; ran.exists(c =&gt; c.id == lane.get(h)[i].id)))
+  val witnessRewound      = GROUPS.exists(h =&gt; cursor.get(h) &lt; hwm.get(h))
+  val witnessRedispatch   = witnessRewound and GROUPS.exists(h =&gt; lane.get(h).indices().exists(i =&gt; ran.exists(c =&gt; c.id == lane.get(h)[i].id)))
+  val witnessDoubleAppend = not(effectsOnceOf(log))
+  val witnessUnguardable  = guarded and rule6 and not(effectsOnceOf(log))
+  // A guarding, guardable procedure still double-appends when rule 6 is broken.
+  val witnessGuardMissed  = guarded and not(rule6) and not(effectsOnceGuardableOf(g, log))
+  val witnessOneGroupRun  = oneGroup and log.length() &gt;= 2
+}
+</pre></details>
+</section>
+</main>

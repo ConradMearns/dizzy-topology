@@ -1,0 +1,5 @@
+/home/conrad/.bun/bin/quint verify st.qnt --invariant=allInvariants --max-steps=4
+
+[ok] No violation found (313257ms).
+You may increase --max-steps.
+Use --verbosity to produce more (or less) output.

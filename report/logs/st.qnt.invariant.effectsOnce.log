@@ -1,0 +1,748 @@
+/home/conrad/.bun/bin/quint run st.qnt --invariant=effectsOnce --max-samples=8000 --max-steps=20 --seed=7
+
+An example execution:
+
+[State 0]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue: [],
+  ran: Set(),
+  submitted: 0
+}
+
+[State 1]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue:
+    [
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
+  ran: Set(),
+  submitted: 1
+}
+
+[State 2]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue: [],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 1
+}
+
+[State 3]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue:
+    [
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 2
+}
+
+[State 4]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue: [],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 2
+}
+
+[State 5]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue: [],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 2
+}
+
+[State 6]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue: [],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 2
+}
+
+[State 7]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue:
+    [
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 2
+}
+
+[State 8]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue: [],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 2
+}
+
+[State 9]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue: [],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 2
+}
+
+[State 10]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue: [],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 2
+}
+
+[State 11]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue: [],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 2
+}
+
+[State 12]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue:
+    [
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 2
+}
+
+[State 13]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue:
+    [
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 2
+}
+
+[State 14]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue:
+    [
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 2
+}
+
+[State 15]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue: [],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 2
+}
+
+[State 16]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue:
+    [
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 2
+}
+
+[State 17]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue: [],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 2
+}
+
+[State 18]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue:
+    [
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 2
+}
+
+[State 19]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue:
+    [
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 2
+}
+
+[State 20]
+{
+  cursor: 0,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set(), "p2" -> Set()),
+      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
+      interactive: Set("p2"),
+      reacts: Map("y1" -> Set()),
+      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+    },
+  guarded: false,
+  log: [],
+  models: Map("m1" -> Set(), "m2" -> Set()),
+  noops: 0,
+  queue:
+    [
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 2
+}
+
+[ok] No violation found (5478ms at 1460 traces/second).
+Trace length statistics: max=21, min=21, average=21.00
+You may increase --max-samples and --max-steps.
+Use --verbosity to produce more (or less) output.
+Use --seed=0xd372c --backend=rust to reproduce.

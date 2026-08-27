@@ -1,0 +1,5 @@
+/home/conrad/.bun/bin/quint verify groups.qnt --invariant=allInvariants --max-steps=3
+
+[ok] No violation found (6855ms).
+You may increase --max-steps.
+Use --verbosity to produce more (or less) output.
