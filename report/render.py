@@ -95,7 +95,8 @@ def scale_section():
     def ver(r):
         if "verify_result" not in r: return '<span class="muted">not attempted</span>'
         cls = "pass" if r["verify_result"] == "ok" else "fail"
-        return f'<span class="pill {cls}">depth {r["verify_depth"]} · {esc(r["verify_result"])}</span> <span class="muted">{cell(r.get("verify_s"),"s")} · {cell(r.get("verify_rss_mb"),"MB")}</span>'
+        heap = f' · heap {r["verify_heap"]}' if r.get("verify_heap") else ""
+        return f'<span class="pill {cls}">depth {r["verify_depth"]} · {esc(r["verify_result"])}</span> <span class="muted">{cell(r.get("verify_s"),"s")} · {cell(r.get("verify_rss_mb"),"MB")}{heap}</span>'
     trs = "".join(f"""<tr><td class="mono">{esc(r['tag'])}</td><td class="num">{r['procs']} / {r['policies']} / {r['models']} / {r['kinds']} / {r['groups']}</td>
 <td><code>{esc(r['spec'])}</code></td><td class="num">{cell(r.get('typecheck_s'),'s')}</td><td class="num">{cell(r.get('traces_per_s'))}</td>
 <td class="num">{cell(r.get('sim_s'),'s')}</td><td class="num">{cell(r.get('sim_rss_mb'),' MB')}</td><td>{res(r)}</td>

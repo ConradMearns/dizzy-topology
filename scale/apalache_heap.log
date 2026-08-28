@@ -1,1 +1,4 @@
-p10 st.qnt depth 1: error: error: <unknown>: Input error (see the manual): Expected a constant integer range in [ .. ], found 0..Len(log). This is  (11s, heap 24G)
+p10 st.qnt depth 1: [ok] (100s, heap 24G)
+p25 groups.qnt depth 1: [ok] (811s, heap 24G)
+p50 groups.qnt depth 1: error: As of 2022/09/29 (release 21.7) makeExtensionsImmutable should not be called from protobuf gencode. If you are seeing th (19891s, heap 24G)
+p25 st.qnt depth 1: killed at 640s — JVM RSS reached 46 GB (heap 24G) — infeasible

@@ -48,14 +48,14 @@ Apalache depth is exponential here (st: 4 s / 17 s / 5 min at depths 2 / 3 / 4),
 |---|---|---|---|
 | p2 | 2 / 1 / 2 / 2 / 2 | 236 traces/s · Apalache depth 4 | 399 traces/s · Apalache depth 3 |
 | p5 | 5 / 2 / 3 / 3 / 2 | 88 · Apalache depth 2 (5 min) | 355 · Apalache depth 2 |
-| p10 | 10 / 4 / 4 / 4 / 3 | 36 | 267 · Apalache depth 1 |
-| p25 | 25 / 8 / 6 / 4 / 3 | 11 | 96 |
+| p10 | 10 / 4 / 4 / 4 / 3 | 36 · Apalache depth 1 (100 s, 24 GB heap) | 267 · Apalache depth 1 |
+| p25 | 25 / 8 / 6 / 4 / 3 | 11 · Apalache infeasible (JVM > 46 GB) | 96 · Apalache depth 1 (13.5 min, 24 GB heap) |
 | p50 | 50 / 16 / 8 / 6 / 4 | 6 | 61 |
 | p100 | 100 / 32 / 12 / 8 / 4 | 3 (TypeScript backend) | 45 |
 | p200 | 200 / 64 / 16 / 10 / 6 | — (backend error) | 18 |
 | p400 | 400 / 128 / 24 / 12 / 8 | — | — (backend error) |
 
-All rows are 300 traces × 20 steps, all invariants holding. Peak memory stays under 750 MB. The ceiling at p200–p400 is quint's simulators (the Rust one crashes, the TypeScript one runs out of heap), not the machine; Apalache's default 4 GB JVM heap OOMs from p25 (`JVM_ARGS=-Xmx24G` retries in `scale/apalache_heap.sh`).
+All rows are 300 traces × 20 steps, all invariants holding. Peak memory stays under 750 MB. The ceiling at p200–p400 is quint's simulators (the Rust one crashes, the TypeScript one runs out of heap), not the machine; Apalache's default 4 GB JVM heap OOMs from p25; with `JVM_ARGS=-Xmx24G` (`scale/apalache_heap.sh`) depth 1 is provable at p10 for `st` and p25 for `groups`, and that is the proof ceiling on this machine — p50 `groups` ran 5.5 h without finishing and p25 `st` exceeded 46 GB resident.
 
 ## Roadmap
 

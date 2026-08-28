@@ -97,7 +97,12 @@
   "backend": "rust",
   "witness": "witnessCascade",
   "witness_reached": true,
-  "witness_s": 7.0
+  "witness_s": 7.0,
+  "verify_depth": 1,
+  "verify_result": "ok",
+  "verify_s": 100,
+  "verify_rss_mb": null,
+  "verify_heap": "24G"
  },
  {
   "tag": "p10",
@@ -137,7 +142,12 @@
   "backend": "rust",
   "witness": "witnessCascade",
   "witness_reached": true,
-  "witness_s": 6.6
+  "witness_s": 6.6,
+  "verify_depth": 1,
+  "verify_result": "killed: JVM RSS 46 GB",
+  "verify_s": 640,
+  "verify_rss_mb": null,
+  "verify_heap": "24G"
  },
  {
   "tag": "p25",
@@ -157,7 +167,12 @@
   "backend": "rust",
   "witness": "witnessClaimWindow",
   "witness_reached": false,
-  "witness_s": 12.8
+  "witness_s": 12.8,
+  "verify_depth": 1,
+  "verify_result": "ok",
+  "verify_s": 811,
+  "verify_rss_mb": null,
+  "verify_heap": "24G"
  },
  {
   "tag": "p50",
@@ -197,7 +212,12 @@
   "backend": "rust",
   "witness": "witnessClaimWindow",
   "witness_reached": false,
-  "witness_s": 26.8
+  "witness_s": 26.8,
+  "verify_depth": 1,
+  "verify_result": "error (5.5 h, past timeout)",
+  "verify_s": 19891,
+  "verify_rss_mb": null,
+  "verify_heap": "24G"
  },
  {
   "tag": "p100",
