@@ -57,7 +57,6 @@
 module groups {
   import graph.* from "./graph"
 
-  pure val GROUPS = Set("g1", "g2")
   pure val PLACEABLE = ELEMS.union(MODELS)
   pure val PLACEMENTS = PLACEABLE.setOfMaps(GROUPS)
 
@@ -248,16 +247,13 @@ module groups {
 
   // Completeness: every reacting policy of every entry its owner has folded
   // has dispatched (queued, claimed, or run); every run left its block.
+  val knownIds =
+    GROUPS.map(h => lane.get(h).indices().map(i => lane.get(h)[i].id).union(pending.get(h).indices().map(i => pending.get(h)[i].id))).flatten()
+      .union(ran.map(c => c.id))
   val dispatchComplete =
     log.indices().forall(pos =>
       POLICIES.forall(y => (g.reacts.get(y).contains(log[pos].kind) and pos < hwm.get(owner.get(y))) implies
-        PROCS.forall(p => g.dispatches.get(y).contains(p) implies {
-          val id = { origin: y, at: pos, target: p }
-          val h = owner.get(p)
-          lane.get(h).indices().exists(i => lane.get(h)[i].id == id)
-            or pending.get(h).indices().exists(i => pending.get(h)[i].id == id)
-            or ran.exists(c => c.id == id)
-        })))
+        g.dispatches.get(y).forall(p => knownIds.contains({ origin: y, at: pos, target: p }))))
   val emitComplete =
     ran.forall(c => g.emits.get(c.proc) == Set() or log.indices().exists(i => log[i].cause == c.id))
 

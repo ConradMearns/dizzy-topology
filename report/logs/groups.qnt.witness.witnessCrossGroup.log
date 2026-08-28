@@ -7,19 +7,20 @@ An example execution:
   cursor: Map("g1" -> 0, "g2" -> 0),
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set("e1"), "p2" -> Set("e1")),
-      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set()),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set("p2")),
+      emits: Map("p1" -> Set("e2"), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set("e1", "e2")),
-      reads: Map("p1" -> Set("m1"), "p2" -> Set("m1"), "y1" -> Set())
+      reads:
+        Map("p1" -> Set("m1", "m2"), "p2" -> Set("m1"), "y1" -> Set("m1", "m2"))
     },
-  guarded: false,
+  guarded: true,
   hwm: Map("g1" -> 0, "g2" -> 0),
   lane: Map("g1" -> [], "g2" -> []),
   log: [],
   owner:
-    Map("m1" -> "g1", "m2" -> "g2", "p1" -> "g1", "p2" -> "g2", "y1" -> "g2"),
+    Map("m1" -> "g2", "m2" -> "g1", "p1" -> "g2", "p2" -> "g1", "y1" -> "g2"),
   pending: Map("g1" -> [], "g2" -> []),
   ran: Set(),
   rewound: false,
@@ -32,14 +33,15 @@ An example execution:
   cursor: Map("g1" -> 0, "g2" -> 0),
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set("e1"), "p2" -> Set("e1")),
-      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set()),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set("p2")),
+      emits: Map("p1" -> Set("e2"), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set("e1", "e2")),
-      reads: Map("p1" -> Set("m1"), "p2" -> Set("m1"), "y1" -> Set())
+      reads:
+        Map("p1" -> Set("m1", "m2"), "p2" -> Set("m1"), "y1" -> Set("m1", "m2"))
     },
-  guarded: false,
+  guarded: true,
   hwm: Map("g1" -> 0, "g2" -> 0),
   lane:
     Map(
@@ -47,15 +49,15 @@ An example execution:
       "g2" ->
         [
           {
-            id: { at: 0, origin: "host", target: "p2" },
-            proc: "p2",
+            id: { at: 0, origin: "host", target: "p1" },
+            proc: "p1",
             view: Map("m1" -> Set(), "m2" -> Set())
           }
         ]
     ),
   log: [],
   owner:
-    Map("m1" -> "g1", "m2" -> "g2", "p1" -> "g1", "p2" -> "g2", "y1" -> "g2"),
+    Map("m1" -> "g2", "m2" -> "g1", "p1" -> "g2", "p2" -> "g1", "y1" -> "g2"),
   pending: Map("g1" -> [], "g2" -> []),
   ran: Set(),
   rewound: false,
@@ -68,27 +70,28 @@ An example execution:
   cursor: Map("g1" -> 0, "g2" -> 0),
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set("e1"), "p2" -> Set("e1")),
-      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set()),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set("p2")),
+      emits: Map("p1" -> Set("e2"), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set("e1", "e2")),
-      reads: Map("p1" -> Set("m1"), "p2" -> Set("m1"), "y1" -> Set())
+      reads:
+        Map("p1" -> Set("m1", "m2"), "p2" -> Set("m1"), "y1" -> Set("m1", "m2"))
     },
-  guarded: false,
+  guarded: true,
   hwm: Map("g1" -> 0, "g2" -> 0),
   lane: Map("g1" -> [], "g2" -> []),
   log: [],
   owner:
-    Map("m1" -> "g1", "m2" -> "g2", "p1" -> "g1", "p2" -> "g2", "y1" -> "g2"),
+    Map("m1" -> "g2", "m2" -> "g1", "p1" -> "g2", "p2" -> "g1", "y1" -> "g2"),
   pending:
     Map(
       "g1" -> [],
       "g2" ->
         [
           {
-            id: { at: 0, origin: "host", target: "p2" },
-            proc: "p2",
+            id: { at: 0, origin: "host", target: "p1" },
+            proc: "p1",
             view: Map("m1" -> Set(), "m2" -> Set())
           }
         ]
@@ -104,14 +107,15 @@ An example execution:
   cursor: Map("g1" -> 0, "g2" -> 0),
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set("e1"), "p2" -> Set("e1")),
-      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set()),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set("p2")),
+      emits: Map("p1" -> Set("e2"), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set("e1", "e2")),
-      reads: Map("p1" -> Set("m1"), "p2" -> Set("m1"), "y1" -> Set())
+      reads:
+        Map("p1" -> Set("m1", "m2"), "p2" -> Set("m1"), "y1" -> Set("m1", "m2"))
     },
-  guarded: false,
+  guarded: true,
   hwm: Map("g1" -> 0, "g2" -> 0),
   lane:
     Map(
@@ -119,23 +123,23 @@ An example execution:
       "g2" ->
         [
           {
-            id: { at: 1, origin: "host", target: "p2" },
-            proc: "p2",
+            id: { at: 1, origin: "host", target: "p1" },
+            proc: "p1",
             view: Map("m1" -> Set(), "m2" -> Set())
           }
         ]
     ),
   log: [],
   owner:
-    Map("m1" -> "g1", "m2" -> "g2", "p1" -> "g1", "p2" -> "g2", "y1" -> "g2"),
+    Map("m1" -> "g2", "m2" -> "g1", "p1" -> "g2", "p2" -> "g1", "y1" -> "g2"),
   pending:
     Map(
       "g1" -> [],
       "g2" ->
         [
           {
-            id: { at: 0, origin: "host", target: "p2" },
-            proc: "p2",
+            id: { at: 0, origin: "host", target: "p1" },
+            proc: "p1",
             view: Map("m1" -> Set(), "m2" -> Set())
           }
         ]
@@ -151,14 +155,15 @@ An example execution:
   cursor: Map("g1" -> 0, "g2" -> 0),
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set("e1"), "p2" -> Set("e1")),
-      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set()),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set("p2")),
+      emits: Map("p1" -> Set("e2"), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set("e1", "e2")),
-      reads: Map("p1" -> Set("m1"), "p2" -> Set("m1"), "y1" -> Set())
+      reads:
+        Map("p1" -> Set("m1", "m2"), "p2" -> Set("m1"), "y1" -> Set("m1", "m2"))
     },
-  guarded: false,
+  guarded: true,
   hwm: Map("g1" -> 0, "g2" -> 0),
   lane:
     Map(
@@ -166,8 +171,8 @@ An example execution:
       "g2" ->
         [
           {
-            id: { at: 1, origin: "host", target: "p2" },
-            proc: "p2",
+            id: { at: 1, origin: "host", target: "p1" },
+            proc: "p1",
             view: Map("m1" -> Set(), "m2" -> Set())
           }
         ]
@@ -176,20 +181,20 @@ An example execution:
     [
       {
         at: 0,
-        cause: { at: 0, origin: "host", target: "p2" },
+        cause: { at: 0, origin: "host", target: "p1" },
         dispatchView: Map("m1" -> Set(), "m2" -> Set()),
-        kind: "e1",
+        kind: "e2",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ],
   owner:
-    Map("m1" -> "g1", "m2" -> "g2", "p1" -> "g1", "p2" -> "g2", "y1" -> "g2"),
+    Map("m1" -> "g2", "m2" -> "g1", "p1" -> "g2", "p2" -> "g1", "y1" -> "g2"),
   pending: Map("g1" -> [], "g2" -> []),
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ),
@@ -200,33 +205,32 @@ An example execution:
 
 [State 5]
 {
-  cursor: Map("g1" -> 0, "g2" -> 1),
+  cursor: Map("g1" -> 0, "g2" -> 0),
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set("e1"), "p2" -> Set("e1")),
-      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set()),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set("p2")),
+      emits: Map("p1" -> Set("e2"), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set("e1", "e2")),
-      reads: Map("p1" -> Set("m1"), "p2" -> Set("m1"), "y1" -> Set())
+      reads:
+        Map("p1" -> Set("m1", "m2"), "p2" -> Set("m1"), "y1" -> Set("m1", "m2"))
     },
-  guarded: false,
-  hwm: Map("g1" -> 0, "g2" -> 1),
+  guarded: true,
+  hwm: Map("g1" -> 0, "g2" -> 0),
   lane:
     Map(
-      "g1" ->
-        [
-          {
-            id: { at: 0, origin: "y1", target: "p1" },
-            proc: "p1",
-            view: Map("m1" -> Set(), "m2" -> Set())
-          }
-        ],
+      "g1" -> [],
       "g2" ->
         [
           {
-            id: { at: 1, origin: "host", target: "p2" },
-            proc: "p2",
+            id: { at: 0, origin: "host", target: "p1" },
+            proc: "p1",
+            view: Map("m1" -> Set(), "m2" -> Set())
+          },
+          {
+            id: { at: 1, origin: "host", target: "p1" },
+            proc: "p1",
             view: Map("m1" -> Set(), "m2" -> Set())
           }
         ]
@@ -235,20 +239,20 @@ An example execution:
     [
       {
         at: 0,
-        cause: { at: 0, origin: "host", target: "p2" },
+        cause: { at: 0, origin: "host", target: "p1" },
         dispatchView: Map("m1" -> Set(), "m2" -> Set()),
-        kind: "e1",
+        kind: "e2",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ],
   owner:
-    Map("m1" -> "g1", "m2" -> "g2", "p1" -> "g1", "p2" -> "g2", "y1" -> "g2"),
+    Map("m1" -> "g2", "m2" -> "g1", "p1" -> "g2", "p2" -> "g1", "y1" -> "g2"),
   pending: Map("g1" -> [], "g2" -> []),
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ),
@@ -259,33 +263,32 @@ An example execution:
 
 [State 6]
 {
-  cursor: Map("g1" -> 1, "g2" -> 1),
+  cursor: Map("g1" -> 1, "g2" -> 0),
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set("e1"), "p2" -> Set("e1")),
-      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set()),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set("p2")),
+      emits: Map("p1" -> Set("e2"), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set("e1", "e2")),
-      reads: Map("p1" -> Set("m1"), "p2" -> Set("m1"), "y1" -> Set())
+      reads:
+        Map("p1" -> Set("m1", "m2"), "p2" -> Set("m1"), "y1" -> Set("m1", "m2"))
     },
-  guarded: false,
-  hwm: Map("g1" -> 1, "g2" -> 1),
+  guarded: true,
+  hwm: Map("g1" -> 1, "g2" -> 0),
   lane:
     Map(
-      "g1" ->
-        [
-          {
-            id: { at: 0, origin: "y1", target: "p1" },
-            proc: "p1",
-            view: Map("m1" -> Set(), "m2" -> Set())
-          }
-        ],
+      "g1" -> [],
       "g2" ->
         [
           {
-            id: { at: 1, origin: "host", target: "p2" },
-            proc: "p2",
+            id: { at: 0, origin: "host", target: "p1" },
+            proc: "p1",
+            view: Map("m1" -> Set(), "m2" -> Set())
+          },
+          {
+            id: { at: 1, origin: "host", target: "p1" },
+            proc: "p1",
             view: Map("m1" -> Set(), "m2" -> Set())
           }
         ]
@@ -294,57 +297,63 @@ An example execution:
     [
       {
         at: 0,
-        cause: { at: 0, origin: "host", target: "p2" },
+        cause: { at: 0, origin: "host", target: "p1" },
         dispatchView: Map("m1" -> Set(), "m2" -> Set()),
-        kind: "e1",
+        kind: "e2",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ],
   owner:
-    Map("m1" -> "g1", "m2" -> "g2", "p1" -> "g1", "p2" -> "g2", "y1" -> "g2"),
+    Map("m1" -> "g2", "m2" -> "g1", "p1" -> "g2", "p2" -> "g1", "y1" -> "g2"),
   pending: Map("g1" -> [], "g2" -> []),
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ),
   rewound: false,
   submitted: 2,
-  substrate: Map("m1" -> Set(0), "m2" -> Set())
+  substrate: Map("m1" -> Set(), "m2" -> Set())
 }
 
 [State 7]
 {
-  cursor: Map("g1" -> 0, "g2" -> 1),
+  cursor: Map("g1" -> 1, "g2" -> 1),
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set("e1"), "p2" -> Set("e1")),
-      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set()),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set("p2")),
+      emits: Map("p1" -> Set("e2"), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set("e1", "e2")),
-      reads: Map("p1" -> Set("m1"), "p2" -> Set("m1"), "y1" -> Set())
+      reads:
+        Map("p1" -> Set("m1", "m2"), "p2" -> Set("m1"), "y1" -> Set("m1", "m2"))
     },
-  guarded: false,
+  guarded: true,
   hwm: Map("g1" -> 1, "g2" -> 1),
   lane:
     Map(
       "g1" ->
         [
           {
-            id: { at: 0, origin: "y1", target: "p1" },
-            proc: "p1",
+            id: { at: 0, origin: "y1", target: "p2" },
+            proc: "p2",
             view: Map("m1" -> Set(), "m2" -> Set())
           }
         ],
       "g2" ->
         [
           {
-            id: { at: 1, origin: "host", target: "p2" },
-            proc: "p2",
+            id: { at: 0, origin: "host", target: "p1" },
+            proc: "p1",
+            view: Map("m1" -> Set(), "m2" -> Set())
+          },
+          {
+            id: { at: 1, origin: "host", target: "p1" },
+            proc: "p1",
             view: Map("m1" -> Set(), "m2" -> Set())
           }
         ]
@@ -353,74 +362,82 @@ An example execution:
     [
       {
         at: 0,
-        cause: { at: 0, origin: "host", target: "p2" },
+        cause: { at: 0, origin: "host", target: "p1" },
         dispatchView: Map("m1" -> Set(), "m2" -> Set()),
-        kind: "e1",
+        kind: "e2",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ],
   owner:
-    Map("m1" -> "g1", "m2" -> "g2", "p1" -> "g1", "p2" -> "g2", "y1" -> "g2"),
+    Map("m1" -> "g2", "m2" -> "g1", "p1" -> "g2", "p2" -> "g1", "y1" -> "g2"),
   pending: Map("g1" -> [], "g2" -> []),
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ),
-  rewound: true,
+  rewound: false,
   submitted: 2,
-  substrate: Map("m1" -> Set(0), "m2" -> Set())
+  substrate: Map("m1" -> Set(), "m2" -> Set())
 }
 
 [State 8]
 {
-  cursor: Map("g1" -> 0, "g2" -> 1),
+  cursor: Map("g1" -> 1, "g2" -> 1),
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set("e1"), "p2" -> Set("e1")),
-      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set()),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set("p2")),
+      emits: Map("p1" -> Set("e2"), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set("e1", "e2")),
-      reads: Map("p1" -> Set("m1"), "p2" -> Set("m1"), "y1" -> Set())
+      reads:
+        Map("p1" -> Set("m1", "m2"), "p2" -> Set("m1"), "y1" -> Set("m1", "m2"))
     },
-  guarded: false,
+  guarded: true,
   hwm: Map("g1" -> 1, "g2" -> 1),
   lane:
     Map(
       "g1" ->
         [
           {
-            id: { at: 0, origin: "y1", target: "p1" },
-            proc: "p1",
+            id: { at: 0, origin: "y1", target: "p2" },
+            proc: "p2",
             view: Map("m1" -> Set(), "m2" -> Set())
           }
         ],
-      "g2" -> []
+      "g2" ->
+        [
+          {
+            id: { at: 1, origin: "host", target: "p1" },
+            proc: "p1",
+            view: Map("m1" -> Set(), "m2" -> Set())
+          }
+        ]
     ),
   log:
     [
       {
         at: 0,
-        cause: { at: 0, origin: "host", target: "p2" },
+        cause: { at: 0, origin: "host", target: "p1" },
         dispatchView: Map("m1" -> Set(), "m2" -> Set()),
-        kind: "e1",
+        kind: "e2",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ],
   owner:
-    Map("m1" -> "g1", "m2" -> "g2", "p1" -> "g1", "p2" -> "g2", "y1" -> "g2"),
+    Map("m1" -> "g2", "m2" -> "g1", "p1" -> "g2", "p2" -> "g1", "y1" -> "g2"),
   pending:
     Map(
       "g1" -> [],
       "g2" ->
         [
           {
-            id: { at: 1, origin: "host", target: "p2" },
-            proc: "p2",
+            id: { at: 0, origin: "host", target: "p1" },
+            proc: "p1",
             view: Map("m1" -> Set(), "m2" -> Set())
           }
         ]
@@ -428,14 +445,14 @@ An example execution:
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ),
-  rewound: true,
+  rewound: false,
   submitted: 2,
-  substrate: Map("m1" -> Set(0), "m2" -> Set())
+  substrate: Map("m1" -> Set(), "m2" -> Set())
 }
 
 [State 9]
@@ -443,47 +460,55 @@ An example execution:
   cursor: Map("g1" -> 1, "g2" -> 1),
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set("e1"), "p2" -> Set("e1")),
-      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set()),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set("p2")),
+      emits: Map("p1" -> Set("e2"), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set("e1", "e2")),
-      reads: Map("p1" -> Set("m1"), "p2" -> Set("m1"), "y1" -> Set())
+      reads:
+        Map("p1" -> Set("m1", "m2"), "p2" -> Set("m1"), "y1" -> Set("m1", "m2"))
     },
-  guarded: false,
+  guarded: true,
   hwm: Map("g1" -> 1, "g2" -> 1),
   lane:
-    Map(
-      "g1" ->
-        [
-          {
-            id: { at: 0, origin: "y1", target: "p1" },
-            proc: "p1",
-            view: Map("m1" -> Set(), "m2" -> Set())
-          }
-        ],
-      "g2" -> []
-    ),
-  log:
-    [
-      {
-        at: 0,
-        cause: { at: 0, origin: "host", target: "p2" },
-        dispatchView: Map("m1" -> Set(), "m2" -> Set()),
-        kind: "e1",
-        view: Map("m1" -> Set(), "m2" -> Set())
-      }
-    ],
-  owner:
-    Map("m1" -> "g1", "m2" -> "g2", "p1" -> "g1", "p2" -> "g2", "y1" -> "g2"),
-  pending:
     Map(
       "g1" -> [],
       "g2" ->
         [
           {
-            id: { at: 1, origin: "host", target: "p2" },
+            id: { at: 1, origin: "host", target: "p1" },
+            proc: "p1",
+            view: Map("m1" -> Set(), "m2" -> Set())
+          }
+        ]
+    ),
+  log:
+    [
+      {
+        at: 0,
+        cause: { at: 0, origin: "host", target: "p1" },
+        dispatchView: Map("m1" -> Set(), "m2" -> Set()),
+        kind: "e2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
+  owner:
+    Map("m1" -> "g2", "m2" -> "g1", "p1" -> "g2", "p2" -> "g1", "y1" -> "g2"),
+  pending:
+    Map(
+      "g1" ->
+        [
+          {
+            id: { at: 0, origin: "y1", target: "p2" },
             proc: "p2",
+            view: Map("m1" -> Set(), "m2" -> Set())
+          }
+        ],
+      "g2" ->
+        [
+          {
+            id: { at: 0, origin: "host", target: "p1" },
+            proc: "p1",
             view: Map("m1" -> Set(), "m2" -> Set())
           }
         ]
@@ -491,14 +516,14 @@ An example execution:
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ),
-  rewound: true,
+  rewound: false,
   submitted: 2,
-  substrate: Map("m1" -> Set(0), "m2" -> Set())
+  substrate: Map("m1" -> Set(), "m2" -> Set())
 }
 
 [State 10]
@@ -506,58 +531,70 @@ An example execution:
   cursor: Map("g1" -> 1, "g2" -> 1),
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set("e1"), "p2" -> Set("e1")),
-      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set()),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set("p2")),
+      emits: Map("p1" -> Set("e2"), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set("e1", "e2")),
-      reads: Map("p1" -> Set("m1"), "p2" -> Set("m1"), "y1" -> Set())
+      reads:
+        Map("p1" -> Set("m1", "m2"), "p2" -> Set("m1"), "y1" -> Set("m1", "m2"))
     },
-  guarded: false,
+  guarded: true,
   hwm: Map("g1" -> 1, "g2" -> 1),
-  lane: Map("g1" -> [], "g2" -> []),
+  lane:
+    Map(
+      "g1" -> [],
+      "g2" ->
+        [
+          {
+            id: { at: 1, origin: "host", target: "p1" },
+            proc: "p1",
+            view: Map("m1" -> Set(), "m2" -> Set())
+          }
+        ]
+    ),
   log:
     [
       {
         at: 0,
-        cause: { at: 0, origin: "host", target: "p2" },
+        cause: { at: 0, origin: "host", target: "p1" },
         dispatchView: Map("m1" -> Set(), "m2" -> Set()),
-        kind: "e1",
+        kind: "e2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        at: 1,
+        cause: { at: 0, origin: "host", target: "p1" },
+        dispatchView: Map("m1" -> Set(), "m2" -> Set()),
+        kind: "e2",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ],
   owner:
-    Map("m1" -> "g1", "m2" -> "g2", "p1" -> "g1", "p2" -> "g2", "y1" -> "g2"),
+    Map("m1" -> "g2", "m2" -> "g1", "p1" -> "g2", "p2" -> "g1", "y1" -> "g2"),
   pending:
     Map(
       "g1" ->
         [
           {
-            id: { at: 0, origin: "y1", target: "p1" },
-            proc: "p1",
-            view: Map("m1" -> Set(), "m2" -> Set())
-          }
-        ],
-      "g2" ->
-        [
-          {
-            id: { at: 1, origin: "host", target: "p2" },
+            id: { at: 0, origin: "y1", target: "p2" },
             proc: "p2",
             view: Map("m1" -> Set(), "m2" -> Set())
           }
-        ]
+        ],
+      "g2" -> []
     ),
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ),
-  rewound: true,
+  rewound: false,
   submitted: 2,
-  substrate: Map("m1" -> Set(0), "m2" -> Set())
+  substrate: Map("m1" -> Set(), "m2" -> Set())
 }
 
 [State 11]
@@ -565,14 +602,15 @@ An example execution:
   cursor: Map("g1" -> 1, "g2" -> 1),
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set("e1"), "p2" -> Set("e1")),
-      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set()),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set("p2")),
+      emits: Map("p1" -> Set("e2"), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set("e1", "e2")),
-      reads: Map("p1" -> Set("m1"), "p2" -> Set("m1"), "y1" -> Set())
+      reads:
+        Map("p1" -> Set("m1", "m2"), "p2" -> Set("m1"), "y1" -> Set("m1", "m2"))
     },
-  guarded: false,
+  guarded: true,
   hwm: Map("g1" -> 1, "g2" -> 1),
   lane:
     Map(
@@ -580,8 +618,13 @@ An example execution:
       "g2" ->
         [
           {
-            id: { at: 0, origin: "host", target: "p2" },
-            proc: "p2",
+            id: { at: 0, origin: "host", target: "p1" },
+            proc: "p1",
+            view: Map("m1" -> Set(), "m2" -> Set())
+          },
+          {
+            id: { at: 1, origin: "host", target: "p1" },
+            proc: "p1",
             view: Map("m1" -> Set(), "m2" -> Set())
           }
         ]
@@ -590,68 +633,74 @@ An example execution:
     [
       {
         at: 0,
-        cause: { at: 0, origin: "host", target: "p2" },
+        cause: { at: 0, origin: "host", target: "p1" },
         dispatchView: Map("m1" -> Set(), "m2" -> Set()),
-        kind: "e1",
+        kind: "e2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        at: 1,
+        cause: { at: 0, origin: "host", target: "p1" },
+        dispatchView: Map("m1" -> Set(), "m2" -> Set()),
+        kind: "e2",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ],
   owner:
-    Map("m1" -> "g1", "m2" -> "g2", "p1" -> "g1", "p2" -> "g2", "y1" -> "g2"),
+    Map("m1" -> "g2", "m2" -> "g1", "p1" -> "g2", "p2" -> "g1", "y1" -> "g2"),
   pending:
     Map(
       "g1" ->
         [
           {
-            id: { at: 0, origin: "y1", target: "p1" },
-            proc: "p1",
-            view: Map("m1" -> Set(), "m2" -> Set())
-          }
-        ],
-      "g2" ->
-        [
-          {
-            id: { at: 1, origin: "host", target: "p2" },
+            id: { at: 0, origin: "y1", target: "p2" },
             proc: "p2",
             view: Map("m1" -> Set(), "m2" -> Set())
           }
-        ]
+        ],
+      "g2" -> []
     ),
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ),
-  rewound: true,
+  rewound: false,
   submitted: 2,
-  substrate: Map("m1" -> Set(0), "m2" -> Set())
+  substrate: Map("m1" -> Set(), "m2" -> Set())
 }
 
 [State 12]
 {
-  cursor: Map("g1" -> 0, "g2" -> 1),
+  cursor: Map("g1" -> 2, "g2" -> 1),
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set("e1"), "p2" -> Set("e1")),
-      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set()),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set("p2")),
+      emits: Map("p1" -> Set("e2"), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set("e1", "e2")),
-      reads: Map("p1" -> Set("m1"), "p2" -> Set("m1"), "y1" -> Set())
+      reads:
+        Map("p1" -> Set("m1", "m2"), "p2" -> Set("m1"), "y1" -> Set("m1", "m2"))
     },
-  guarded: false,
-  hwm: Map("g1" -> 1, "g2" -> 1),
+  guarded: true,
+  hwm: Map("g1" -> 2, "g2" -> 1),
   lane:
     Map(
       "g1" -> [],
       "g2" ->
         [
           {
-            id: { at: 0, origin: "host", target: "p2" },
-            proc: "p2",
+            id: { at: 0, origin: "host", target: "p1" },
+            proc: "p1",
+            view: Map("m1" -> Set(), "m2" -> Set())
+          },
+          {
+            id: { at: 1, origin: "host", target: "p1" },
+            proc: "p1",
             view: Map("m1" -> Set(), "m2" -> Set())
           }
         ]
@@ -660,218 +709,74 @@ An example execution:
     [
       {
         at: 0,
-        cause: { at: 0, origin: "host", target: "p2" },
+        cause: { at: 0, origin: "host", target: "p1" },
         dispatchView: Map("m1" -> Set(), "m2" -> Set()),
-        kind: "e1",
+        kind: "e2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        at: 1,
+        cause: { at: 0, origin: "host", target: "p1" },
+        dispatchView: Map("m1" -> Set(), "m2" -> Set()),
+        kind: "e2",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ],
   owner:
-    Map("m1" -> "g1", "m2" -> "g2", "p1" -> "g1", "p2" -> "g2", "y1" -> "g2"),
+    Map("m1" -> "g2", "m2" -> "g1", "p1" -> "g2", "p2" -> "g1", "y1" -> "g2"),
   pending:
     Map(
       "g1" ->
         [
           {
-            id: { at: 0, origin: "y1", target: "p1" },
-            proc: "p1",
-            view: Map("m1" -> Set(), "m2" -> Set())
-          }
-        ],
-      "g2" ->
-        [
-          {
-            id: { at: 1, origin: "host", target: "p2" },
+            id: { at: 0, origin: "y1", target: "p2" },
             proc: "p2",
             view: Map("m1" -> Set(), "m2" -> Set())
           }
-        ]
+        ],
+      "g2" -> []
     ),
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ),
-  rewound: true,
+  rewound: false,
   submitted: 2,
-  substrate: Map("m1" -> Set(0), "m2" -> Set())
+  substrate: Map("m1" -> Set(), "m2" -> Set())
 }
 
 [State 13]
 {
-  cursor: Map("g1" -> 1, "g2" -> 1),
+  cursor: Map("g1" -> 2, "g2" -> 1),
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set("e1"), "p2" -> Set("e1")),
-      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set()),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set("p2")),
+      emits: Map("p1" -> Set("e2"), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set("e1", "e2")),
-      reads: Map("p1" -> Set("m1"), "p2" -> Set("m1"), "y1" -> Set())
+      reads:
+        Map("p1" -> Set("m1", "m2"), "p2" -> Set("m1"), "y1" -> Set("m1", "m2"))
     },
-  guarded: false,
-  hwm: Map("g1" -> 1, "g2" -> 1),
+  guarded: true,
+  hwm: Map("g1" -> 2, "g2" -> 1),
   lane:
     Map(
       "g1" -> [],
       "g2" ->
         [
           {
-            id: { at: 0, origin: "host", target: "p2" },
-            proc: "p2",
-            view: Map("m1" -> Set(), "m2" -> Set())
-          }
-        ]
-    ),
-  log:
-    [
-      {
-        at: 0,
-        cause: { at: 0, origin: "host", target: "p2" },
-        dispatchView: Map("m1" -> Set(), "m2" -> Set()),
-        kind: "e1",
-        view: Map("m1" -> Set(), "m2" -> Set())
-      }
-    ],
-  owner:
-    Map("m1" -> "g1", "m2" -> "g2", "p1" -> "g1", "p2" -> "g2", "y1" -> "g2"),
-  pending:
-    Map(
-      "g1" ->
-        [
-          {
-            id: { at: 0, origin: "y1", target: "p1" },
+            id: { at: 0, origin: "host", target: "p1" },
             proc: "p1",
-            view: Map("m1" -> Set(), "m2" -> Set())
-          }
-        ],
-      "g2" ->
-        [
-          {
-            id: { at: 1, origin: "host", target: "p2" },
-            proc: "p2",
-            view: Map("m1" -> Set(), "m2" -> Set())
-          }
-        ]
-    ),
-  ran:
-    Set(
-      {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
-        view: Map("m1" -> Set(), "m2" -> Set())
-      }
-    ),
-  rewound: true,
-  submitted: 2,
-  substrate: Map("m1" -> Set(0), "m2" -> Set())
-}
-
-[State 14]
-{
-  cursor: Map("g1" -> 1, "g2" -> 1),
-  g:
-    {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set("e1"), "p2" -> Set("e1")),
-      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set()),
-      interactive: Set("p2"),
-      reacts: Map("y1" -> Set("e1", "e2")),
-      reads: Map("p1" -> Set("m1"), "p2" -> Set("m1"), "y1" -> Set())
-    },
-  guarded: false,
-  hwm: Map("g1" -> 1, "g2" -> 1),
-  lane:
-    Map(
-      "g1" -> [],
-      "g2" ->
-        [
-          {
-            id: { at: 0, origin: "host", target: "p2" },
-            proc: "p2",
-            view: Map("m1" -> Set(), "m2" -> Set())
-          }
-        ]
-    ),
-  log:
-    [
-      {
-        at: 0,
-        cause: { at: 0, origin: "host", target: "p2" },
-        dispatchView: Map("m1" -> Set(), "m2" -> Set()),
-        kind: "e1",
-        view: Map("m1" -> Set(), "m2" -> Set())
-      },
-      {
-        at: 1,
-        cause: { at: 1, origin: "host", target: "p2" },
-        dispatchView: Map("m1" -> Set(), "m2" -> Set()),
-        kind: "e1",
-        view: Map("m1" -> Set(0), "m2" -> Set())
-      }
-    ],
-  owner:
-    Map("m1" -> "g1", "m2" -> "g2", "p1" -> "g1", "p2" -> "g2", "y1" -> "g2"),
-  pending:
-    Map(
-      "g1" ->
-        [
-          {
-            id: { at: 0, origin: "y1", target: "p1" },
-            proc: "p1",
-            view: Map("m1" -> Set(), "m2" -> Set())
-          }
-        ],
-      "g2" -> []
-    ),
-  ran:
-    Set(
-      {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
-        view: Map("m1" -> Set(), "m2" -> Set())
-      },
-      {
-        id: { at: 1, origin: "host", target: "p2" },
-        proc: "p2",
-        view: Map("m1" -> Set(), "m2" -> Set())
-      }
-    ),
-  rewound: true,
-  submitted: 2,
-  substrate: Map("m1" -> Set(0), "m2" -> Set())
-}
-
-[State 15]
-{
-  cursor: Map("g1" -> 1, "g2" -> 1),
-  g:
-    {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set("e1"), "p2" -> Set("e1")),
-      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set()),
-      interactive: Set("p2"),
-      reacts: Map("y1" -> Set("e1", "e2")),
-      reads: Map("p1" -> Set("m1"), "p2" -> Set("m1"), "y1" -> Set())
-    },
-  guarded: false,
-  hwm: Map("g1" -> 1, "g2" -> 1),
-  lane:
-    Map(
-      "g1" -> [],
-      "g2" ->
-        [
-          {
-            id: { at: 1, origin: "host", target: "p2" },
-            proc: "p2",
             view: Map("m1" -> Set(), "m2" -> Set())
           },
           {
-            id: { at: 0, origin: "host", target: "p2" },
-            proc: "p2",
+            id: { at: 1, origin: "host", target: "p1" },
+            proc: "p1",
             view: Map("m1" -> Set(), "m2" -> Set())
           }
         ]
@@ -880,227 +785,48 @@ An example execution:
     [
       {
         at: 0,
-        cause: { at: 0, origin: "host", target: "p2" },
+        cause: { at: 0, origin: "host", target: "p1" },
         dispatchView: Map("m1" -> Set(), "m2" -> Set()),
-        kind: "e1",
+        kind: "e2",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
         at: 1,
-        cause: { at: 1, origin: "host", target: "p2" },
+        cause: { at: 0, origin: "host", target: "p1" },
         dispatchView: Map("m1" -> Set(), "m2" -> Set()),
-        kind: "e1",
-        view: Map("m1" -> Set(0), "m2" -> Set())
-      }
-    ],
-  owner:
-    Map("m1" -> "g1", "m2" -> "g2", "p1" -> "g1", "p2" -> "g2", "y1" -> "g2"),
-  pending:
-    Map(
-      "g1" ->
-        [
-          {
-            id: { at: 0, origin: "y1", target: "p1" },
-            proc: "p1",
-            view: Map("m1" -> Set(), "m2" -> Set())
-          }
-        ],
-      "g2" -> []
-    ),
-  ran:
-    Set(
-      {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        kind: "e2",
         view: Map("m1" -> Set(), "m2" -> Set())
-      },
-      {
-        id: { at: 1, origin: "host", target: "p2" },
-        proc: "p2",
-        view: Map("m1" -> Set(), "m2" -> Set())
-      }
-    ),
-  rewound: true,
-  submitted: 2,
-  substrate: Map("m1" -> Set(0), "m2" -> Set())
-}
-
-[State 16]
-{
-  cursor: Map("g1" -> 1, "g2" -> 2),
-  g:
-    {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set("e1"), "p2" -> Set("e1")),
-      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set()),
-      interactive: Set("p2"),
-      reacts: Map("y1" -> Set("e1", "e2")),
-      reads: Map("p1" -> Set("m1"), "p2" -> Set("m1"), "y1" -> Set())
-    },
-  guarded: false,
-  hwm: Map("g1" -> 1, "g2" -> 2),
-  lane:
-    Map(
-      "g1" ->
-        [
-          {
-            id: { at: 1, origin: "y1", target: "p1" },
-            proc: "p1",
-            view: Map("m1" -> Set(), "m2" -> Set())
-          }
-        ],
-      "g2" ->
-        [
-          {
-            id: { at: 1, origin: "host", target: "p2" },
-            proc: "p2",
-            view: Map("m1" -> Set(), "m2" -> Set())
-          },
-          {
-            id: { at: 0, origin: "host", target: "p2" },
-            proc: "p2",
-            view: Map("m1" -> Set(), "m2" -> Set())
-          }
-        ]
-    ),
-  log:
-    [
-      {
-        at: 0,
-        cause: { at: 0, origin: "host", target: "p2" },
-        dispatchView: Map("m1" -> Set(), "m2" -> Set()),
-        kind: "e1",
-        view: Map("m1" -> Set(), "m2" -> Set())
-      },
-      {
-        at: 1,
-        cause: { at: 1, origin: "host", target: "p2" },
-        dispatchView: Map("m1" -> Set(), "m2" -> Set()),
-        kind: "e1",
-        view: Map("m1" -> Set(0), "m2" -> Set())
-      }
-    ],
-  owner:
-    Map("m1" -> "g1", "m2" -> "g2", "p1" -> "g1", "p2" -> "g2", "y1" -> "g2"),
-  pending:
-    Map(
-      "g1" ->
-        [
-          {
-            id: { at: 0, origin: "y1", target: "p1" },
-            proc: "p1",
-            view: Map("m1" -> Set(), "m2" -> Set())
-          }
-        ],
-      "g2" -> []
-    ),
-  ran:
-    Set(
-      {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
-        view: Map("m1" -> Set(), "m2" -> Set())
-      },
-      {
-        id: { at: 1, origin: "host", target: "p2" },
-        proc: "p2",
-        view: Map("m1" -> Set(), "m2" -> Set())
-      }
-    ),
-  rewound: true,
-  submitted: 2,
-  substrate: Map("m1" -> Set(0), "m2" -> Set())
-}
-
-[State 17]
-{
-  cursor: Map("g1" -> 1, "g2" -> 2),
-  g:
-    {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set("e1"), "p2" -> Set("e1")),
-      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set()),
-      interactive: Set("p2"),
-      reacts: Map("y1" -> Set("e1", "e2")),
-      reads: Map("p1" -> Set("m1"), "p2" -> Set("m1"), "y1" -> Set())
-    },
-  guarded: false,
-  hwm: Map("g1" -> 1, "g2" -> 2),
-  lane:
-    Map(
-      "g1" ->
-        [
-          {
-            id: { at: 1, origin: "y1", target: "p1" },
-            proc: "p1",
-            view: Map("m1" -> Set(), "m2" -> Set())
-          }
-        ],
-      "g2" ->
-        [
-          {
-            id: { at: 1, origin: "host", target: "p2" },
-            proc: "p2",
-            view: Map("m1" -> Set(), "m2" -> Set())
-          },
-          {
-            id: { at: 0, origin: "host", target: "p2" },
-            proc: "p2",
-            view: Map("m1" -> Set(), "m2" -> Set())
-          }
-        ]
-    ),
-  log:
-    [
-      {
-        at: 0,
-        cause: { at: 0, origin: "host", target: "p2" },
-        dispatchView: Map("m1" -> Set(), "m2" -> Set()),
-        kind: "e1",
-        view: Map("m1" -> Set(), "m2" -> Set())
-      },
-      {
-        at: 1,
-        cause: { at: 1, origin: "host", target: "p2" },
-        dispatchView: Map("m1" -> Set(), "m2" -> Set()),
-        kind: "e1",
-        view: Map("m1" -> Set(0), "m2" -> Set())
       },
       {
         at: 2,
-        cause: { at: 0, origin: "y1", target: "p1" },
+        cause: { at: 0, origin: "y1", target: "p2" },
         dispatchView: Map("m1" -> Set(), "m2" -> Set()),
-        kind: "e1",
-        view: Map("m1" -> Set(0), "m2" -> Set())
+        kind: "e2",
+        view: Map("m1" -> Set(), "m2" -> Set())
       }
     ],
   owner:
-    Map("m1" -> "g1", "m2" -> "g2", "p1" -> "g1", "p2" -> "g2", "y1" -> "g2"),
+    Map("m1" -> "g2", "m2" -> "g1", "p1" -> "g2", "p2" -> "g1", "y1" -> "g2"),
   pending: Map("g1" -> [], "g2" -> []),
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
-        view: Map("m1" -> Set(), "m2" -> Set())
-      },
-      {
-        id: { at: 0, origin: "y1", target: "p1" },
+        id: { at: 0, origin: "host", target: "p1" },
         proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
-        id: { at: 1, origin: "host", target: "p2" },
+        id: { at: 0, origin: "y1", target: "p2" },
         proc: "p2",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ),
-  rewound: true,
+  rewound: false,
   submitted: 2,
-  substrate: Map("m1" -> Set(0), "m2" -> Set())
+  substrate: Map("m1" -> Set(), "m2" -> Set())
 }
 
-[violation] Found an issue (83ms at 120 traces/second).
+[violation] Found an issue (124ms at 145 traces/second).
 Use --verbosity=3 to show executions.
-Use --seed=0x793 --backend=rust to reproduce.
+Use --seed=0xe37 --backend=rust to reproduce.
 error: Invariant violated

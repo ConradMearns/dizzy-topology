@@ -7,12 +7,12 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
@@ -28,12 +28,12 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
@@ -42,8 +42,8 @@ An example execution:
   queue:
     [
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ],
@@ -56,27 +56,32 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
   models: Map("m1" -> Set(), "m2" -> Set()),
   noops: 0,
-  queue: [],
-  ran:
-    Set(
+  queue:
+    [
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
-    ),
-  submitted: 1
+    ],
+  ran: Set(),
+  submitted: 2
 }
 
 [State 3]
@@ -84,12 +89,12 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
@@ -106,8 +111,8 @@ An example execution:
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ),
@@ -119,12 +124,12 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
@@ -134,8 +139,8 @@ An example execution:
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
@@ -152,23 +157,30 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
   models: Map("m1" -> Set(), "m2" -> Set()),
   noops: 0,
-  queue: [],
+  queue:
+    [
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
@@ -185,23 +197,35 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
   models: Map("m1" -> Set(), "m2" -> Set()),
   noops: 0,
-  queue: [],
+  queue:
+    [
+      {
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
@@ -218,12 +242,12 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
@@ -232,16 +256,16 @@ An example execution:
   queue:
     [
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ],
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
@@ -258,23 +282,35 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
   models: Map("m1" -> Set(), "m2" -> Set()),
   noops: 0,
-  queue: [],
+  queue:
+    [
+      {
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
@@ -291,23 +327,30 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
   models: Map("m1" -> Set(), "m2" -> Set()),
   noops: 0,
-  queue: [],
+  queue:
+    [
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
@@ -324,23 +367,35 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
   models: Map("m1" -> Set(), "m2" -> Set()),
   noops: 0,
-  queue: [],
+  queue:
+    [
+      {
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
@@ -357,23 +412,30 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
   models: Map("m1" -> Set(), "m2" -> Set()),
   noops: 0,
-  queue: [],
+  queue:
+    [
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
@@ -390,12 +452,12 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
@@ -404,16 +466,21 @@ An example execution:
   queue:
     [
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 1, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ],
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
@@ -430,12 +497,12 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
@@ -447,18 +514,13 @@ An example execution:
         id: { at: 1, origin: "host", target: "p1" },
         proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
-      },
-      {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
-        view: Map("m1" -> Set(), "m2" -> Set())
       }
     ],
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
@@ -475,30 +537,23 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
   models: Map("m1" -> Set(), "m2" -> Set()),
   noops: 0,
-  queue:
-    [
-      {
-        id: { at: 1, origin: "host", target: "p1" },
-        proc: "p1",
-        view: Map("m1" -> Set(), "m2" -> Set())
-      }
-    ],
+  queue: [],
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
@@ -515,23 +570,30 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
   models: Map("m1" -> Set(), "m2" -> Set()),
   noops: 0,
-  queue: [],
+  queue:
+    [
+      {
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
@@ -548,12 +610,12 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
@@ -565,13 +627,18 @@ An example execution:
         id: { at: 1, origin: "host", target: "p1" },
         proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
       }
     ],
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
@@ -588,23 +655,30 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
   models: Map("m1" -> Set(), "m2" -> Set()),
   noops: 0,
-  queue: [],
+  queue:
+    [
+      {
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
@@ -621,30 +695,23 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
   models: Map("m1" -> Set(), "m2" -> Set()),
   noops: 0,
-  queue:
-    [
-      {
-        id: { at: 1, origin: "host", target: "p1" },
-        proc: "p1",
-        view: Map("m1" -> Set(), "m2" -> Set())
-      }
-    ],
+  queue: [],
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
@@ -661,35 +728,23 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
   models: Map("m1" -> Set(), "m2" -> Set()),
   noops: 0,
-  queue:
-    [
-      {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
-        view: Map("m1" -> Set(), "m2" -> Set())
-      },
-      {
-        id: { at: 1, origin: "host", target: "p1" },
-        proc: "p1",
-        view: Map("m1" -> Set(), "m2" -> Set())
-      }
-    ],
+  queue: [],
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
@@ -706,12 +761,12 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p1")),
-      emits: Map("p1" -> Set(), "p2" -> Set()),
-      folds: Map("m1" -> Set("e2"), "m2" -> Set("e1")),
-      interactive: Set("p2"),
+      dispatches: Map("y1" -> Set()),
+      emits: Map("p1" -> Set(), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
+      interactive: Set("p1"),
       reacts: Map("y1" -> Set()),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m2"))
+      reads: Map("p1" -> Set("m1", "m2"), "p2" -> Set("m2"), "y1" -> Set("m2"))
     },
   guarded: false,
   log: [],
@@ -728,8 +783,8 @@ An example execution:
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
@@ -741,8 +796,8 @@ An example execution:
   submitted: 2
 }
 
-[ok] No violation found (7383ms at 1084 traces/second).
+[ok] No violation found (3093ms at 2586 traces/second).
 Trace length statistics: max=21, min=21, average=21.00
 You may increase --max-samples and --max-steps.
 Use --verbosity to produce more (or less) output.
-Use --seed=0xd372c --backend=rust to reproduce.
+Use --seed=0xd377f --backend=rust to reproduce.

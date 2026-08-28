@@ -174,30 +174,32 @@ module st {
   // I6. Policies read fresh too, visible at log level via dispatchView …
   val freshDispatch = freshDispatchOf(g, log)
   // … and in the queue, for commands not yet run.
-  val freshQueue =
+  val freshQueue = {
+    val pv = prefixViews(g, log)
     queue.indices().forall(i => {
       val c = queue[i]
       c.id.origin != "host" implies
-        c.view == restrict(g, c.id.origin, foldPrefix(g, log, c.id.at + 1))
+        c.view == restrict(g, c.id.origin, pv.get(c.id.at + 1))
     })
+  }
 
   // I7. Completeness — an engine that drops work must FAIL these:
   //   every reacting policy of every folded event has dispatched its command …
+  val queuedIds = queue.indices().map(i => queue[i].id)
+  val ranIds    = ran.map(c => c.id)
   val dispatchComplete =
     log.indices().forall(pos =>
       POLICIES.forall(y => g.reacts.get(y).contains(log[pos].kind) implies
-        PROCS.forall(p => g.dispatches.get(y).contains(p) implies {
+        g.dispatches.get(y).forall(p => {
           val id = { origin: y, at: pos, target: p }
-          queue.indices().exists(i => queue[i].id == id) or ran.exists(c => c.id == id)
+          queuedIds.contains(id) or ranIds.contains(id)
         })))
   //   … and every command that ran left its block in the log.
   val emitComplete =
     ran.forall(c => g.emits.get(c.proc) == Set() or log.indices().exists(i => log[i].cause == c.id))
 
   // I8. One DB row per command: no two queued commands share an id.
-  val queueIdsDistinct =
-    queue.indices().forall(i => queue.indices().forall(j =>
-      i != j implies queue[i].id != queue[j].id))
+  val queueIdsDistinct = queuedIds.size() == queue.length()
 
   val allInvariants = all {
     zeroLag, modelsAreFold, blocksWellFormed, effectsOnce, causal,

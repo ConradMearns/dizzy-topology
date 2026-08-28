@@ -33,12 +33,13 @@ details.src{margin-top:1.5rem} details.src pre{max-height:32rem}
 .sev{font:500 .7rem "IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--fail);margin-right:.5rem}
 .lens{font:.75rem "IBM Plex Mono",monospace;color:var(--mute);margin-left:.5rem} .ref{color:var(--mute);font-size:.85rem}
 .votes{font-size:.88rem;padding-left:1.2rem} .muted{color:var(--mute)}
+.mono{font-family:"IBM Plex Mono",monospace;font-size:.85rem}
 .method{max-width:70ch} .method dt{font-weight:500;margin-top:.6rem} .method dd{margin:0;color:var(--mute)}
 </style>
 <main>
 <h1>Dizzy Engine Ledger</h1>
 <p class="lede">Every check run against the Quint engine specifications: what was asked, how it was checked, and what came back.
-Generated 2026-08-27 12:33:40 · quint 0.32.0 · dizzy @ <code>7f66a31</code> · 8000 samples × 20 steps per simulation.</p>
+Generated 2026-08-27 22:42:56 · quint 0.32.0 · dizzy @ <code>7f66a31</code> · 8000 samples × 20 steps per simulation.</p>
 <div class="strip"><div><b>46/46</b><span>checks as expected</span></div>
 <div><b>22</b><span>invariants holding</span></div>
 <div><b>22</b><span>witnesses reachable</span></div>
@@ -56,103 +57,103 @@ Generated 2026-08-27 12:33:40 · quint 0.32.0 · dizzy @ <code>7f66a31</code> ·
 <td><code>zeroLag</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I1 no lag: cursor == log.length()</td>
-<td class="num">5.4s</td>
+<td class="num">5.7s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>modelsAreFold</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I2 carried models are a refold of the log (the rebuild guarantee)</td>
-<td class="num">6.6s</td>
+<td class="num">6.3s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>blocksWellFormed</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I3 every run leaves one complete, contiguous, ordered block</td>
-<td class="num">10.3s</td>
+<td class="num">9.4s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>effectsOnce</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I3&#x27; exactly-once effects for GUARDABLE procedures, when the application guards</td>
-<td class="num">8.1s</td>
+<td class="num">7.1s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>causal</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I4 policy-dispatched effects follow a trigger the policy reacts to</td>
-<td class="num">6.3s</td>
+<td class="num">6.2s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>freshReads</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I5 every procedure read the fold of everything before its block</td>
-<td class="num">10.0s</td>
+<td class="num">11.3s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>freshDispatch</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I6 every dispatching policy read the fold through its trigger</td>
-<td class="num">6.2s</td>
+<td class="num">7.4s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>freshQueue</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I6&#x27; the same, for commands still queued</td>
-<td class="num">9.4s</td>
+<td class="num">8.6s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>dispatchComplete</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I7 every reacting policy of every event has dispatched</td>
-<td class="num">8.7s</td>
+<td class="num">6.7s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>emitComplete</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I7&#x27; every command that ran left its block</td>
-<td class="num">7.3s</td>
+<td class="num">6.5s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>queueIdsDistinct</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I8 one DB row per command</td>
-<td class="num">9.8s</td>
+<td class="num">5.5s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>witnessCascade</code></td>
 <td class="kind">witness · reachability</td>
 <td>a policy-dispatched command ran</td>
-<td class="num">2.8s</td>
+<td class="num">2.3s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessReader</code></td>
 <td class="kind">witness · reachability</td>
 <td>a procedure observed a non-empty model</td>
-<td class="num">2.7s</td>
+<td class="num">2.4s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessPolicyReader</code></td>
 <td class="kind">witness · reachability</td>
 <td>a policy observed a non-empty model</td>
-<td class="num">2.8s</td>
+<td class="num">2.5s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessPriority</code></td>
 <td class="kind">witness · reachability</td>
 <td>an interactive command was claimed ahead of the queue head</td>
-<td class="num">2.5s</td>
+<td class="num">2.4s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessBound</code></td>
 <td class="kind">witness · reachability</td>
 <td>the log bound was reached (cascades are bounded, not absent)</td>
-<td class="num">2.5s</td>
+<td class="num">2.3s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessRedelivered</code></td>
 <td class="kind">witness · reachability</td>
 <td>a claimed row was recovered and re-queued</td>
-<td class="num">2.4s</td>
+<td class="num">2.5s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessGuardNoop</code></td>
@@ -164,19 +165,19 @@ Generated 2026-08-27 12:33:40 · quint 0.32.0 · dizzy @ <code>7f66a31</code> ·
 <td><code>witnessUnguardable</code></td>
 <td class="kind">witness · reachability</td>
 <td>a guarding application still double-appended: the procedure was not guardable</td>
-<td class="num">2.5s</td>
+<td class="num">2.4s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessDoubleAppend</code></td>
 <td class="kind">witness · reachability</td>
 <td>an unguarded redelivery appended a second block (executor.py:49-56)</td>
-<td class="num">2.3s</td>
+<td class="num">2.4s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>allInvariants</code></td>
 <td class="kind">Apalache · bounded</td>
 <td>Apalache: all invariants, every graph × guard, 4 steps</td>
-<td class="num">315.8s</td>
+<td class="num">524.9s</td>
 <td><span class="pill pass">holds</span></td></tr></tbody></table></div>
 <section class="review">
 <h3>Adversarial review</h3>
@@ -471,30 +472,32 @@ module st {
   // I6. Policies read fresh too, visible at log level via dispatchView …
   val freshDispatch = freshDispatchOf(g, log)
   // … and in the queue, for commands not yet run.
-  val freshQueue =
+  val freshQueue = {
+    val pv = prefixViews(g, log)
     queue.indices().forall(i =&gt; {
       val c = queue[i]
       c.id.origin != &quot;host&quot; implies
-        c.view == restrict(g, c.id.origin, foldPrefix(g, log, c.id.at + 1))
+        c.view == restrict(g, c.id.origin, pv.get(c.id.at + 1))
     })
+  }
 
   // I7. Completeness — an engine that drops work must FAIL these:
   //   every reacting policy of every folded event has dispatched its command …
+  val queuedIds = queue.indices().map(i =&gt; queue[i].id)
+  val ranIds    = ran.map(c =&gt; c.id)
   val dispatchComplete =
     log.indices().forall(pos =&gt;
       POLICIES.forall(y =&gt; g.reacts.get(y).contains(log[pos].kind) implies
-        PROCS.forall(p =&gt; g.dispatches.get(y).contains(p) implies {
+        g.dispatches.get(y).forall(p =&gt; {
           val id = { origin: y, at: pos, target: p }
-          queue.indices().exists(i =&gt; queue[i].id == id) or ran.exists(c =&gt; c.id == id)
+          queuedIds.contains(id) or ranIds.contains(id)
         })))
   //   … and every command that ran left its block in the log.
   val emitComplete =
     ran.forall(c =&gt; g.emits.get(c.proc) == Set() or log.indices().exists(i =&gt; log[i].cause == c.id))
 
   // I8. One DB row per command: no two queued commands share an id.
-  val queueIdsDistinct =
-    queue.indices().forall(i =&gt; queue.indices().forall(j =&gt;
-      i != j implies queue[i].id != queue[j].id))
+  val queueIdsDistinct = queuedIds.size() == queue.length()
 
   val allInvariants = all {
     zeroLag, modelsAreFold, blocksWellFormed, effectsOnce, causal,
@@ -522,151 +525,151 @@ module st {
 <td><code>substrateIsFold</code></td>
 <td class="kind">invariant · simulation</td>
 <td>each model == its owner&#x27;s fold up to the owner&#x27;s high-water mark</td>
-<td class="num">8.8s</td>
+<td class="num">11.3s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>cursorBelowHwm</code></td>
 <td class="kind">invariant · simulation</td>
 <td>a rewound cursor never exceeds what was folded</td>
-<td class="num">8.1s</td>
+<td class="num">9.8s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>blocksWellFormed</code></td>
 <td class="kind">invariant · simulation</td>
 <td>as st, under any topology</td>
-<td class="num">9.5s</td>
+<td class="num">12.0s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>effectsOnce</code></td>
 <td class="kind">invariant · simulation</td>
 <td>exactly-once for guardable procedures needs the guard AND rule 6</td>
-<td class="num">8.0s</td>
+<td class="num">10.2s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>causal</code></td>
 <td class="kind">invariant · simulation</td>
 <td>as st, under any topology</td>
-<td class="num">8.0s</td>
+<td class="num">11.4s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>routed</code></td>
 <td class="kind">invariant · simulation</td>
 <td>a command sits only in its procedure&#x27;s owner lane / pending slot</td>
-<td class="num">8.4s</td>
+<td class="num">10.4s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>dispatchComplete</code></td>
 <td class="kind">invariant · simulation</td>
 <td>every folded event&#x27;s reacting policies have dispatched</td>
-<td class="num">8.2s</td>
+<td class="num">10.8s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>emitComplete</code></td>
 <td class="kind">invariant · simulation</td>
 <td>every command that ran left its block</td>
-<td class="num">8.7s</td>
+<td class="num">10.1s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>rule6Guarantee</code></td>
 <td class="kind">invariant · simulation</td>
 <td>T1: rule 6 ⇒ model committed through the cause before the run; no policy dispatched behind its trigger</td>
-<td class="num">8.2s</td>
+<td class="num">10.1s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>noFaultFreshDispatch</code></td>
 <td class="kind">invariant · simulation</td>
 <td>T1&#x27;: with rule 6 and no cursor loss, policies read exactly the fold through their trigger</td>
-<td class="num">8.2s</td>
+<td class="num">10.4s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>singleGroupIsSt</code></td>
 <td class="kind">invariant · simulation</td>
 <td>T2: one group ⇒ st&#x27;s fresh reads</td>
-<td class="num">8.2s</td>
+<td class="num">10.1s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>witnessClaimWindow</code></td>
 <td class="kind">witness · reachability</td>
 <td>a rule-6-LEGAL split read behind the tail (the claim→execute window, groups.py:44-50)</td>
-<td class="num">3.3s</td>
+<td class="num">3.7s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessWriteSkew</code></td>
 <td class="kind">witness · reachability</td>
 <td>WRITE SKEW under rule 6: two decisions, neither saw the other — no serial order explains both</td>
-<td class="num">8.4s</td>
+<td class="num">4.4s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessStaleRead</code></td>
 <td class="kind">witness · reachability</td>
 <td>a rule-6-violating split broke even the weak guarantee</td>
-<td class="num">3.8s</td>
+<td class="num">4.0s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessStalePolicy</code></td>
 <td class="kind">witness · reachability</td>
 <td>a rule-6-violating policy read stale or ahead</td>
-<td class="num">2.8s</td>
+<td class="num">4.2s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessLegalLag</code></td>
 <td class="kind">witness · reachability</td>
 <td>a legal multi-group split with real inter-group lag</td>
-<td class="num">2.6s</td>
+<td class="num">3.9s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessCrossGroup</code></td>
 <td class="kind">witness · reachability</td>
 <td>a policy in one group dispatched to a procedure in another</td>
-<td class="num">2.6s</td>
+<td class="num">3.5s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessRedelivered</code></td>
 <td class="kind">witness · reachability</td>
 <td>an at-least-once redelivery occurred</td>
-<td class="num">2.6s</td>
+<td class="num">3.6s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessRewound</code></td>
 <td class="kind">witness · reachability</td>
 <td>a cursor was lost and rewound</td>
-<td class="num">2.6s</td>
+<td class="num">3.6s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessRedispatch</code></td>
 <td class="kind">witness · reachability</td>
 <td>a rewound cursor re-dispatched an already-run command</td>
-<td class="num">2.6s</td>
+<td class="num">3.8s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessDoubleAppend</code></td>
 <td class="kind">witness · reachability</td>
 <td>an unguarded replay appended a second block</td>
-<td class="num">2.7s</td>
+<td class="num">3.8s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessUnguardable</code></td>
 <td class="kind">witness · reachability</td>
 <td>a guarding application still double-appended: procedure not guardable</td>
-<td class="num">2.6s</td>
+<td class="num">3.7s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessGuardMissed</code></td>
 <td class="kind">witness · reachability</td>
 <td>a guarding, guardable procedure double-appended because rule 6 was broken</td>
-<td class="num">2.6s</td>
+<td class="num">3.6s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessOneGroupRun</code></td>
 <td class="kind">witness · reachability</td>
 <td>the one-group (st) topology was exercised</td>
-<td class="num">2.6s</td>
+<td class="num">3.7s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>allInvariants</code></td>
 <td class="kind">Apalache · bounded</td>
 <td>Apalache: all invariants, every graph × placement × guard, 3 steps</td>
-<td class="num">9.7s</td>
+<td class="num">25.1s</td>
 <td><span class="pill pass">holds</span></td></tr></tbody></table></div>
 <section class="review">
 <h3>Adversarial review</h3>
@@ -844,7 +847,6 @@ module st {
 module groups {
   import graph.* from &quot;./graph&quot;
 
-  pure val GROUPS = Set(&quot;g1&quot;, &quot;g2&quot;)
   pure val PLACEABLE = ELEMS.union(MODELS)
   pure val PLACEMENTS = PLACEABLE.setOfMaps(GROUPS)
 
@@ -1035,16 +1037,13 @@ module groups {
 
   // Completeness: every reacting policy of every entry its owner has folded
   // has dispatched (queued, claimed, or run); every run left its block.
+  val knownIds =
+    GROUPS.map(h =&gt; lane.get(h).indices().map(i =&gt; lane.get(h)[i].id).union(pending.get(h).indices().map(i =&gt; pending.get(h)[i].id))).flatten()
+      .union(ran.map(c =&gt; c.id))
   val dispatchComplete =
     log.indices().forall(pos =&gt;
       POLICIES.forall(y =&gt; (g.reacts.get(y).contains(log[pos].kind) and pos &lt; hwm.get(owner.get(y))) implies
-        PROCS.forall(p =&gt; g.dispatches.get(y).contains(p) implies {
-          val id = { origin: y, at: pos, target: p }
-          val h = owner.get(p)
-          lane.get(h).indices().exists(i =&gt; lane.get(h)[i].id == id)
-            or pending.get(h).indices().exists(i =&gt; pending.get(h)[i].id == id)
-            or ran.exists(c =&gt; c.id == id)
-        })))
+        g.dispatches.get(y).forall(p =&gt; knownIds.contains({ origin: y, at: pos, target: p }))))
   val emitComplete =
     ran.forall(c =&gt; g.emits.get(c.proc) == Set() or log.indices().exists(i =&gt; log[i].cause == c.id))
 
@@ -1096,4 +1095,58 @@ module groups {
 }
 </pre></details>
 </section>
+<section><h2>Scale ladder <span class="count">8 rungs</span></h2>
+<p class="intro">The same two engine specs, unchanged, over generated universes of increasing size (<code>scale/gen.py</code>, <code>scale/bench.py</code>).
+Simulation is 300 traces × 20 steps; the witness column runs 1200 traces looking for one reachable trace of <code>witnessCascade</code> (st) or <code>witnessClaimWindow</code> (groups).
+Peak memory is the process's maximum resident set.</p>
+<div class="tbl"><table><thead><tr><th>rung</th><th class="num">procs / policies / models / kinds / groups</th><th>spec</th><th class="num">typecheck</th><th class="num">traces/s</th><th class="num">sim wall</th><th class="num">peak RSS</th><th>result</th><th>witness</th><th>Apalache</th></tr></thead>
+<tbody><tr><td class="mono">p2</td><td class="num">2 / 1 / 2 / 2 / 2</td>
+<td><code>st.qnt</code></td><td class="num">9.5s</td><td class="num">139</td>
+<td class="num">8.6s</td><td class="num">127 MB</td><td><span class="pill pass">ok</span></td>
+<td>reached</td><td><span class="muted">not attempted</span></td></tr><tr><td class="mono">p2</td><td class="num">2 / 1 / 2 / 2 / 2</td>
+<td><code>groups.qnt</code></td><td class="num">12.0s</td><td class="num">267</td>
+<td class="num">7.9s</td><td class="num">131 MB</td><td><span class="pill pass">ok</span></td>
+<td>reached</td><td><span class="muted">not attempted</span></td></tr><tr><td class="mono">p5</td><td class="num">5 / 2 / 3 / 3 / 2</td>
+<td><code>st.qnt</code></td><td class="num">6.9s</td><td class="num">64</td>
+<td class="num">11.8s</td><td class="num">128 MB</td><td><span class="pill pass">ok</span></td>
+<td>reached</td><td><span class="muted">not attempted</span></td></tr><tr><td class="mono">p5</td><td class="num">5 / 2 / 3 / 3 / 2</td>
+<td><code>groups.qnt</code></td><td class="num">8.0s</td><td class="num">101</td>
+<td class="num">11.0s</td><td class="num">131 MB</td><td><span class="pill pass">ok</span></td>
+<td>reached</td><td><span class="muted">not attempted</span></td></tr><tr><td class="mono">p10</td><td class="num">10 / 4 / 4 / 4 / 3</td>
+<td><code>st.qnt</code></td><td class="num">8.7s</td><td class="num">32</td>
+<td class="num">18.1s</td><td class="num">137 MB</td><td><span class="pill pass">ok</span></td>
+<td>reached</td><td><span class="muted">not attempted</span></td></tr><tr><td class="mono">p10</td><td class="num">10 / 4 / 4 / 4 / 3</td>
+<td><code>groups.qnt</code></td><td class="num">6.9s</td><td class="num">193</td>
+<td class="num">13.9s</td><td class="num">131 MB</td><td><span class="pill pass">ok</span></td>
+<td><span class="muted">not in budget</span></td><td><span class="muted">not attempted</span></td></tr><tr><td class="mono">p25</td><td class="num">25 / 8 / 6 / 4 / 3</td>
+<td><code>st.qnt</code></td><td class="num">9.2s</td><td class="num">11</td>
+<td class="num">37.8s</td><td class="num">156 MB</td><td><span class="pill pass">ok</span></td>
+<td>reached</td><td><span class="muted">not attempted</span></td></tr><tr><td class="mono">p25</td><td class="num">25 / 8 / 6 / 4 / 3</td>
+<td><code>groups.qnt</code></td><td class="num">10.1s</td><td class="num">96</td>
+<td class="num">14.3s</td><td class="num">132 MB</td><td><span class="pill pass">ok</span></td>
+<td><span class="muted">not in budget</span></td><td><span class="muted">not attempted</span></td></tr><tr><td class="mono">p50</td><td class="num">50 / 16 / 8 / 6 / 4</td>
+<td><code>st.qnt</code></td><td class="num">9.1s</td><td class="num">6</td>
+<td class="num">62.4s</td><td class="num">163 MB</td><td><span class="pill pass">ok</span></td>
+<td>reached</td><td><span class="muted">not attempted</span></td></tr><tr><td class="mono">p50</td><td class="num">50 / 16 / 8 / 6 / 4</td>
+<td><code>groups.qnt</code></td><td class="num">8.1s</td><td class="num">61</td>
+<td class="num">15.5s</td><td class="num">145 MB</td><td><span class="pill pass">ok</span></td>
+<td><span class="muted">not in budget</span></td><td><span class="muted">not attempted</span></td></tr><tr><td class="mono">p100</td><td class="num">100 / 32 / 12 / 8 / 4</td>
+<td><code>st.qnt</code></td><td class="num">2.5s</td><td class="num">3</td>
+<td class="num">113.3s</td><td class="num">299 MB</td><td><span class="pill pass">ok</span></td>
+<td>reached</td><td><span class="muted">not attempted</span></td></tr><tr><td class="mono">p100</td><td class="num">100 / 32 / 12 / 8 / 4</td>
+<td><code>groups.qnt</code></td><td class="num">2.9s</td><td class="num">45</td>
+<td class="num">10.5s</td><td class="num">160 MB</td><td><span class="pill pass">ok</span></td>
+<td><span class="muted">not in budget</span></td><td><span class="muted">not attempted</span></td></tr><tr><td class="mono">p200</td><td class="num">200 / 64 / 16 / 10 / 6</td>
+<td><code>st.qnt</code></td><td class="num">3.9s</td><td class="num">—</td>
+<td class="num">299.4s</td><td class="num">395 MB</td><td><span class="pill fail">error</span></td>
+<td><span class="muted">not in budget</span></td><td><span class="muted">not attempted</span></td></tr><tr><td class="mono">p200</td><td class="num">200 / 64 / 16 / 10 / 6</td>
+<td><code>groups.qnt</code></td><td class="num">3.5s</td><td class="num">18</td>
+<td class="num">20.7s</td><td class="num">171 MB</td><td><span class="pill pass">ok</span></td>
+<td><span class="muted">not in budget</span></td><td><span class="muted">not attempted</span></td></tr><tr><td class="mono">p400</td><td class="num">400 / 128 / 24 / 12 / 8</td>
+<td><code>st.qnt</code></td><td class="num">5.9s</td><td class="num">—</td>
+<td class="num">408.0s</td><td class="num">675 MB</td><td><span class="pill fail">error</span></td>
+<td><span class="muted">not in budget</span></td><td><span class="muted">not attempted</span></td></tr><tr><td class="mono">p400</td><td class="num">400 / 128 / 24 / 12 / 8</td>
+<td><code>groups.qnt</code></td><td class="num">4.3s</td><td class="num">—</td>
+<td class="num">178.7s</td><td class="num">732 MB</td><td><span class="pill fail">error</span></td>
+<td><span class="muted">not in budget</span></td><td><span class="muted">not attempted</span></td></tr></tbody></table></div></section>
 </main>

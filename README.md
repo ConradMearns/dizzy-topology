@@ -40,6 +40,23 @@ python3 report/render.py                # → report/index.html
 
 Apalache depth is exponential here (st: 4 s / 17 s / 5 min at depths 2 / 3 / 4), so the suite proves depth 4 for `st` and 3 for `groups`; simulation covers 3000 traces × 20 steps.
 
+## Scale
+
+`scale/gen.py` regenerates the universe block of `graph.qnt` at any size (procedures, policies, models, event kinds, groups) with out-degree ≤ 2 per element — real feature files are sparse, and an unbounded powerset makes a 100-procedure universe dispatch ~50 commands per event. `st.qnt` / `groups.qnt` are copied verbatim, so every rung checks the same semantics. `scale/bench.py` runs the ladder and records throughput and peak RSS in `scale/results.json` (rendered into the ledger).
+
+| rung | procs / policies / models / kinds / groups | st | groups |
+|---|---|---|---|
+| p2 | 2 / 1 / 2 / 2 / 2 | 236 traces/s · Apalache depth 4 | 399 traces/s · Apalache depth 3 |
+| p5 | 5 / 2 / 3 / 3 / 2 | 88 · Apalache depth 2 (5 min) | 355 · Apalache depth 2 |
+| p10 | 10 / 4 / 4 / 4 / 3 | 36 | 267 · Apalache depth 1 |
+| p25 | 25 / 8 / 6 / 4 / 3 | 11 | 96 |
+| p50 | 50 / 16 / 8 / 6 / 4 | 6 | 61 |
+| p100 | 100 / 32 / 12 / 8 / 4 | 3 (TypeScript backend) | 45 |
+| p200 | 200 / 64 / 16 / 10 / 6 | — (backend error) | 18 |
+| p400 | 400 / 128 / 24 / 12 / 8 | — | — (backend error) |
+
+All rows are 300 traces × 20 steps, all invariants holding. Peak memory stays under 750 MB. The ceiling at p200–p400 is quint's simulators (the Rust one crashes, the TypeScript one runs out of heap), not the machine; Apalache's default 4 GB JVM heap OOMs from p25 (`JVM_ARGS=-Xmx24G` retries in `scale/apalache_heap.sh`).
+
 ## Roadmap
 
 Tracked in `.seeds/` — `sd ready` shows what is unblocked. Increments: st → consumer

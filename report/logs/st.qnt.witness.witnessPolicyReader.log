@@ -7,12 +7,13 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p2")),
-      emits: Map("p1" -> Set("e2"), "p2" -> Set("e1", "e2")),
-      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
-      interactive: Set(),
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set("e1", "e2"), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set("e1")),
+      interactive: Set("p1", "p2"),
       reacts: Map("y1" -> Set("e2")),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m1"))
+      reads:
+        Map("p1" -> Set(), "p2" -> Set("m1", "m2"), "y1" -> Set("m1", "m2"))
     },
   guarded: false,
   log: [],
@@ -28,12 +29,13 @@ An example execution:
   cursor: 0,
   g:
     {
-      dispatches: Map("y1" -> Set("p2")),
-      emits: Map("p1" -> Set("e2"), "p2" -> Set("e1", "e2")),
-      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
-      interactive: Set(),
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set("e1", "e2"), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set("e1")),
+      interactive: Set("p1", "p2"),
       reacts: Map("y1" -> Set("e2")),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m1"))
+      reads:
+        Map("p1" -> Set(), "p2" -> Set("m1", "m2"), "y1" -> Set("m1", "m2"))
     },
   guarded: false,
   log: [],
@@ -42,8 +44,8 @@ An example execution:
   queue:
     [
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ],
@@ -56,46 +58,47 @@ An example execution:
   cursor: 2,
   g:
     {
-      dispatches: Map("y1" -> Set("p2")),
-      emits: Map("p1" -> Set("e2"), "p2" -> Set("e1", "e2")),
-      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
-      interactive: Set(),
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set("e1", "e2"), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set("e1")),
+      interactive: Set("p1", "p2"),
       reacts: Map("y1" -> Set("e2")),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m1"))
+      reads:
+        Map("p1" -> Set(), "p2" -> Set("m1", "m2"), "y1" -> Set("m1", "m2"))
     },
   guarded: false,
   log:
     [
       {
         at: 0,
-        cause: { at: 0, origin: "host", target: "p2" },
+        cause: { at: 0, origin: "host", target: "p1" },
         dispatchView: Map("m1" -> Set(), "m2" -> Set()),
         kind: "e1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
         at: 0,
-        cause: { at: 0, origin: "host", target: "p2" },
+        cause: { at: 0, origin: "host", target: "p1" },
         dispatchView: Map("m1" -> Set(), "m2" -> Set()),
         kind: "e2",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ],
-  models: Map("m1" -> Set(0), "m2" -> Set()),
+  models: Map("m1" -> Set(0, 1), "m2" -> Set(0)),
   noops: 0,
   queue:
     [
       {
-        id: { at: 1, origin: "y1", target: "p2" },
-        proc: "p2",
-        view: Map("m1" -> Set(0), "m2" -> Set())
+        id: { at: 1, origin: "y1", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(0, 1), "m2" -> Set(0))
       }
     ],
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ),
@@ -104,75 +107,138 @@ An example execution:
 
 [State 3]
 {
-  cursor: 4,
+  cursor: 2,
   g:
     {
-      dispatches: Map("y1" -> Set("p2")),
-      emits: Map("p1" -> Set("e2"), "p2" -> Set("e1", "e2")),
-      folds: Map("m1" -> Set("e1"), "m2" -> Set()),
-      interactive: Set(),
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set("e1", "e2"), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set("e1")),
+      interactive: Set("p1", "p2"),
       reacts: Map("y1" -> Set("e2")),
-      reads: Map("p1" -> Set(), "p2" -> Set(), "y1" -> Set("m1"))
+      reads:
+        Map("p1" -> Set(), "p2" -> Set("m1", "m2"), "y1" -> Set("m1", "m2"))
     },
   guarded: false,
   log:
     [
       {
         at: 0,
-        cause: { at: 0, origin: "host", target: "p2" },
+        cause: { at: 0, origin: "host", target: "p1" },
         dispatchView: Map("m1" -> Set(), "m2" -> Set()),
         kind: "e1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
         at: 0,
-        cause: { at: 0, origin: "host", target: "p2" },
+        cause: { at: 0, origin: "host", target: "p1" },
+        dispatchView: Map("m1" -> Set(), "m2" -> Set()),
+        kind: "e2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
+  models: Map("m1" -> Set(0, 1), "m2" -> Set(0)),
+  noops: 0,
+  queue:
+    [
+      {
+        id: { at: 1, origin: "y1", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(0, 1), "m2" -> Set(0))
+      },
+      {
+        id: { at: 1, origin: "host", target: "p2" },
+        proc: "p2",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ],
+  ran:
+    Set(
+      {
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      }
+    ),
+  submitted: 2
+}
+
+[State 4]
+{
+  cursor: 4,
+  g:
+    {
+      dispatches: Map("y1" -> Set("p1")),
+      emits: Map("p1" -> Set("e1", "e2"), "p2" -> Set("e2")),
+      folds: Map("m1" -> Set("e1", "e2"), "m2" -> Set("e1")),
+      interactive: Set("p1", "p2"),
+      reacts: Map("y1" -> Set("e2")),
+      reads:
+        Map("p1" -> Set(), "p2" -> Set("m1", "m2"), "y1" -> Set("m1", "m2"))
+    },
+  guarded: false,
+  log:
+    [
+      {
+        at: 0,
+        cause: { at: 0, origin: "host", target: "p1" },
+        dispatchView: Map("m1" -> Set(), "m2" -> Set()),
+        kind: "e1",
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        at: 0,
+        cause: { at: 0, origin: "host", target: "p1" },
         dispatchView: Map("m1" -> Set(), "m2" -> Set()),
         kind: "e2",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
         at: 2,
-        cause: { at: 1, origin: "y1", target: "p2" },
-        dispatchView: Map("m1" -> Set(0), "m2" -> Set()),
+        cause: { at: 1, origin: "y1", target: "p1" },
+        dispatchView: Map("m1" -> Set(0, 1), "m2" -> Set(0)),
         kind: "e1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
         at: 2,
-        cause: { at: 1, origin: "y1", target: "p2" },
-        dispatchView: Map("m1" -> Set(0), "m2" -> Set()),
+        cause: { at: 1, origin: "y1", target: "p1" },
+        dispatchView: Map("m1" -> Set(0, 1), "m2" -> Set(0)),
         kind: "e2",
         view: Map("m1" -> Set(), "m2" -> Set())
       }
     ],
-  models: Map("m1" -> Set(0, 2), "m2" -> Set()),
+  models: Map("m1" -> Set(0, 1, 2, 3), "m2" -> Set(0, 2)),
   noops: 0,
   queue:
     [
       {
-        id: { at: 3, origin: "y1", target: "p2" },
+        id: { at: 1, origin: "host", target: "p2" },
         proc: "p2",
-        view: Map("m1" -> Set(0, 2), "m2" -> Set())
+        view: Map("m1" -> Set(), "m2" -> Set())
+      },
+      {
+        id: { at: 3, origin: "y1", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(0, 1, 2, 3), "m2" -> Set(0, 2))
       }
     ],
   ran:
     Set(
       {
-        id: { at: 0, origin: "host", target: "p2" },
-        proc: "p2",
+        id: { at: 0, origin: "host", target: "p1" },
+        proc: "p1",
         view: Map("m1" -> Set(), "m2" -> Set())
       },
       {
-        id: { at: 1, origin: "y1", target: "p2" },
-        proc: "p2",
-        view: Map("m1" -> Set(0), "m2" -> Set())
+        id: { at: 1, origin: "y1", target: "p1" },
+        proc: "p1",
+        view: Map("m1" -> Set(0, 1), "m2" -> Set(0))
       }
     ),
-  submitted: 1
+  submitted: 2
 }
 
-[violation] Found an issue (72ms at 139 traces/second).
+[violation] Found an issue (54ms at 19 traces/second).
 Use --verbosity=3 to show executions.
-Use --seed=0x3e0 --backend=rust to reproduce.
+Use --seed=0x7 --backend=rust to reproduce.
 error: Invariant violated

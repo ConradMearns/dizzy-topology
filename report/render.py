@@ -81,6 +81,32 @@ def review_block(name):
 def source(spec):
     return f'<details class="src"><summary>source · <code>specs/{esc(spec)}</code></summary><pre>{esc((ROOT/"specs"/spec).read_text())}</pre></details>'
 
+# ---- scale ladder (optional) ----
+def scale_section():
+    p = ROOT / "scale" / "results.json"
+    if not p.exists(): return ""
+    rows = json.loads(p.read_text())
+    if not rows: return ""
+    def cell(v, suf=""): return "—" if v is None else f"{v}{suf}"
+    def res(r):
+        if r.get("error"): return '<span class="pill fail">typecheck failed</span>'
+        cls = "pass" if r.get("sim_result") == "ok" else "fail"
+        return f'<span class="pill {cls}">{esc(r.get("sim_result"))}</span>'
+    def ver(r):
+        if "verify_result" not in r: return '<span class="muted">not attempted</span>'
+        cls = "pass" if r["verify_result"] == "ok" else "fail"
+        return f'<span class="pill {cls}">depth {r["verify_depth"]} · {esc(r["verify_result"])}</span> <span class="muted">{cell(r.get("verify_s"),"s")} · {cell(r.get("verify_rss_mb"),"MB")}</span>'
+    trs = "".join(f"""<tr><td class="mono">{esc(r['tag'])}</td><td class="num">{r['procs']} / {r['policies']} / {r['models']} / {r['kinds']} / {r['groups']}</td>
+<td><code>{esc(r['spec'])}</code></td><td class="num">{cell(r.get('typecheck_s'),'s')}</td><td class="num">{cell(r.get('traces_per_s'))}</td>
+<td class="num">{cell(r.get('sim_s'),'s')}</td><td class="num">{cell(r.get('sim_rss_mb'),' MB')}</td><td>{res(r)}</td>
+<td>{'reached' if r.get('witness_reached') else '<span class="muted">not in budget</span>'}</td><td>{ver(r)}</td></tr>""" for r in rows)
+    return f"""<section><h2>Scale ladder <span class="count">{len(set(r['tag'] for r in rows))} rungs</span></h2>
+<p class="intro">The same two engine specs, unchanged, over generated universes of increasing size (<code>scale/gen.py</code>, <code>scale/bench.py</code>).
+Simulation is 300 traces × 20 steps; the witness column runs 1200 traces looking for one reachable trace of <code>witnessCascade</code> (st) or <code>witnessClaimWindow</code> (groups).
+Peak memory is the process's maximum resident set.</p>
+<div class="tbl"><table><thead><tr><th>rung</th><th class="num">procs / policies / models / kinds / groups</th><th>spec</th><th class="num">typecheck</th><th class="num">traces/s</th><th class="num">sim wall</th><th class="num">peak RSS</th><th>result</th><th>witness</th><th>Apalache</th></tr></thead>
+<tbody>{trs}</tbody></table></div></section>"""
+
 total = len(checks); passed = sum(c["passed"] for c in checks)
 sections = []
 for spec, (title, intro) in SPEC_INTRO.items():
@@ -129,6 +155,7 @@ details.src{{margin-top:1.5rem}} details.src pre{{max-height:32rem}}
 .sev{{font:500 .7rem "IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--fail);margin-right:.5rem}}
 .lens{{font:.75rem "IBM Plex Mono",monospace;color:var(--mute);margin-left:.5rem}} .ref{{color:var(--mute);font-size:.85rem}}
 .votes{{font-size:.88rem;padding-left:1.2rem}} .muted{{color:var(--mute)}}
+.mono{{font-family:"IBM Plex Mono",monospace;font-size:.85rem}}
 .method{{max-width:70ch}} .method dt{{font-weight:500;margin-top:.6rem}} .method dd{{margin:0;color:var(--mute)}}
 </style>
 <main>
@@ -145,6 +172,7 @@ Generated {esc(meta['generated'])} · quint {esc(meta['quint'])} · dizzy @ <cod
 <dt>Apalache · bounded</dt><dd>Symbolic model checking of every behaviour up to the stated depth, across every graph (and placement) the <code>init</code> can draw.</dd>
 </dl>
 {''.join(sections)}
+{scale_section()}
 </main>
 """
 (OUT / "index.html").write_text(page)
