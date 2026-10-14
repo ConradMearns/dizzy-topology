@@ -1,0 +1,394 @@
+<title>The Fold Between</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{--bg:#F3F5F7;--panel:#FFFFFF;--panel2:#E9EDF0;--ink:#161B20;--mute:#5E6B76;--rule:#CFD6DC;
+--cmd:#B9741C;--cmd-bg:#FBE9CF;--evt:#2A6F95;--evt-bg:#D7EAF5;--fold:#2E7D5B;--fold-bg:#D8F0E4;--stale:#B8443B;--stale-bg:#F8DEDB;
+--g1:#7A4FB8;--g2:#1F8A8A;--focus:#B9741C}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#13181D;--panel:#1B2229;--panel2:#232C34;--ink:#E8ECEF;--mute:#8A97A3;--rule:#2F3A44;
+--cmd:#E8A33D;--cmd-bg:#3A2C15;--evt:#5FA8D3;--evt-bg:#16303E;--fold:#7FC8A9;--fold-bg:#163329;--stale:#E0716A;--stale-bg:#3E1F1C;
+--g1:#B497E8;--g2:#5ED0CF;--focus:#E8A33D}}
+:root[data-theme="dark"]{--bg:#13181D;--panel:#1B2229;--panel2:#232C34;--ink:#E8ECEF;--mute:#8A97A3;--rule:#2F3A44;
+--cmd:#E8A33D;--cmd-bg:#3A2C15;--evt:#5FA8D3;--evt-bg:#16303E;--fold:#7FC8A9;--fold-bg:#163329;--stale:#E0716A;--stale-bg:#3E1F1C;
+--g1:#B497E8;--g2:#5ED0CF;--focus:#E8A33D}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 "Source Sans 3",system-ui,sans-serif;padding:2rem 1rem 4rem}
+main{max-width:1040px;margin:0 auto}
+h1{font:700 clamp(2rem,5vw,3.2rem)/1.05 "Bricolage Grotesque",system-ui,sans-serif;letter-spacing:-.02em;margin:0 0 .4rem;text-wrap:balance}
+.lede{color:var(--mute);max-width:62ch;margin:0 0 1.5rem}
+code,.mono{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.86em}
+.chapters{display:flex;gap:.5rem;flex-wrap:wrap;margin:0 0 1rem}
+.chapters button{font:600 .85rem "JetBrains Mono",monospace;letter-spacing:.02em;padding:.5em .9em;border-radius:999px;border:1px solid var(--rule);background:var(--panel);color:var(--mute);cursor:pointer}
+.chapters button[aria-current="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chapters button:focus-visible,.step button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.stage{background:var(--panel);border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+svg{display:block;width:100%;height:auto}
+.box{fill:var(--panel2);stroke:var(--rule)} .box-label{fill:var(--mute);font:600 11px "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase}
+.slot{fill:none;stroke:var(--rule);stroke-dasharray:3 3}
+.slot-idx{fill:var(--mute);font:11px "JetBrains Mono",monospace}
+.chip{transition:transform .55s cubic-bezier(.4,0,.2,1),opacity .4s}
+.chip rect{rx:6}
+.chip.cmd rect{fill:var(--cmd-bg);stroke:var(--cmd)} .chip.cmd text{fill:var(--cmd)}
+.chip.evt rect{fill:var(--evt-bg);stroke:var(--evt)} .chip.evt text{fill:var(--evt)}
+.chip text{font:600 12px "JetBrains Mono",monospace}
+.chip.enter{opacity:0;transform:scale(.6)}
+.cursor{transition:transform .55s cubic-bezier(.4,0,.2,1)} .cursor.g1{fill:var(--g1)} .cursor.g2{fill:var(--g2)}
+.cursor-label{font:600 10px "JetBrains Mono",monospace} .cursor-label.g1{fill:var(--g1)} .cursor-label.g2{fill:var(--g2)}
+.grp-label{font:700 15px "Bricolage Grotesque",sans-serif} .grp-label.g1{fill:var(--g1)} .grp-label.g2{fill:var(--g2)}
+.grp-sub{fill:var(--mute);font:11px "JetBrains Mono",monospace}
+.row-hl{fill:none;stroke-width:2;opacity:0;transition:opacity .3s} .row-hl.on{opacity:1} .row-hl.g1{stroke:var(--g1)} .row-hl.g2{stroke:var(--g2)}
+.model-pos{font:600 12px "JetBrains Mono",monospace;fill:var(--fold)} .model-pos.stale{fill:var(--stale)}
+.model-dot{fill:var(--fold)}
+.readview{fill:var(--stale);font:600 12px "JetBrains Mono",monospace}
+.tail{stroke:var(--evt);stroke-width:2;stroke-dasharray:4 3;transition:transform .55s cubic-bezier(.4,0,.2,1)}
+.tail-label{fill:var(--evt);font:600 10px "JetBrains Mono",monospace}
+.atomic{fill:none;stroke:var(--fold);stroke-width:2;stroke-dasharray:6 4;opacity:0;transition:opacity .4s} .atomic.on{opacity:1}
+.atomic-label{fill:var(--fold);font:600 11px "JetBrains Mono",monospace;letter-spacing:.08em;opacity:0;transition:opacity .4s} .atomic-label.on{opacity:1}
+.panel{display:grid;grid-template-columns:1fr auto;gap:1.5rem;align-items:start;margin-top:1rem}
+@media (max-width:720px){.panel{grid-template-columns:1fr}}
+.narr h2{font:700 1.35rem/1.2 "Bricolage Grotesque",sans-serif;margin:0 0 .35rem;letter-spacing:-.01em}
+.narr p{margin:0;max-width:60ch}
+.eyebrow{font:600 .72rem "JetBrains Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-bottom:.4rem}
+.who{display:flex;gap:.35rem;flex-wrap:wrap;align-items:center;margin:.7rem 0 0}
+.who .k{font:600 .68rem "JetBrains Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-right:.3rem}
+.who span.pill{font:600 .78rem "JetBrains Mono",monospace;padding:.3em .6em;border-radius:6px;border:1px solid var(--rule);color:var(--mute);background:var(--panel2)}
+.who span.pill.feat{color:var(--bg);background:var(--cmd);border-color:transparent}
+.who span.arrow{color:var(--mute);font-size:.8rem}
+.keys{display:grid;grid-template-columns:auto 1fr;gap:.25rem 1rem;font-size:.9rem;margin:0 0 1.2rem;max-width:70ch}
+.keys dt{font:600 .78rem "JetBrains Mono",monospace;padding:.15em .5em;border-radius:5px;align-self:start;white-space:nowrap}
+.keys dt.eng{background:var(--panel2);color:var(--mute);border:1px solid var(--rule)} .keys dt.feat{background:var(--cmd);color:var(--bg)}
+.keys dd{margin:0;color:var(--mute)}
+.preds{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem}
+.pred{font:600 .8rem "JetBrains Mono",monospace;padding:.35em .7em;border-radius:6px;border:1px solid var(--rule);color:var(--mute);background:var(--panel)}
+.pred.ok{color:var(--fold);background:var(--fold-bg);border-color:transparent} .pred.bad{color:var(--stale);background:var(--stale-bg);border-color:transparent}
+.step{display:flex;gap:.5rem;align-items:center}
+.step button{font:600 .9rem "Source Sans 3",sans-serif;padding:.55em 1em;border-radius:8px;border:1px solid var(--rule);background:var(--panel);color:var(--ink);cursor:pointer}
+.step button.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.step button:disabled{opacity:.4;cursor:default}
+.counter{font:.8rem "JetBrains Mono",monospace;color:var(--mute);min-width:4ch;text-align:center}
+.legend{display:flex;gap:1.2rem;flex-wrap:wrap;margin-top:1.4rem;color:var(--mute);font-size:.85rem}
+.legend span::before{content:"";display:inline-block;width:.8em;height:.8em;border-radius:3px;margin-right:.4em;vertical-align:-1px}
+.legend .c::before{background:var(--cmd)} .legend .e::before{background:var(--evt)} .legend .f::before{background:var(--fold)} .legend .s::before{background:var(--stale)}
+.legend .a::before{background:var(--g1)} .legend .b::before{background:var(--g2)}
+.foot{margin-top:2.5rem;color:var(--mute);font-size:.9rem;max-width:70ch}
+@media (prefers-reduced-motion: reduce){.chip,.cursor,.tail,.row-hl,.atomic,.atomic-label{transition:none}}
+</style>
+<main>
+<h1>The Fold Between</h1>
+<p class="lede">How a Dizzy consumer group turns commands into events: <span class="mono">fold → claim → fold → execute → fold</span>. Step through it, then watch what the gap between the second fold and <span class="mono">execute</span> lets in.</p>
+
+<dl class="keys">
+<dt class="eng">engine</dt><dd><code>dizzy.engine</code> — the queue, the log, cursors, commit. Generated wiring binds your elements to it; you never write this.</dd>
+<dt class="feat">your code</dt><dd>The procedure, projection and policy bodies you fill in after <code>dizzy generate</code>. They run only where a pill of this colour appears — a group is a deployment of a subset of them.</dd>
+</dl>
+<div class="chapters" role="tablist" id="chapters"></div>
+<div class="stage"><svg id="svg" viewBox="0 0 1000 540" aria-label="Animated engine stage"></svg></div>
+
+<div class="panel">
+  <div class="narr">
+    <div class="eyebrow" id="eyebrow"></div>
+    <h2 id="title"></h2>
+    <p id="text"></p>
+    <div class="who" id="who"></div>
+    <div class="preds" id="preds"></div>
+  </div>
+  <div class="step">
+    <button id="prev">← Back</button>
+    <span class="counter" id="counter"></span>
+    <button id="next" class="primary">Next →</button>
+    <button id="play">Play</button>
+  </div>
+</div>
+<div class="legend"><span class="c">command</span><span class="e">event</span><span class="f">folded position</span><span class="s">what a stale read misses</span><span class="a">group g1</span><span class="b">group g2</span></div>
+
+<p class="foot">Positions, not payloads: a model is shown as the set of log positions folded into it, which is all the engine can see. This mirrors <code>specs/groups.qnt</code>; the cycle is <code>GroupWorker.step()</code> in <code>dizzy/engine/groups.py</code>. Byte-identical model contents follow whenever the same positions were folded.</p>
+</main>
+
+<script>
+// ---------- geometry ----------
+const SLOT_X = i => 190 + i * 112, SLOT_Y = 58, SLOT_W = 100, SLOT_H = 46, NSLOT = 6;
+const ROWS = { g1: 190, g2: 370 };
+const LANE = { x: 190, w: 270 }, PEND = { x: 480, w: 120 }, PROC = { x: 620, w: 150 }, MODEL = { x: 790, w: 190 };
+const ROW_H = 120;
+
+// ---------- feature used in every chapter ----------
+// p1 (emits e1, reads nothing)   p2 (reads m1, emits e2)   m1 folds e1   y1 reacts e1 → dispatches p2
+const FEATURE = { emits: { p1: ['e1'], p2: ['e2'] }, reads: { p1: [], p2: ['m1'] }, folds: { m1: ['e1'] }, reacts: { y1: ['e1'] }, dispatches: { y1: ['p2'] } };
+
+// ---------- scenario builder ----------
+function scenario(owner, groups) {
+  const S = { owner, groups, log: [], cursor: {}, lane: {}, pending: {}, proc: {}, models: { m1: [] }, modelOwner: owner.m1, n: 0 };
+  groups.forEach(g => { S.cursor[g] = 0; S.lane[g] = []; S.pending[g] = null; S.proc[g] = null; });
+  const steps = [];
+  const snap = (o) => steps.push(Object.assign({ state: JSON.parse(JSON.stringify(S)) }, o));
+  const foldOf = upto => S.log.map((e, i) => i).filter(i => i < upto && FEATURE.folds.m1.includes(S.log[i].kind));
+  const preds = (extra) => Object.assign({ rule6: !FEATURE.reads.p2.some(m => owner[m] !== owner.p2) }, extra || {});
+  const api = {
+    submit(proc, title, text) { const id = `host#${S.n++}`; S.lane[owner[proc]].push({ id, proc, view: null }); snap({ title, text, actor: 'host', preds: preds(), act: 'submit' }); },
+    fold(g, title, text, opts) {
+      const pos = S.cursor[g]; const e = S.log[pos]; let dispatched = null;
+      if (owner.m1 === g && FEATURE.folds.m1.includes(e.kind)) S.models.m1.push(pos);
+      if (owner.y1 === g && FEATURE.reacts.y1.includes(e.kind)) { const id = `y1@${pos}`; dispatched = { id, proc: 'p2', view: [...S.models.m1], cause: pos }; S.lane[owner.p2].push(dispatched); }
+      S.cursor[g] = pos + 1;
+      snap(Object.assign({ title, text, actor: g, preds: preds(), act: 'fold', folded: owner.m1 === g && FEATURE.folds.m1.includes(e.kind), reacted: owner.y1 === g && FEATURE.reacts.y1.includes(e.kind) }, opts || {}));
+    },
+    claim(g, title, text, opts) { S.pending[g] = S.lane[g].shift(); snap(Object.assign({ title, text, actor: g, preds: preds(), act: 'claim' }, opts || {})); },
+    execute(g, title, text, opts) {
+      const c = S.pending[g]; S.pending[g] = null; S.proc[g] = c;
+      const view = FEATURE.reads[c.proc].includes('m1') ? [...S.models.m1] : null;
+      const tailView = FEATURE.reads[c.proc].includes('m1') ? foldOf(S.log.length) : null;
+      const at = S.log.length;
+      FEATURE.emits[c.proc].forEach(k => S.log.push({ kind: k, by: c.proc, cause: c.id, at, view }));
+      let fresh = null, causeFolded = null, missed = [];
+      if (view) {
+        missed = tailView.filter(p => !view.includes(p)); fresh = missed.length === 0;
+        if (c.cause !== undefined) { const thr = foldOf(c.cause + 1); causeFolded = thr.every(p => view.includes(p)); }
+      }
+      const ownFold = owner.m1 === g && FEATURE.emits[c.proc].some(k => FEATURE.folds.m1.includes(k)); const ownReact = owner.y1 === g && FEATURE.emits[c.proc].some(k => FEATURE.reacts.y1.includes(k));
+      snap(Object.assign({ title, text, actor: g, preds: preds({ freshReads: fresh, causeFolded }), missed, readView: view, readGroup: g, act: 'execute', proc: c.proc, reads: FEATURE.reads[c.proc].length > 0, ownFold, ownReact }, opts || {}));
+      S.proc[g] = null;
+    },
+    idle(title, text, opts) { snap(Object.assign({ title, text, actor: null, preds: preds(), act: 'idle' }, opts || {})); },
+    steps,
+  };
+  return api;
+}
+
+// ---------- chapters ----------
+const CHAPTERS = [];
+
+// 1. st — one group, one atomic step
+{
+  const o = { p1: 'g1', p2: 'g1', m1: 'g1', y1: 'g1' };
+  const s = scenario(o, ['g1']);
+  s.idle('One group is the single-threaded engine', 'Every element — both procedures, the projection for m1, the policy y1 — lives in g1. One lane, one cursor, one thread. Nothing can interleave, so the whole cycle collapses into one atomic step.', { atomic: false });
+  s.submit('p1', 'The host submits a command', 'A command for p1 lands in g1’s lane. It is not in the log — commands live in the durable queue, so there is no position to hold.');
+  s.claim('g1', 'Claim', 'g1 takes the earliest command off its lane. Its cursor already sits at the tail (nothing to fold), so the leading fold is a no-op.', { atomic: true });
+  s.execute('g1', 'Execute → append', 'Now your code runs: the procedure p1 emits e1, and the engine appends it at position 0. p1 declares no queries, so its view is empty by declaration. Note the strip: the procedure sits between engine code on both sides.', { atomic: true });
+  s.fold('g1', 'Fold, commit, react, dispatch', 'g1 folds e1 into m1 (position 0 is now in the model), commits, then runs y1 on the same entry. y1 reacts to e1 and dispatches a p2 command with the deterministic id y1@0. The cursor advances to 1.', { atomic: true });
+  s.claim('g1', 'Claim the dispatched command', 'The cascade continues in the same lane. Because g1 folded before dispatching, the model p2 will read already contains the event that caused it.', { atomic: true });
+  s.execute('g1', 'Execute p2 — a fresh read', 'p2 reads m1 = {0}: exactly the fold of everything before its block. This is st’s guarantee, freshReads, and in one group it always holds.', { atomic: true });
+  s.fold('g1', 'Fold again', 'e2 is folded (m1 ignores it), no policy reacts, the cursor reaches the tail. In st, run_command does not return until this is done — engine code brackets your code on both sides.', { atomic: true });
+  CHAPTERS.push({ name: '1 · One group', steps: s.steps, groups: ['g1'], owner: o });
+}
+
+// 2. two groups — the cycle
+{
+  const o = { p1: 'g1', p2: 'g2', m1: 'g2', y1: 'g2' };
+  const s = scenario(o, ['g1', 'g2']);
+  s.idle('Split it: two groups, one log', 'p1 moves to g1. p2, its model m1 and the policy y1 stay together in g2 — rule 6 says a reader shares a group with what it reads, so this split is legal. Each group has its own cursor and its own lane; the log and the model store are shared.');
+  s.submit('p1', 'Host submits to g1', 'The command is routed to the lane of the group that owns p1.');
+  s.claim('g1', 'g1: fold to tail, then claim', 'g1 owns no model and no policy, so it holds no cursor and does not fold. It just claims.');
+  s.execute('g1', 'g1: execute → append e1 at 0', 'e1 enters the shared log. g2 has not seen it yet: its cursor is still 0 — that is lag, and it is legitimate.');
+  s.fold('g2', 'g2: fold → commit → react', 'Whenever g2 wakes (the transport is only a doorbell), it folds entry 0 into m1, commits, and y1 dispatches y1@0 for p2 — into g2’s own lane, because g2 owns p2.');
+  s.claim('g2', 'g2: fold to tail, claim', 'Cursor 1 equals the tail, so g2 claims y1@0. The claim may block for as long as it likes …');
+  s.idle('g2: fold to tail again', '… which is why a second fold follows the claim: anything appended while the claim waited is folded before the command runs. Here nothing arrived, so the cursor stays at 1.', { actor: 'g2' });
+  s.execute('g2', 'g2: execute p2', 'p2 reads m1 = {0}. The event that caused this command is in the model it reads — that is the guarantee the split preserves: the read model commits before the dispatched command runs.');
+  s.fold('g2', 'g2: trailing fold', 'In the worker, g2 already folded its own e2 inline as part of execute (the strip above shows where); the trailing fold_to_tail is for anything foreign that landed meanwhile. Either way the cursor reaches the tail. Both groups idle; models converge to the positions st would have produced.');
+  CHAPTERS.push({ name: '2 · The cycle', steps: s.steps, groups: ['g1', 'g2'], owner: o });
+}
+
+// 3. the window
+{
+  const o = { p1: 'g1', p2: 'g2', m1: 'g2', y1: 'g2' };
+  const s = scenario(o, ['g1', 'g2']);
+  s.idle('The same legal split, one more host command', 'Rule 6 still holds. Now watch the instant between g2’s second fold returning and p2’s first read. GroupWorker.step() is fold_to_tail(); claim(); fold_to_tail(); execute() — with no lock across that gap.');
+  s.submit('p1', 'Host submits #0 to g1', '');
+  s.claim('g1', 'g1 claims', '');
+  s.execute('g1', 'g1 appends e1 at 0', '');
+  s.fold('g2', 'g2 folds 0, dispatches y1@0', 'm1 = {0}. The p2 command carries cause 0.');
+  s.claim('g2', 'g2 claims y1@0 at the tail', 'Cursor 1 == tail 1. The middle fold returns. g2 is about to run p2 …');
+  s.submit('p1', '… and the host submits #1 to g1', 'A second command for p1 arrives in g1’s lane. g2 has already claimed and folded.');
+  s.claim('g1', 'g1 claims #1', '');
+  s.execute('g1', 'g1 appends e1 at 1 — inside the window', 'Position 1 is an e1, which m1 folds. But m1 is g2’s model, and g2’s cursor is at 1, so the model store still says m1 = {0}.');
+  s.execute('g2', 'g2 executes p2 against m1 = {0}', 'p2 reads {0}. A fold to the tail would have given {0, 1}. freshReads fails — in a rule-6-legal deployment. What still holds is causeFolded: the fold through the command’s cause (position 0) is inside the view. That is precisely, and only, what groups.py promises.');
+  s.fold('g2', 'g2 folds 1 (and dispatches y1@1)', 'The model catches up: m1 = {0, 1}. Models converge; the decision p2 made at the previous step does not. This is the claim→execute window, witnessClaimWindow in groups.qnt.');
+  CHAPTERS.push({ name: '3 · The window', steps: s.steps, groups: ['g1', 'g2'], owner: o });
+}
+
+// 4. without rule 6
+{
+  const o = { p1: 'g1', p2: 'g1', y1: 'g1', m1: 'g2' };
+  const s = scenario(o, ['g1', 'g2']);
+  s.idle('Break rule 6: the reader and the model part ways', 'p2 and the policy y1 now live in g1; the model m1 they depend on is folded by g2. p2 reads a model its own group never folds. The topology validator refuses this layout — here it is allowed so you can watch why.');
+  s.submit('p1', 'Host submits to g1', '');
+  s.claim('g1', 'g1 claims', 'g1 owns y1, so it does hold a cursor — at 0, which is the tail.');
+  s.execute('g1', 'g1 appends e1 at 0', '');
+  s.fold('g1', 'g1 folds 0: y1 reacts, dispatches y1@0', 'g1’s cursor passes position 0. g1 folds nothing into m1 — m1 is g2’s — but y1 lives here, so it fires and dispatches a p2 command with cause 0 into g1’s own lane. g2 has not woken up: m1 is still empty.');
+  s.claim('g1', 'g1 claims y1@0 at its own tail', 'Cursor 1 == tail 1, so the claim is not held back by anything. The fold g1 waited for was its own — and its own fold never touches m1.');
+  s.execute('g1', 'g1 executes p2 against m1 = { }', 'p2 reads an empty model. The event that caused this very command — e1 at position 0 — is not in it. causeFolded fails: this is a decision reached against a model that does not yet contain its own cause, the divergence topology.md calls “reads an empty model, dispatches nothing, and kills a cascade permanently.” No later fold repairs the e2 that was emitted from the wrong view.');
+  s.fold('g2', 'g2 finally folds 0', 'm1 = {0} now. The models converge; the log already holds the wrong decision. Rule 6 exists to make this state unrepresentable: co-locate the reader with what it reads, and the fold before the claim is the fold that matters.');
+  CHAPTERS.push({ name: '4 · Without rule 6', steps: s.steps, groups: ['g1', 'g2'], owner: o });
+}
+
+// ---------- rendering ----------
+const svg = document.getElementById('svg');
+const NS = 'http://www.w3.org/2000/svg';
+const el = (tag, attrs, parent) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); (parent || svg).appendChild(n); return n; };
+let chapterIdx = 0, stepIdx = 0, timer = null;
+const chips = new Map(); // id -> {node, kind}
+
+function staticLayer(ch) {
+  svg.innerHTML = ''; chips.clear();
+  const st = el('g', { id: 'static' });
+  // log
+  el('text', { x: 20, y: SLOT_Y + 28, class: 'box-label' }, st).textContent = 'shared log';
+  for (let i = 0; i < NSLOT; i++) {
+    el('rect', { x: SLOT_X(i), y: SLOT_Y, width: SLOT_W, height: SLOT_H, rx: 6, class: 'slot' }, st);
+    el('text', { x: SLOT_X(i) + 4, y: SLOT_Y - 6, class: 'slot-idx' }, st).textContent = i;
+  }
+  // rows
+  ch.groups.forEach(g => {
+    const y = ROWS[g];
+    el('rect', { x: 8, y: y - 30, width: 984, height: ROW_H + 16, rx: 10, class: `row-hl ${g}`, id: `hl-${g}` }, st);
+    el('text', { x: 20, y: y + 10, class: `grp-label ${g}` }, st).textContent = g;
+    const owns = Object.entries(ch.owner).filter(([k, v]) => v === g).map(([k]) => k).join(' ');
+    el('text', { x: 20, y: y + 30, class: 'grp-sub' }, st).textContent = 'owns ' + owns;
+    const hasCursor = ch.owner.m1 === g || ch.owner.y1 === g;
+    el('text', { x: 20, y: y + 48, class: 'grp-sub' }, st).textContent = hasCursor ? 'cursor + lane' : 'lane only';
+    [[LANE, 'lane'], [PEND, 'pending'], [PROC, 'execute'], [MODEL, 'models it owns']].forEach(([b, label]) => {
+      el('rect', { x: b.x, y: y - 10, width: b.w, height: ROW_H - 20, rx: 8, class: 'box' }, st);
+      el('text', { x: b.x + 10, y: y + 8, class: 'box-label' }, st).textContent = label;
+    });
+  });
+  // arrows between boxes
+  ch.groups.forEach(g => { const y = ROWS[g] + 50; [[LANE, PEND], [PEND, PROC]].forEach(([a, b]) => { el('path', { d: `M${a.x + a.w + 2},${y} L${b.x - 2},${y}`, stroke: 'var(--rule)', 'stroke-width': 2, fill: 'none' }, st); }); });
+  // atomic bracket (chapter 1)
+  el('rect', { x: LANE.x - 8, y: ROWS.g1 - 22, width: PROC.x + PROC.w - LANE.x + 16, height: ROW_H + 4, rx: 12, class: 'atomic', id: 'atomic' }, st);
+  el('text', { x: LANE.x, y: ROWS.g1 + ROW_H - 4, class: 'atomic-label', id: 'atomic-label' }, st).textContent = 'one atomic step: claim → execute → append → fold → policies → dispatch';
+  el('g', { id: 'dyn' });
+  el('g', { id: 'cursors' });
+  el('g', { id: 'tailg' });
+}
+
+function chip(id, kind, label, sub, x, y, isNew) {
+  let c = chips.get(id);
+  if (!c) {
+    const node = el('g', { class: `chip ${kind}${isNew ? ' enter' : ''}` }, document.getElementById('dyn'));
+    el('rect', { x: 0, y: 0, width: 96, height: 40 }, node);
+    el('text', { x: 8, y: 17 }, node).textContent = label;
+    el('text', { x: 8, y: 32, style: 'font-size:10px;opacity:.8' }, node).textContent = sub || '';
+    node.style.transform = `translate(${x}px,${y}px)`;
+    c = { node }; chips.set(id, c);
+    requestAnimationFrame(() => requestAnimationFrame(() => node.classList.remove('enter')));
+  } else {
+    c.node.style.transform = `translate(${x}px,${y}px)`;
+    c.node.querySelectorAll('text')[1].textContent = sub || '';
+  }
+  c.seen = true;
+}
+
+function render(ch, step, prev) {
+  const S = step.state;
+  chips.forEach(c => c.seen = false);
+  // log events
+  S.log.forEach((e, i) => chip(`ev-${i}`, 'evt', `${e.kind} @${i}`, `by ${e.by} · ${e.cause}`, SLOT_X(i) + 2, SLOT_Y + 3, true));
+  // lanes / pending / proc
+  ch.groups.forEach(g => {
+    const y = ROWS[g] + 24;
+    S.lane[g].forEach((c, i) => chip(`cmd-${c.id}`, 'cmd', `${c.proc} ← ${c.id}`, c.cause !== undefined ? `cause @${c.cause}` : 'from host', LANE.x + 10 + i * 104, y, true));
+    if (S.pending[g]) chip(`cmd-${S.pending[g].id}`, 'cmd', `${S.pending[g].proc} ← ${S.pending[g].id}`, 'claimed', PEND.x + 12, y, true);
+    if (S.proc[g]) chip(`cmd-${S.proc[g].id}`, 'cmd', `${S.proc[g].proc} ← ${S.proc[g].id}`, 'running', PROC.x + 27, y, true);
+  });
+  // drop unseen
+  chips.forEach((c, id) => { if (!c.seen) { c.node.classList.add('enter'); setTimeout(() => { c.node.remove(); }, 400); chips.delete(id); } });
+  // models
+  const dyn = document.getElementById('dyn');
+  dyn.querySelectorAll('.modelview').forEach(n => n.remove());
+  ch.groups.forEach(g => {
+    if (ch.owner.m1 !== g) { const t = el('text', { x: MODEL.x + 10, y: ROWS[g] + 46, class: 'grp-sub modelview' }, dyn); t.textContent = '—'; return; }
+    const mv = el('g', { class: 'modelview' }, dyn);
+    el('text', { x: MODEL.x + 10, y: ROWS[g] + 34, class: 'grp-sub' }, mv).textContent = 'm1 = folded positions';
+    const t = el('text', { x: MODEL.x + 10, y: ROWS[g] + 60, class: 'model-pos' }, mv);
+    t.textContent = '{ ' + S.models.m1.join(', ') + ' }';
+    if (step.missed && step.missed.length) { const m = el('text', { x: MODEL.x + 10, y: ROWS[g] + 82, class: 'readview' }, mv); m.textContent = 'tail has also: ' + step.missed.join(', '); }
+  });
+  // read view under executing proc
+  if (step.readView) { const t = el('text', { x: PROC.x + 10, y: ROWS[step.readGroup] + 82, class: `model-pos modelview${(step.preds.freshReads === false) ? ' stale' : ''}` }, dyn); t.textContent = 'read m1 = {' + step.readView.join(', ') + '}'; }
+  // cursors
+  const cg = document.getElementById('cursors');
+  ch.groups.forEach(g => {
+    const hasCursor = ch.owner.m1 === g || ch.owner.y1 === g; if (!hasCursor) return;
+    let m = cg.querySelector(`#cur-${g}`);
+    const off = g === 'g1' ? -14 : 14;
+    if (!m) { m = el('g', { id: `cur-${g}`, class: `cursor ${g}` }, cg); el('path', { d: 'M0,0 L-7,12 L7,12 Z', class: `cursor ${g}` }, m); el('text', { x: -6, y: 24, class: `cursor-label ${g}` }, m).textContent = g; }
+    m.style.transform = `translate(${SLOT_X(S.cursor[g]) + off}px,${SLOT_Y + SLOT_H + 4}px)`;
+  });
+  // tail marker
+  const tg = document.getElementById('tailg');
+  let tl = tg.querySelector('#tail');
+  if (!tl) { tl = el('g', { id: 'tail' }, tg); el('line', { x1: 0, y1: -8, x2: 0, y2: SLOT_H + 8, class: 'tail' }, tl); el('text', { x: 4, y: -12, class: 'tail-label' }, tl).textContent = 'tail'; }
+  tl.style.transform = `translate(${SLOT_X(S.log.length) - 6}px,${SLOT_Y}px)`;
+  // highlight actor
+  ch.groups.forEach(g => document.getElementById(`hl-${g}`).classList.toggle('on', step.actor === g));
+  const at = document.getElementById('atomic'), al = document.getElementById('atomic-label');
+  at.classList.toggle('on', !!step.atomic); al.classList.toggle('on', !!step.atomic);
+  // narration
+  document.getElementById('eyebrow').textContent = `${ch.name} · step ${stepIdx + 1} of ${ch.steps.length}` + (step.actor ? ` · ${step.actor}` : '');
+  document.getElementById('title').textContent = step.title;
+  document.getElementById('text').textContent = step.text;
+  // who runs: engine vs your code, in execution order
+  const who = document.getElementById('who'); who.innerHTML = '';
+  const seq = whoRuns(step);
+  if (seq.length) { const k = document.createElement('span'); k.className = 'k'; k.textContent = 'who runs'; who.appendChild(k); }
+  seq.forEach((w, i) => { if (i) { const a = document.createElement('span'); a.className = 'arrow'; a.textContent = '→'; who.appendChild(a); } const p = document.createElement('span'); p.className = 'pill ' + w[0]; p.textContent = w[1]; who.appendChild(p); });
+  const P = step.preds; const preds = document.getElementById('preds'); preds.innerHTML = '';
+  const badge = (k, v, labels) => { const s = document.createElement('span'); s.className = 'pred ' + (v === true ? 'ok' : v === false ? 'bad' : ''); s.textContent = `${k} ${v === true ? '✓' : v === false ? '✗' : '–'}`; s.title = labels; preds.appendChild(s); };
+  badge('rule 6', P.rule6, 'a reader shares a group with every model it reads');
+  badge('freshReads', P.freshReads, 'the view equals the fold of everything before the block');
+  badge('causeFolded', P.causeFolded, 'the fold through the command’s cause is inside the view');
+  document.getElementById('counter').textContent = `${stepIdx + 1}/${ch.steps.length}`;
+  document.getElementById('prev').disabled = stepIdx === 0;
+  document.getElementById('next').disabled = stepIdx === ch.steps.length - 1;
+}
+
+function whoRuns(step) {
+  const E = l => ['eng', l], F = l => ['feat', l];
+  switch (step.act) {
+    case 'submit': return [E('host API → queue.put')];
+    case 'claim': return [E('fold_to_tail'), E('queue.claim: queued → running')];
+    case 'fold': {
+      const s = [E('read cursor, fetch entry')];
+      if (step.folded) s.push(F('projection → m1')); else s.push(E('no projection here'));
+      s.push(E('commit'));
+      if (step.reacted) { s.push(F('policy y1')); s.push(E('dispatch → queue.put')); }
+      s.push(E('save cursor'));
+      return s;
+    }
+    case 'execute': {
+      const s = [E('fold_to_tail')];
+      if (step.reads) s.push(F(`query m1`));
+      s.push(F(`procedure ${step.proc}`));
+      s.push(E('ingest: append'));
+      if (step.ownFold) s.push(F('projection → m1 (inline)'));
+      if (step.ownFold || step.ownReact) s.push(E('commit'));
+      if (step.ownReact) { s.push(F('policy y1 (inline)')); s.push(E('dispatch → queue.put')); }
+      s.push(E('save cursor · ack row'));
+      return s;
+    }
+    default: return step.actor ? [E('fold_to_tail: nothing new')] : [];
+  }
+}
+
+function go(ci, si) {
+  const changed = ci !== chapterIdx; chapterIdx = ci; stepIdx = si;
+  const ch = CHAPTERS[ci];
+  if (changed || !svg.querySelector('#static')) staticLayer(ch);
+  render(ch, ch.steps[si]);
+  document.querySelectorAll('#chapters button').forEach((b, i) => b.setAttribute('aria-current', i === ci ? 'true' : 'false'));
+  try { localStorage.setItem('foldbetween', JSON.stringify([ci, si])); } catch (e) {}
+}
+function stopPlay() { if (timer) { clearInterval(timer); timer = null; document.getElementById('play').textContent = 'Play'; } }
+document.getElementById('prev').onclick = () => { stopPlay(); go(chapterIdx, Math.max(0, stepIdx - 1)); };
+document.getElementById('next').onclick = () => { go(chapterIdx, Math.min(CHAPTERS[chapterIdx].steps.length - 1, stepIdx + 1)); };
+document.getElementById('play').onclick = () => {
+  if (timer) return stopPlay();
+  document.getElementById('play').textContent = 'Pause';
+  if (stepIdx === CHAPTERS[chapterIdx].steps.length - 1) go(chapterIdx, 0);
+  timer = setInterval(() => { if (stepIdx >= CHAPTERS[chapterIdx].steps.length - 1) return stopPlay(); go(chapterIdx, stepIdx + 1); }, 2600);
+};
+document.addEventListener('keydown', e => { if (e.key === 'ArrowRight') document.getElementById('next').click(); if (e.key === 'ArrowLeft') document.getElementById('prev').click(); });
+const tabs = document.getElementById('chapters');
+CHAPTERS.forEach((c, i) => { const b = document.createElement('button'); b.textContent = c.name; b.setAttribute('role', 'tab'); b.onclick = () => { stopPlay(); go(i, 0); }; tabs.appendChild(b); });
+let start = [0, 0]; try { const s = JSON.parse(localStorage.getItem('foldbetween')); if (Array.isArray(s) && CHAPTERS[s[0]] && CHAPTERS[s[0]].steps[s[1]]) start = s; } catch (e) {}
+go(start[0], start[1]);
+</script>

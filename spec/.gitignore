@@ -1,0 +1,6 @@
+_apalache-out/
+*.itf.json
+.venv/
+__pycache__/
+scale/p*/
+report/logs/

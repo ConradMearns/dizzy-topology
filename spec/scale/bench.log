@@ -1,0 +1,54 @@
+
+=== p2: 2 procs / 1 policies / 2 models / 2 kinds / 2 groups (MAX_LOG=6)
+  st.qnt: typecheck 9.5s · sim 300×20 [rust]: ok in 8.6s, 139 traces/s, 127 MB
+    witnessCascade: reached in 5.7s
+  groups.qnt: typecheck 12.0s · sim 300×20 [rust]: ok in 7.9s, 267 traces/s, 131 MB
+    witnessClaimWindow: reached in 8.9s
+
+=== p5: 5 procs / 2 policies / 3 models / 3 kinds / 2 groups (MAX_LOG=8)
+  st.qnt: typecheck 6.9s · sim 300×20 [rust]: ok in 11.8s, 64 traces/s, 128 MB
+    witnessCascade: reached in 9.0s
+  groups.qnt: typecheck 8.0s · sim 300×20 [rust]: ok in 11.0s, 101 traces/s, 131 MB
+    witnessClaimWindow: reached in 11.4s
+
+=== p10: 10 procs / 4 policies / 4 models / 4 kinds / 3 groups (MAX_LOG=8)
+  st.qnt: typecheck 8.7s · sim 300×20 [rust]: ok in 18.1s, 32 traces/s, 137 MB
+    witnessCascade: reached in 7.0s
+  groups.qnt: typecheck 6.9s · sim 300×20 [rust]: ok in 13.9s, 193 traces/s, 131 MB
+    witnessClaimWindow: NOT reached in 16.3s
+
+=== p25: 25 procs / 8 policies / 6 models / 4 kinds / 3 groups (MAX_LOG=10)
+  st.qnt: typecheck 9.2s · sim 300×20 [rust]: ok in 37.8s, 11 traces/s, 156 MB
+    witnessCascade: reached in 6.6s
+  groups.qnt: typecheck 10.1s · sim 300×20 [rust]: ok in 14.3s, 96 traces/s, 132 MB
+    witnessClaimWindow: NOT reached in 12.8s
+
+=== p50: 50 procs / 16 policies / 8 models / 6 kinds / 4 groups (MAX_LOG=10)
+  st.qnt: typecheck 9.1s · sim 300×20 [rust]: ok in 62.4s, 6 traces/s, 163 MB
+    witnessCascade: reached in 7.3s
+  groups.qnt: typecheck 8.1s · sim 300×20 [rust]: ok in 15.5s, 61 traces/s, 145 MB
+    witnessClaimWindow: NOT reached in 26.8s
+
+=== p100: 100 procs / 32 policies / 12 models / 8 kinds / 4 groups (MAX_LOG=12)
+
+=== p100: 100 procs / 32 policies / 12 models / 8 kinds / 4 groups (MAX_LOG=12)
+
+=== p100: 100 procs / 32 policies / 12 models / 8 kinds / 4 groups (MAX_LOG=12)
+  st.qnt: typecheck 2.5s · sim 300×20 [typescript]: ok in 113.3s, 3 traces/s, 299 MB
+    witnessCascade: reached in 3.2s
+  groups.qnt: typecheck 2.9s · sim 300×20 [rust]: ok in 10.5s, 45 traces/s, 160 MB
+    witnessClaimWindow: NOT reached in 17.1s
+
+=== p200: 200 procs / 64 policies / 16 models / 10 kinds / 6 groups (MAX_LOG=12)
+  st.qnt: typecheck 3.9s · sim 300×20 [typescript]: error in 299.4s, None traces/s, 395 MB
+    witnessCascade: NOT reached in 5.8s
+  groups.qnt: typecheck 3.5s · sim 300×20 [rust]: ok in 20.7s, 18 traces/s, 171 MB
+    witnessClaimWindow: NOT reached in 58.7s
+
+=== p400: 400 procs / 128 policies / 24 models / 12 kinds / 8 groups (MAX_LOG=12)
+  st.qnt: typecheck 5.9s · sim 300×20 [typescript]: error in 408.0s, None traces/s, 675 MB
+    witnessCascade: NOT reached in 17.8s
+  groups.qnt: typecheck 4.3s · sim 300×20 [typescript]: error in 178.7s, None traces/s, 732 MB
+    witnessClaimWindow: NOT reached in 413.1s
+
+wrote /home/conrad/dizzy-quint/scale/results.json
