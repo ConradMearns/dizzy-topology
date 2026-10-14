@@ -39,17 +39,566 @@ details.src{margin-top:1.5rem} details.src pre{max-height:32rem}
 <main>
 <h1>Dizzy Engine Ledger</h1>
 <p class="lede">Every check run against the Quint engine specifications: what was asked, how it was checked, and what came back.
-Generated 2026-08-27 22:42:56 · quint 0.32.0 · dizzy @ <code>7f66a31</code> · 8000 samples × 20 steps per simulation.</p>
-<div class="strip"><div><b>46/46</b><span>checks as expected</span></div>
-<div><b>22</b><span>invariants holding</span></div>
-<div><b>22</b><span>witnesses reachable</span></div>
-<div><b>2/2</b><span>bounded proofs</span></div></div>
+Generated 2026-10-14 10:35:43 · quint 0.32.0 · dizzy @ <code>1527342d</code> · 8000 samples × 20 steps per simulation.</p>
+<div class="strip"><div><b>73/73</b><span>checks as expected</span></div>
+<div><b>35</b><span>invariants holding</span></div>
+<div><b>35</b><span>witnesses reachable</span></div>
+<div><b>3/3</b><span>bounded proofs</span></div></div>
 <dl class="method">
 <dt>invariant · simulation</dt><dd>Random traces from the nondeterministic step relation; a violation prints a concrete counterexample.</dd>
 <dt>witness · reachability</dt><dd>Runs <code>--invariant=not(X)</code>. A violation is the desired outcome: it is a trace that reaches X, proving the invariants are not vacuous.</dd>
 <dt>Apalache · bounded</dt><dd>Symbolic model checking of every behaviour up to the stated depth, across every graph (and placement) the <code>init</code> can draw.</dd>
 </dl>
 <section>
+<h2>Spec 4 — the topology engine (as shipped) <span class="count">27/27</span></h2>
+<p class="intro">The Simple Engine with lanes: an inline lane on the host thread and a process-pool lane, over the Simple Engine store. Every transaction boundary is its own step — claim, append+ack, fold+enqueue, cursor — and a crash may fall between any two, losing the read model and in-flight pool work but never the store. Graph and rule-3 placement are drawn at <code>init</code>. Headline: exactly-once effects hold <em>unconditionally</em> (st needed an application guard), and reads stay fresh with pools although the log leaves claim order. The Python engine is held to the same invariants by <code>engine/tests/test_spec_conformance.py</code>.</p>
+<div class="tbl"><table><thead><tr><th>check</th><th>method</th><th>what it says</th><th class="num">time</th><th>result</th></tr></thead>
+<tbody><tr>
+<td><code>modelsAreFold</code></td>
+<td class="kind">invariant · simulation</td>
+<td>E1 the read model is a fold of the log, across crashes (refold on open)</td>
+<td class="num">5.2s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>cursorSound</code></td>
+<td class="kind">invariant · simulation</td>
+<td>E2 the cursor never claims ground the read model has not covered</td>
+<td class="num">5.2s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>blocksWellFormed</code></td>
+<td class="kind">invariant · simulation</td>
+<td>E3 every run leaves one complete, contiguous, ordered block</td>
+<td class="num">6.0s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>effectsOnce</code></td>
+<td class="kind">invariant · simulation</td>
+<td>E4 EXACTLY-ONCE effects, unconditionally: append and ack are one transaction</td>
+<td class="num">5.5s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>ackAtomic</code></td>
+<td class="kind">invariant · simulation</td>
+<td>E5 a block&#x27;s command is done; a done command has its block; nothing else appended</td>
+<td class="num">7.1s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>causal</code></td>
+<td class="kind">invariant · simulation</td>
+<td>E6 policy-dispatched effects follow a trigger the policy reacts to</td>
+<td class="num">5.8s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>freshReads</code></td>
+<td class="kind">invariant · simulation</td>
+<td>E7 with rule 3, every procedure read the fold of everything before its block — pools included</td>
+<td class="num">6.2s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>freshDispatch</code></td>
+<td class="kind">invariant · simulation</td>
+<td>E8 every dispatching policy read exactly the fold through its trigger, across crashes</td>
+<td class="num">7.5s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>freshQueue</code></td>
+<td class="kind">invariant · simulation</td>
+<td>E8&#x27; the same, for commands still queued</td>
+<td class="num">7.3s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>dispatchComplete</code></td>
+<td class="kind">invariant · simulation</td>
+<td>E9 every settled event&#x27;s reacting policies have dispatched</td>
+<td class="num">7.2s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>idsDistinct</code></td>
+<td class="kind">invariant · simulation</td>
+<td>E10 one row per command id (INSERT OR IGNORE)</td>
+<td class="num">6.2s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>memorySound</code></td>
+<td class="kind">invariant · simulation</td>
+<td>E11 the host&#x27;s in-flight units are rows really running; pools within their width</td>
+<td class="num">5.6s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>noLostWork</code></td>
+<td class="kind">invariant · simulation</td>
+<td>E12 an idle engine has finished every command</td>
+<td class="num">6.7s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>witnessCascade</code></td>
+<td class="kind">witness · reachability</td>
+<td>a policy-dispatched command ran</td>
+<td class="num">1.7s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessReader</code></td>
+<td class="kind">witness · reachability</td>
+<td>a procedure observed a non-empty model</td>
+<td class="num">1.7s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessPooledRun</code></td>
+<td class="kind">witness · reachability</td>
+<td>a pooled procedure&#x27;s block was committed</td>
+<td class="num">2.0s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessConcurrent</code></td>
+<td class="kind">witness · reachability</td>
+<td>the pool lane was full: jobs genuinely in flight together</td>
+<td class="num">1.6s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessOutOfOrder</code></td>
+<td class="kind">witness · reachability</td>
+<td>under rule 3 the log left claim order — and every read was still fresh</td>
+<td class="num">1.7s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessPriority</code></td>
+<td class="kind">witness · reachability</td>
+<td>an interactive command was claimed ahead of an older batch one</td>
+<td class="num">1.8s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessRecovered</code></td>
+<td class="kind">witness · reachability</td>
+<td>an interrupted attempt re-ran under its own id after a crash</td>
+<td class="num">1.6s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessCrashAfterAppend</code></td>
+<td class="kind">witness · reachability</td>
+<td>a crash after an append</td>
+<td class="num">1.7s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessResettle</code></td>
+<td class="kind">witness · reachability</td>
+<td>a crash between enqueue and cursor; the re-settle&#x27;s ids were ignored</td>
+<td class="num">1.8s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessFailed</code></td>
+<td class="kind">witness · reachability</td>
+<td>an element raised; its attempt failed and appended nothing</td>
+<td class="num">1.7s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessRetried</code></td>
+<td class="kind">witness · reachability</td>
+<td>a failure was retried by the host and the run finished clean</td>
+<td class="num">1.7s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessBound</code></td>
+<td class="kind">witness · reachability</td>
+<td>the log bound was reached (cascades are bounded, not absent)</td>
+<td class="num">2.0s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessStalePool</code></td>
+<td class="kind">witness · reachability</td>
+<td>rule 3 is NECESSARY: a pooled reader decided on a stale model</td>
+<td class="num">1.8s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>allInvariants</code></td>
+<td class="kind">Apalache · bounded</td>
+<td>Apalache: all invariants, every graph × placement, 5 steps</td>
+<td class="num">60.8s</td>
+<td><span class="pill pass">holds</span></td></tr></tbody></table></div>
+
+<details class="src"><summary>source · <code>specs/engine.qnt</code></summary><pre>// specs/engine.qnt — Spec 4: the topology engine (engine/src/dizzy_topology_engine),
+// over an ARBITRARY feature graph and an arbitrary rule-3 placement.
+//
+// The topology engine is the Simple Engine (ext/dizzy/docs/design/simple-engine.md)
+// with lanes: an inline lane served on the host thread, and a pool lane whose
+// procedures run in worker processes while the host thread keeps claiming. Unlike
+// st.qnt (the pre-Simple-Engine `dizzy.engine.st`), the store&#x27;s transaction
+// boundaries are what make it correct, so they are modelled one step each:
+//
+//   claim        attempt `running`, durably, before anything runs  (_claim_next)
+//   append+ack   the block AND the command&#x27;s `done`, ONE transaction (_unit, _commit)
+//   settleFold   fold one event, then its policies enqueue by derived id with
+//                INSERT OR IGNORE                                  (Engine._settle)
+//   advance      the cursor moves past that event — its own transaction
+//
+// and a CRASH may fall between any two of them. The store (log, command table,
+// cursor) survives; process memory (read model, in-flight pool work, the unit the
+// host thread is running) does not. Reopening refolds the read model up to the
+// cursor (spec §4), settles what lies past it, and re-runs every attempt still
+// `running` under its own id.
+//
+// What the host thread serialises, and why claims wait for `settled`: after an
+// append the engine settles the new events before it does anything else, and a
+// reopen settles before its first claim. So a claim always sees cursor == log
+// length — zero lag at the moment a procedure reads.
+//
+// Placement: `pooled` ⊆ PROCS is drawn at init. Topology rule 3 says only a
+// procedure that declares no `queries:` may be pooled; `rule3` is drawn too, so the
+// suite can show the rule is NECESSARY (witnessStalePool) as well as sufficient
+// (freshReads). A pool child never sees the host&#x27;s read model; when rule 3 is broken
+// it is modelled as reading the snapshot taken when its job was dispatched — the most
+// charitable thing an implementation could do — and that is still stale.
+//
+// The headline results, against st.qnt&#x27;s:
+//   • effectsOnce holds UNCONDITIONALLY. st needed the application to guard, and
+//     only guardable procedures could (witnessDoubleAppend there). Here the append
+//     and the ack are one transaction, so a replay can never append a second block.
+//   • freshReads holds with pools (given rule 3), although the log&#x27;s ORDER is no
+//     longer the claim order (witnessOutOfOrder).
+//   • freshDispatch and dispatchComplete survive crashes, including a crash
+//     between a policy&#x27;s enqueue and the cursor (witnessResettle): the re-settle
+//     re-derives the same ids and the store ignores them.
+//
+//   quint run    engine.qnt --invariant=allInvariants --max-samples=3000 --max-steps=25
+//   quint run    engine.qnt --invariant=&#x27;not(witnessOutOfOrder)&#x27;   # expect violation = reachable
+//   quint verify engine.qnt --invariant=allInvariants --max-steps=4
+
+module engine {
+  import graph.* from &quot;./graph&quot;
+
+  pure val MAX_SUBMISSIONS = 2   // host-originated commands
+  pure val MAX_LOG = 6           // a policy cycle can be genuinely infinite; bound it
+  pure val MAX_CRASHES = 2
+  pure val MAX_FAILS = 1         // element raises (or a pool worker dies)
+  pure val POOL_WORKERS = 2      // one pool lane, this wide
+
+  type Row = { cmd: Command, status: str }        // status: queued | running | done | failed
+  type Job = { idx: int, view: View }             // a pool job: table row + what it could read
+
+  // --- State: the store (durable) -----------------------------------------
+  var log: List[Event]           // events table
+  var table: List[Row]           // commands table, in enqueue (seq) order
+  var cursor: int                // cursors table: events settled through here
+  // --- State: the host process (volatile) --------------------------------
+  var models: View               // the read model
+  var folded: int                // ghost: models == fold of log[0, folded)
+  var current: List[int]         // the inline unit the host thread is running (0 or 1 row)
+  var inflight: Set[Job]         // pool jobs dispatched and not yet committed
+  // --- Configuration (fixed after init) ----------------------------------
+  var g: Graph
+  var pooled: Set[str]           // procedures placed on the pool lane
+  var rule3: bool                // does the placement obey topology rule 3?
+  // --- Ghosts ------------------------------------------------------------
+  var submitted: int
+  var crashes: int
+  var fails: int
+  var reran: int                 // claims of a row already `running` (recovery)
+  var ignored: int               // policy enqueues the store ignored (re-settle)
+
+  pure def isReaderProc(gr: Graph, p: str): bool = gr.reads.get(p) != Set()
+
+  action init = {
+    nondet reads = READS.oneOf()
+    nondet emits = EMITS.oneOf()
+    nondet folds = FOLDS.oneOf()
+    nondet reacts = REACTS.oneOf()
+    nondet dispatches = DISPATCHES.oneOf()
+    nondet interactive = INTERACTIVE.oneOf()
+    nondet pl = PROCS.powerset().oneOf()
+    val gr = { reads: reads, emits: emits, folds: folds, reacts: reacts, dispatches: dispatches, interactive: interactive }
+    all {
+      g&#x27; = gr,
+      pooled&#x27; = pl,
+      rule3&#x27; = pl.forall(p =&gt; not(isReaderProc(gr, p))),
+      log&#x27; = [], table&#x27; = [], cursor&#x27; = 0,
+      models&#x27; = emptyView, folded&#x27; = 0, current&#x27; = [], inflight&#x27; = Set(),
+      submitted&#x27; = 0, crashes&#x27; = 0, fails&#x27; = 0, reran&#x27; = 0, ignored&#x27; = 0,
+    }
+  }
+
+  // --- Helpers -------------------------------------------------------------
+  val settled = cursor == log.length() and folded == cursor
+  val busyIdx = inflight.map(j =&gt; j.idx)
+  val poolRoom = inflight.size() &lt; POOL_WORKERS
+
+  pure def ids(t: List[Row]): Set[CmdId] = t.indices().map(i =&gt; t[i].cmd.id)
+  pure def setStatus(t: List[Row], i: int, s: str): List[Row] =
+    t.replaceAt(i, { cmd: t[i].cmd, status: s })
+  pure def minOf(s: Set[int]): int = s.fold(-1, (a, i) =&gt; if (a == -1 or i &lt; a) i else a)
+
+  // _claim_next: an interrupted attempt first (in seq order, its lane must have room),
+  // then interactive before batch, then seq — among rows whose lane has room.
+  def hasRoom(i: int): bool = not(pooled.contains(table[i].cmd.proc)) or poolRoom
+  def claimIndex: int = {
+    val recovering = table.indices().filter(i =&gt;
+      table[i].status == &quot;running&quot; and not(busyIdx.contains(i)) and hasRoom(i))
+    val queued = table.indices().filter(i =&gt; table[i].status == &quot;queued&quot; and hasRoom(i))
+    val urgent = queued.filter(i =&gt; g.interactive.contains(table[i].cmd.proc))
+    if (recovering != Set()) minOf(recovering)
+    else if (urgent != Set()) minOf(urgent)
+    else minOf(queued)
+  }
+
+  // Append a block and ack its row: ONE transaction.
+  action appendAndAck(i: int, view: View): bool = {
+    val emitted = runProcedure(g, table[i].cmd, view, log.length())
+    all {
+      log&#x27; = log.concat(emitted),
+      table&#x27; = setStatus(table, i, &quot;done&quot;),
+    }
+  }
+
+  action unchangedConfig = all { g&#x27; = g, pooled&#x27; = pooled, rule3&#x27; = rule3 }
+
+  // --- Host submits a command ----------------------------------------------
+  action submit = {
+    nondet p = PROCS.oneOf()
+    all {
+      submitted &lt; MAX_SUBMISSIONS,
+      table&#x27; = table.append({ cmd: { id: { origin: &quot;host&quot;, at: submitted, target: p }, proc: p, view: emptyView }, status: &quot;queued&quot; }),
+      submitted&#x27; = submitted + 1,
+      log&#x27; = log, cursor&#x27; = cursor, models&#x27; = models, folded&#x27; = folded, current&#x27; = current, inflight&#x27; = inflight,
+      crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, unchangedConfig,
+    }
+  }
+
+  // --- Claim (host thread, between units, only when settled) ----------------
+  action claim = all {
+    current == [],
+    settled,
+    log.length() &lt; MAX_LOG,
+    val i = claimIndex
+    all {
+      i &gt;= 0,
+      table&#x27; = setStatus(table, i, &quot;running&quot;),
+      reran&#x27; = if (table[i].status == &quot;running&quot;) reran + 1 else reran,
+      if (pooled.contains(table[i].cmd.proc))
+        // A pool child gets no read model. Under rule 3 the procedure reads nothing, so
+        // the snapshot is irrelevant; without it, this is the freshest view it could have.
+        all { inflight&#x27; = inflight.union(Set({ idx: i, view: models })), current&#x27; = current }
+      else
+        all { current&#x27; = [i], inflight&#x27; = inflight },
+    },
+    log&#x27; = log, cursor&#x27; = cursor, models&#x27; = models, folded&#x27; = folded,
+    submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, ignored&#x27; = ignored, unchangedConfig,
+  }
+
+  // --- The inline unit: run against the live read model, append + ack ------
+  action runInline = all {
+    current.length() == 1,
+    val i = current[0]
+    appendAndAck(i, models),
+    current&#x27; = [],
+    cursor&#x27; = cursor, models&#x27; = models, folded&#x27; = folded, inflight&#x27; = inflight,
+    submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, unchangedConfig,
+  }
+
+  // --- A pool job finishes; the host thread commits it (only when settled) ---
+  action completePool = all {
+    current == [],
+    settled,
+    inflight != Set(),
+    nondet j = inflight.oneOf()
+    all {
+      appendAndAck(j.idx, j.view),
+      inflight&#x27; = inflight.exclude(Set(j)),
+    },
+    current&#x27; = current, cursor&#x27; = cursor, models&#x27; = models, folded&#x27; = folded,
+    submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, unchangedConfig,
+  }
+
+  // --- An element raises (or a pool worker dies): attempt failed, nothing appended
+  action failInline = all {
+    current.length() == 1,
+    fails &lt; MAX_FAILS,
+    table&#x27; = setStatus(table, current[0], &quot;failed&quot;),
+    current&#x27; = [], fails&#x27; = fails + 1,
+    log&#x27; = log, cursor&#x27; = cursor, models&#x27; = models, folded&#x27; = folded, inflight&#x27; = inflight,
+    submitted&#x27; = submitted, crashes&#x27; = crashes, reran&#x27; = reran, ignored&#x27; = ignored, unchangedConfig,
+  }
+  action failPool = all {
+    current == [],
+    settled,
+    fails &lt; MAX_FAILS,
+    inflight != Set(),
+    nondet j = inflight.oneOf()
+    all {
+      table&#x27; = setStatus(table, j.idx, &quot;failed&quot;),
+      inflight&#x27; = inflight.exclude(Set(j)),
+    },
+    fails&#x27; = fails + 1,
+    log&#x27; = log, cursor&#x27; = cursor, models&#x27; = models, folded&#x27; = folded, current&#x27; = current,
+    submitted&#x27; = submitted, crashes&#x27; = crashes, reran&#x27; = reran, ignored&#x27; = ignored, unchangedConfig,
+  }
+
+  // --- The host retries a failed command: a new attempt, never automatic ----
+  action retry = {
+    nondet i = table.indices().oneOf()
+    all {
+      table.length() &gt; 0,
+      table[i].status == &quot;failed&quot;,
+      table&#x27; = setStatus(table, i, &quot;queued&quot;),
+      log&#x27; = log, cursor&#x27; = cursor, models&#x27; = models, folded&#x27; = folded, current&#x27; = current, inflight&#x27; = inflight,
+      submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, unchangedConfig,
+    }
+  }
+
+  // --- Settle one event: fold, then its policies enqueue (INSERT OR IGNORE) --
+  action settleFold = all {
+    current == [],
+    folded == cursor,
+    cursor &lt; log.length(),
+    val e = log[cursor]
+    val v2 = applyEvent(g, models, e, cursor)
+    val dispatched = runPolicies(g, e, cursor, v2)
+    val r = dispatched.foldl({ t: table, dup: 0 }, (acc, c) =&gt;
+      if (ids(acc.t).contains(c.id)) { t: acc.t, dup: acc.dup + 1 }
+      else { t: acc.t.append({ cmd: c, status: &quot;queued&quot; }), dup: acc.dup })
+    all {
+      models&#x27; = v2,
+      folded&#x27; = folded + 1,
+      table&#x27; = r.t,
+      ignored&#x27; = ignored + r.dup,
+    },
+    log&#x27; = log, cursor&#x27; = cursor, current&#x27; = current, inflight&#x27; = inflight,
+    submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, unchangedConfig,
+  }
+
+  // --- ... and only then the cursor moves past it ---------------------------
+  action advance = all {
+    folded == cursor + 1,
+    cursor&#x27; = folded,
+    log&#x27; = log, table&#x27; = table, models&#x27; = models, folded&#x27; = folded, current&#x27; = current, inflight&#x27; = inflight,
+    submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, unchangedConfig,
+  }
+
+  // --- Crash and reopen: memory is gone, the store is not -------------------
+  // _recover refolds a fresh read model to the cursor; settling past it is the
+  // ordinary settle steps, which claims wait for.
+  action crash = all {
+    crashes &lt; MAX_CRASHES,
+    models&#x27; = foldPrefix(g, log, cursor),
+    folded&#x27; = cursor,
+    current&#x27; = [],
+    inflight&#x27; = Set(),
+    crashes&#x27; = crashes + 1,
+    log&#x27; = log, table&#x27; = table, cursor&#x27; = cursor,
+    submitted&#x27; = submitted, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, unchangedConfig,
+  }
+
+  val idle = current == [] and inflight == Set() and settled and
+    table.indices().forall(i =&gt; table[i].status == &quot;done&quot; or table[i].status == &quot;failed&quot;)
+  action quiescent = all {
+    idle or log.length() &gt;= MAX_LOG,
+    submitted == MAX_SUBMISSIONS,
+    log&#x27; = log, table&#x27; = table, cursor&#x27; = cursor, models&#x27; = models, folded&#x27; = folded,
+    current&#x27; = current, inflight&#x27; = inflight,
+    submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, unchangedConfig,
+  }
+
+  action step = any {
+    submit, claim, runInline, completePool, failInline, failPool, retry,
+    settleFold, advance, crash, quiescent,
+  }
+
+  // --- Invariants ----------------------------------------------------------
+
+  // E1. The read model is a fold of the log (the refold-on-open guarantee).
+  val modelsAreFold = models == foldPrefix(g, log, folded)
+
+  // E2. The cursor never claims ground the read model has not covered.
+  val cursorSound = cursor &lt;= folded and folded &lt;= cursor + 1 and folded &lt;= log.length()
+
+  // E3. Every block is a complete, contiguous, ordered run of its procedure.
+  val blocksWellFormed = blocksWellFormedOf(g, log)
+
+  // E4. EXACTLY-ONCE EFFECTS, unconditionally: every cause owns one block. No
+  //     application guard, no `guardable` side-condition — the transaction does it.
+  val effectsOnce = effectsOnceOf(log)
+
+  // E5. Append and ack are one transaction: a block&#x27;s command is `done`, and a
+  //     `done` command that emits has its block.
+  pure def statusOf(t: List[Row], id: CmdId): Set[str] =
+    t.indices().filter(i =&gt; t[i].cmd.id == id).map(i =&gt; t[i].status)
+  val ackAtomic = all {
+    log.indices().forall(i =&gt; statusOf(table, log[i].cause) == Set(&quot;done&quot;)),
+    table.indices().forall(i =&gt; (table[i].status == &quot;done&quot; and g.emits.get(table[i].cmd.proc) != Set())
+      implies log.indices().exists(k =&gt; log[k].cause == table[i].cmd.id)),
+    // a failed or unrun attempt appended nothing
+    table.indices().forall(i =&gt; table[i].status != &quot;done&quot;
+      implies not(log.indices().exists(k =&gt; log[k].cause == table[i].cmd.id))),
+  }
+
+  // E6. Causality of ids.
+  val causal = causalOf(g, log)
+
+  // E7. Fresh reads — sequential consistency of every decision — given rule 3.
+  val freshReads = rule3 implies freshReadsOf(g, log)
+
+  // E8. Policies read exactly the fold through their trigger, across crashes, in the
+  //     log and in the queue.
+  val freshDispatch = freshDispatchOf(g, log)
+  val freshQueue = {
+    val pv = prefixViews(g, log)
+    table.indices().forall(i =&gt; {
+      val c = table[i].cmd
+      c.id.origin != &quot;host&quot; implies c.view == restrict(g, c.id.origin, pv.get(c.id.at + 1))
+    })
+  }
+
+  // E9. Nothing settled is lost: every reacting policy of every settled event has
+  //     its command in the table.
+  val dispatchComplete =
+    log.indices().forall(pos =&gt; pos &lt; cursor implies
+      POLICIES.forall(y =&gt; g.reacts.get(y).contains(log[pos].kind) implies
+        g.dispatches.get(y).forall(p =&gt; ids(table).contains({ origin: y, at: pos, target: p }))))
+
+  // E10. One row per command id.
+  val idsDistinct = ids(table).size() == table.length()
+
+  // E11. Process memory points only at rows that are really running.
+  val memorySound = all {
+    current.indices().forall(k =&gt; table[current[k]].status == &quot;running&quot;),
+    inflight.forall(j =&gt; table[j.idx].status == &quot;running&quot;),
+    current.indices().forall(k =&gt; not(busyIdx.contains(current[k]))),
+    inflight.size() &lt;= POOL_WORKERS,
+  }
+
+  // E12. Nothing waits behind an empty engine: when idle, every command finished.
+  val noLostWork = (idle and log.length() &lt; MAX_LOG) implies
+    table.indices().forall(i =&gt; table[i].status == &quot;done&quot; or table[i].status == &quot;failed&quot;)
+
+  val allInvariants = all {
+    modelsAreFold, cursorSound, blocksWellFormed, effectsOnce, ackAtomic, causal,
+    freshReads, freshDispatch, freshQueue, dispatchComplete, idsDistinct, memorySound, noLostWork,
+  }
+
+  // --- Witnesses (should be REACHABLE: `--invariant=not(w)` must violate) ---
+  val witnessCascade    = log.indices().exists(i =&gt; log[i].cause.origin != &quot;host&quot;)
+  val witnessReader     = log.indices().exists(i =&gt; log[i].view != emptyView)
+  val witnessPooledRun  = log.indices().exists(i =&gt; pooled.contains(log[i].cause.target))
+  // Two pool jobs genuinely in flight at once.
+  val witnessConcurrent = inflight.size() == POOL_WORKERS
+  // The log is not in claim order: a block lands after a block whose command was
+  // enqueued LATER. Pools make the order a race; the reads stay fresh regardless.
+  pure def seqOf(t: List[Row], id: CmdId): int =
+    t.indices().filter(i =&gt; t[i].cmd.id == id).fold(-1, (a, i) =&gt; i)
+  val witnessOutOfOrder = rule3 and log.indices().exists(i =&gt; log.indices().exists(k =&gt;
+    i &lt; k and seqOf(table, log[i].cause) &gt; seqOf(table, log[k].cause)))
+  val witnessPriority   = table.length() &gt;= 2 and settled and current == [] and
+    claimIndex &gt; 0 and table.indices().forall(i =&gt; table[i].status != &quot;running&quot;)
+  val witnessRecovered  = reran &gt; 0                  // an interrupted attempt re-ran under its id
+  val witnessCrashAfterAppend = crashes &gt; 0 and log.length() &gt; 0
+  val witnessResettle   = ignored &gt; 0                // a re-settle re-derived ids the store held
+  val witnessFailed     = table.indices().exists(i =&gt; table[i].status == &quot;failed&quot;)
+  // Every failure was retried by the host and the run still finished clean.
+  val witnessRetried    = fails &gt; 0 and idle and table.indices().forall(i =&gt; table[i].status == &quot;done&quot;)
+  val witnessBound      = log.length() &gt;= MAX_LOG
+  // Rule 3 is NECESSARY: pool a reader and it decides on a stale model.
+  val witnessStalePool  = not(rule3) and not(freshReadsOf(g, log))
+}
+</pre></details>
+</section><section>
 <h2>Spec 1 — single-threaded engine <span class="count">21/21</span></h2>
 <p class="intro">One hybrid group, one lane, one cursor. <code>run_command</code> is a single atomic step: claim → run procedure → append → fold → commit → run policies → dispatch. The feature graph is drawn nondeterministically at <code>init</code>, so every check ranges over every feature of the bounded size (2 procedures, 1 policy, 2 models, 2 event kinds ≈ 10⁶ graphs).</p>
 <div class="tbl"><table><thead><tr><th>check</th><th>method</th><th>what it says</th><th class="num">time</th><th>result</th></tr></thead>
@@ -57,127 +606,127 @@ Generated 2026-08-27 22:42:56 · quint 0.32.0 · dizzy @ <code>7f66a31</code> ·
 <td><code>zeroLag</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I1 no lag: cursor == log.length()</td>
-<td class="num">5.7s</td>
+<td class="num">3.8s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>modelsAreFold</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I2 carried models are a refold of the log (the rebuild guarantee)</td>
-<td class="num">6.3s</td>
+<td class="num">4.0s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>blocksWellFormed</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I3 every run leaves one complete, contiguous, ordered block</td>
-<td class="num">9.4s</td>
+<td class="num">6.7s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>effectsOnce</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I3&#x27; exactly-once effects for GUARDABLE procedures, when the application guards</td>
-<td class="num">7.1s</td>
+<td class="num">5.4s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>causal</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I4 policy-dispatched effects follow a trigger the policy reacts to</td>
-<td class="num">6.2s</td>
+<td class="num">4.0s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>freshReads</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I5 every procedure read the fold of everything before its block</td>
-<td class="num">11.3s</td>
+<td class="num">7.3s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>freshDispatch</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I6 every dispatching policy read the fold through its trigger</td>
-<td class="num">7.4s</td>
+<td class="num">4.7s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>freshQueue</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I6&#x27; the same, for commands still queued</td>
-<td class="num">8.6s</td>
+<td class="num">6.5s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>dispatchComplete</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I7 every reacting policy of every event has dispatched</td>
-<td class="num">6.7s</td>
+<td class="num">3.4s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>emitComplete</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I7&#x27; every command that ran left its block</td>
-<td class="num">6.5s</td>
+<td class="num">3.5s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>queueIdsDistinct</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I8 one DB row per command</td>
-<td class="num">5.5s</td>
+<td class="num">3.8s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>witnessCascade</code></td>
 <td class="kind">witness · reachability</td>
 <td>a policy-dispatched command ran</td>
-<td class="num">2.3s</td>
+<td class="num">1.5s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessReader</code></td>
 <td class="kind">witness · reachability</td>
 <td>a procedure observed a non-empty model</td>
-<td class="num">2.4s</td>
+<td class="num">1.3s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessPolicyReader</code></td>
 <td class="kind">witness · reachability</td>
 <td>a policy observed a non-empty model</td>
-<td class="num">2.5s</td>
+<td class="num">1.3s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessPriority</code></td>
 <td class="kind">witness · reachability</td>
 <td>an interactive command was claimed ahead of the queue head</td>
-<td class="num">2.4s</td>
+<td class="num">1.3s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessBound</code></td>
 <td class="kind">witness · reachability</td>
 <td>the log bound was reached (cascades are bounded, not absent)</td>
-<td class="num">2.3s</td>
+<td class="num">1.5s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessRedelivered</code></td>
 <td class="kind">witness · reachability</td>
 <td>a claimed row was recovered and re-queued</td>
-<td class="num">2.5s</td>
+<td class="num">1.3s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessGuardNoop</code></td>
 <td class="kind">witness · reachability</td>
 <td>a guarding procedure saw its own block and no-op&#x27;d its redelivery</td>
-<td class="num">2.4s</td>
+<td class="num">1.5s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessUnguardable</code></td>
 <td class="kind">witness · reachability</td>
 <td>a guarding application still double-appended: the procedure was not guardable</td>
-<td class="num">2.4s</td>
+<td class="num">1.6s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessDoubleAppend</code></td>
 <td class="kind">witness · reachability</td>
 <td>an unguarded redelivery appended a second block (executor.py:49-56)</td>
-<td class="num">2.4s</td>
+<td class="num">1.6s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>allInvariants</code></td>
 <td class="kind">Apalache · bounded</td>
 <td>Apalache: all invariants, every graph × guard, 4 steps</td>
-<td class="num">524.9s</td>
+<td class="num">213.9s</td>
 <td><span class="pill pass">holds</span></td></tr></tbody></table></div>
 <section class="review">
 <h3>Adversarial review</h3>
@@ -525,151 +1074,151 @@ module st {
 <td><code>substrateIsFold</code></td>
 <td class="kind">invariant · simulation</td>
 <td>each model == its owner&#x27;s fold up to the owner&#x27;s high-water mark</td>
-<td class="num">11.3s</td>
+<td class="num">4.6s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>cursorBelowHwm</code></td>
 <td class="kind">invariant · simulation</td>
 <td>a rewound cursor never exceeds what was folded</td>
-<td class="num">9.8s</td>
+<td class="num">4.1s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>blocksWellFormed</code></td>
 <td class="kind">invariant · simulation</td>
 <td>as st, under any topology</td>
-<td class="num">12.0s</td>
+<td class="num">4.8s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>effectsOnce</code></td>
 <td class="kind">invariant · simulation</td>
 <td>exactly-once for guardable procedures needs the guard AND rule 6</td>
-<td class="num">10.2s</td>
+<td class="num">3.9s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>causal</code></td>
 <td class="kind">invariant · simulation</td>
 <td>as st, under any topology</td>
-<td class="num">11.4s</td>
+<td class="num">3.9s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>routed</code></td>
 <td class="kind">invariant · simulation</td>
 <td>a command sits only in its procedure&#x27;s owner lane / pending slot</td>
-<td class="num">10.4s</td>
+<td class="num">4.3s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>dispatchComplete</code></td>
 <td class="kind">invariant · simulation</td>
 <td>every folded event&#x27;s reacting policies have dispatched</td>
-<td class="num">10.8s</td>
+<td class="num">4.3s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>emitComplete</code></td>
 <td class="kind">invariant · simulation</td>
 <td>every command that ran left its block</td>
-<td class="num">10.1s</td>
+<td class="num">3.9s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>rule6Guarantee</code></td>
 <td class="kind">invariant · simulation</td>
 <td>T1: rule 6 ⇒ model committed through the cause before the run; no policy dispatched behind its trigger</td>
-<td class="num">10.1s</td>
+<td class="num">4.2s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>noFaultFreshDispatch</code></td>
 <td class="kind">invariant · simulation</td>
 <td>T1&#x27;: with rule 6 and no cursor loss, policies read exactly the fold through their trigger</td>
-<td class="num">10.4s</td>
+<td class="num">4.0s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>singleGroupIsSt</code></td>
 <td class="kind">invariant · simulation</td>
 <td>T2: one group ⇒ st&#x27;s fresh reads</td>
-<td class="num">10.1s</td>
+<td class="num">4.6s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>witnessClaimWindow</code></td>
 <td class="kind">witness · reachability</td>
 <td>a rule-6-LEGAL split read behind the tail (the claim→execute window, groups.py:44-50)</td>
-<td class="num">3.7s</td>
+<td class="num">1.6s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessWriteSkew</code></td>
 <td class="kind">witness · reachability</td>
 <td>WRITE SKEW under rule 6: two decisions, neither saw the other — no serial order explains both</td>
-<td class="num">4.4s</td>
+<td class="num">1.8s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessStaleRead</code></td>
 <td class="kind">witness · reachability</td>
 <td>a rule-6-violating split broke even the weak guarantee</td>
-<td class="num">4.0s</td>
+<td class="num">1.5s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessStalePolicy</code></td>
 <td class="kind">witness · reachability</td>
 <td>a rule-6-violating policy read stale or ahead</td>
-<td class="num">4.2s</td>
+<td class="num">2.1s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessLegalLag</code></td>
 <td class="kind">witness · reachability</td>
 <td>a legal multi-group split with real inter-group lag</td>
-<td class="num">3.9s</td>
+<td class="num">1.7s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessCrossGroup</code></td>
 <td class="kind">witness · reachability</td>
 <td>a policy in one group dispatched to a procedure in another</td>
-<td class="num">3.5s</td>
+<td class="num">1.5s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessRedelivered</code></td>
 <td class="kind">witness · reachability</td>
 <td>an at-least-once redelivery occurred</td>
-<td class="num">3.6s</td>
+<td class="num">1.6s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessRewound</code></td>
 <td class="kind">witness · reachability</td>
 <td>a cursor was lost and rewound</td>
-<td class="num">3.6s</td>
+<td class="num">1.6s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessRedispatch</code></td>
 <td class="kind">witness · reachability</td>
 <td>a rewound cursor re-dispatched an already-run command</td>
-<td class="num">3.8s</td>
+<td class="num">1.5s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessDoubleAppend</code></td>
 <td class="kind">witness · reachability</td>
 <td>an unguarded replay appended a second block</td>
-<td class="num">3.8s</td>
+<td class="num">1.5s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessUnguardable</code></td>
 <td class="kind">witness · reachability</td>
 <td>a guarding application still double-appended: procedure not guardable</td>
-<td class="num">3.7s</td>
+<td class="num">1.5s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessGuardMissed</code></td>
 <td class="kind">witness · reachability</td>
 <td>a guarding, guardable procedure double-appended because rule 6 was broken</td>
-<td class="num">3.6s</td>
+<td class="num">1.8s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessOneGroupRun</code></td>
 <td class="kind">witness · reachability</td>
 <td>the one-group (st) topology was exercised</td>
-<td class="num">3.7s</td>
+<td class="num">1.8s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>allInvariants</code></td>
 <td class="kind">Apalache · bounded</td>
 <td>Apalache: all invariants, every graph × placement × guard, 3 steps</td>
-<td class="num">25.1s</td>
+<td class="num">13.3s</td>
 <td><span class="pill pass">holds</span></td></tr></tbody></table></div>
 <section class="review">
 <h3>Adversarial review</h3>

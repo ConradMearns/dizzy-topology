@@ -17,6 +17,13 @@ for name in ("st", "groups"):
         reviews[name] = json.loads(p.read_text())
 
 SPEC_INTRO = {
+  "engine.qnt": ("Spec 4 — the topology engine (as shipped)",
+    "The Simple Engine with lanes: an inline lane on the host thread and a process-pool lane, over the Simple Engine "
+    "store. Every transaction boundary is its own step — claim, append+ack, fold+enqueue, cursor — and a crash may fall "
+    "between any two, losing the read model and in-flight pool work but never the store. Graph and rule-3 placement are "
+    "drawn at <code>init</code>. Headline: exactly-once effects hold <em>unconditionally</em> (st needed an application "
+    "guard), and reads stay fresh with pools although the log leaves claim order. The Python engine is held to the same "
+    "invariants by <code>engine/tests/test_spec_conformance.py</code>."),
   "st.qnt": ("Spec 1 — single-threaded engine",
     "One hybrid group, one lane, one cursor. <code>run_command</code> is a single atomic step: "
     "claim → run procedure → append → fold → commit → run policies → dispatch. The feature graph is "

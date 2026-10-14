@@ -1,6 +1,7 @@
 # dizzy-topology — project guide
 
-Deployment topology for DIZZY features, as two packages in one uv workspace. Read
+Deployment topology for DIZZY features, as two packages in one uv workspace, plus the
+engine's formal specification in `spec/` (Quint; merged in from `dizzy-quint`). Read
 `README.md` first: it has the layout, how the engine works, and the migration status from
 DIZZY's `engine-topology-v2` branch. `docs/topology.md` is the design.
 
@@ -24,6 +25,29 @@ DIZZY's `engine-topology-v2` branch. `docs/topology.md` is the design.
 - `topology/src/dizzy_topology/topology_schema.py` is generated. Edit
   `def/topology.yaml` and run `just gen-topology-pydantic`.
 
+## The spec is part of the engine
+
+`spec/specs/engine.qnt` specifies `engine/src/dizzy_topology_engine` at the level of its
+store transactions. **Change one, change the other in the same commit.**
+
+- Changing when the engine claims, appends, acks, settles or advances the cursor, or what
+  survives a crash, means changing `engine.qnt`. Re-run `just spec-engine`: the invariants
+  must still hold and every witness must still be reachable.
+- `engine/tests/_spec.py` ports the Quint invariants to Python, checked against the real
+  engine's store by `test_spec_conformance.py`. A new invariant in `engine.qnt` gets a
+  port there.
+- A spec change that weakens an invariant needs a reason in the commit message. Proving
+  less is a design decision, not a fix.
+- Crash coverage is a sweep, never a sample: a bug between two transactions is one crash
+  point among dozens.
+- `spec/report/results.json` and `index.html` are committed outputs of `just spec-full`.
+  `spec/report/logs/` is not.
+
+## Issue tracking
+
+`sd` (Seeds) at the repo root: the roadmap merged from dizzy-quint (ids `dizzy-quint-*`)
+plus this repo's own. DIZZY's tracker is separate: `just dizzy-seeds ...`.
+
 ## DIZZY submodule (`ext/dizzy`) and `vendor/`
 
 DIZZY is a git submodule at `ext/dizzy`. Its commit pointer is the version pin.
@@ -40,7 +64,8 @@ DIZZY is a git submodule at `ext/dizzy`. Its commit pointer is the version pin.
 
 ## Quality gates
 
-`just test` (both packages), `just lint`, `just foogle` (DIZZY's conformance scenario on
+`just test` (both packages, including the spec conformance sweep), `just lint`,
+`just spec-engine`, `just foogle` (DIZZY's conformance scenario on
 the topology engine: inline must match the golden log byte for byte; pooled must hold its
 facts, crash runs included). `just test-update` re-snapshots intentionally.
 

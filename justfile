@@ -31,6 +31,20 @@ foogle-gen:
 fmt:
     uv run ruff format .
 
+# The topology engine's Quint spec: simulate every invariant, then prove them to depth 5
+spec-engine:
+    cd spec/specs && quint run engine.qnt --invariant=allInvariants --max-samples=3000 --max-steps=25 --seed=7
+    cd spec/specs && quint verify engine.qnt --invariant=allInvariants --max-steps=5
+
+# Every spec, every invariant and witness — simulation only, few samples
+spec:
+    cd spec && python3 report/run_checks.py --quick --no-verify
+
+# Every spec at full samples plus every Apalache proof, then the HTML report (~15 min)
+spec-full:
+    cd spec && python3 report/run_checks.py
+    cd spec && python3 report/render.py
+
 # Regenerate the pydantic topology schema from its LinkML source
 gen-topology-pydantic:
     uv run gen-pydantic topology/src/dizzy_topology/def/topology.yaml > topology/src/dizzy_topology/topology_schema.py

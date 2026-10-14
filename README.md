@@ -2,12 +2,14 @@
 
 Deployment topology for [DIZZY](https://github.com/ConradMearns/dizzy) features: **where**
 a feature's elements run, never **what** they do (that is the feature-file). Two packages,
-one on each side of the build/run line:
+one on each side of the build/run line, and the formal specification that proves the
+engine correct:
 
 | Package | When | Depends on | What it does |
 |---|---|---|---|
 | `topology/` → `dizzy-topology` | build time | DIZZY | Validates a `topology.yaml` against the feature-file, resolves it to `placement.json`, profiles a captured run. |
 | `engine/` → `dizzy-topology-engine` | run time | `dizzy_kit`, `dizzy_engine` (what `dizzy generate` vendors into every app). **Never DIZZY** (a test enforces it). | The topology engine: the Simple Engine with lanes and process pools. |
+| `spec/` | — | Quint (+ Apalache) | The engine's formal specification (`spec/specs/engine.qnt`) and the earlier `st`/`groups` specs, merged in from `dizzy-quint` with its history. See [`spec/README.md`](spec/README.md). |
 
 The design is in [`docs/topology.md`](docs/topology.md). The Simple Engine spec it
 builds on is `ext/dizzy/docs/design/simple-engine.md`, whose §10 names this package.
@@ -27,9 +29,9 @@ from dizzy_topology_engine import Placement, TopologyEngine
 
 engine = TopologyEngine(
     data_dir,
-    [wiring.build_domain(resources)],       # the generated wiring, as for the Simple Engine
+    [wiring.build_domain(resources)],  # the generated wiring, as for the Simple Engine
     Placement.load("placement.json"),
-    pool_domains=build_pool_domains,        # module-level: what a pool worker builds
+    pool_domains=build_pool_domains,  # module-level: what a pool worker builds
     commit=session.commit,
 )
 engine.submit(command)
@@ -53,11 +55,33 @@ engine.run()
   raises, or a pool worker that dies, fails the attempt, and the host calls `retry`.
   Workers exit when their host dies.
 
+## Correctness
+
+Three layers, each checking the one below it (details in [`spec/README.md`](spec/README.md)):
+
+1. **The design is proved.** `spec/specs/engine.qnt` models the engine's transactions,
+   both lanes, crashes between any two transactions, element failure and host retry.
+   Apalache proves all 13 invariants over every feature graph × rule-3 placement of the
+   bounded size, to depth 6. Among them:
+   - **exactly-once effects, unconditionally**, because append and ack are one
+     transaction. The old `st` engine needed an application guard.
+   - **fresh reads with pools**, although the log leaves claim order.
+   - **fresh, complete dispatch across crashes.**
+2. **The invariants have teeth.** All 13 witnesses are reachable. Mutating the spec into
+   the old `st` engine's behaviour, or letting claims skip the settle, breaks it.
+3. **The code satisfies the same invariants.** `engine/tests/test_spec_conformance.py`
+   runs the real `TopologyEngine` on random graphs from the spec's universe. It crashes it
+   at every claim/append/enqueue point and checks the store against a port of the Quint
+   predicates. Splitting the ack from the append in the Python engine fails it.
+
 ## Checks
 
 - `just test` — the validator, placement and profiler suites (ported from v2), and the
   engine suite: inline matches the Simple Engine exactly, pools, priority, recovery,
   failure and retry, workers dying with their host, and the import boundary.
+- `just spec-engine` — simulate `engine.qnt`, then prove it to depth 5 (~1 min).
+  `just spec` checks every spec quickly. `just spec-full` runs every proof and renders
+  `spec/report/index.html`.
 - `just foogle` — DIZZY's conformance scenario on the topology engine. All-inline must
   reproduce DIZZY's golden log byte for byte, crash runs included. The pooled topology
   (`engine/conformance/foogle.topology.yaml`) must reproduce the golden's facts and read
@@ -82,6 +106,7 @@ format, not copied over.
 | `max_in_flight`, `transport`, `cursors:` topology fields | **Validated but not executed** yet |
 | `retry:` topology field (automatic retry with backoff) | **Open question.** Conflicts with Simple Engine §11.2 and DIZZY's rule that a retry is a declared reaction. |
 | `profiler.py` + `profile` verb | **Migrated**, but its input (`JsonlBusSink` records) has no producer on main. The Simple Engine's trace spans (`telemetry/*.jsonl`, with per-element `duration_ms`) are the likely replacement. |
+| `dizzy-quint` (Quint specs of `st` and `groups`) | **Merged** into `spec/` with history. `st.qnt` is kept as the baseline. `groups.qnt` is the design spec for consumer groups when they are re-founded. New: `engine.qnt` and the conformance bridge. |
 | Telemetry injection, query-access shapes, `JsonlBusSink` | **Not started.** The Simple Engine has its own trace (spec §9). |
 | Feat validation rules (unique names per section, one procedure per command, command class collisions) | **Belongs upstream** in DIZZY's `validate_feat`. Not on main. |
 | Tutorial, `examples/assay` | **Not migrated.** They run on the old engine. foogle is the conformance scenario for now. |
