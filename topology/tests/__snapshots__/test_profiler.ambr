@@ -1,0 +1,31 @@
+# serializer version: 1
+# name: test_render_profile_snapshot
+  '''
+  Capture span: 2026-01-01T00:00:00+00:00 -> 2026-01-01T00:00:04+00:00
+  Makespan:     4.00s
+  Records:      13 (4 events appended)
+  
+  kind        name              lanes         count  total ms  mean   p50   p95   max  errors  input items  result items  access patterns               pool-eligible
+  ----------  ----------------  ------------  -----  --------  ----  ----  ----  ----  ------  -----------  ------------  ---------------  --------------------------
+  procedure   compute_metrics   compute,main      4     165.5  41.4  40.1  60.4  60.4       1            -             -                -                         yes
+  procedure   summarize_run     -                 1      20.0  20.0  20.0  20.0  20.0       -            -             -                -  no (queries: get_progress)
+  procedure   parse_run         -                 1      12.5  12.5  12.5  12.5  12.5       -            -             -                -                         yes
+  projection  results_ledger    -                 2      12.0   6.0   5.0   7.0   7.0       -            -             -                -                           -
+  policy      fan_out_analysis  -                 1       3.0   3.0   3.0   3.0   3.0       -            -             -                -                           -
+  
+  Events appended:
+    run_parsed       1
+    run_summarized   1
+    sample_analyzed  2
+  Policy invocations:
+    fan_out_analysis  1
+  
+  Bottleneck:
+    serial-bound   35.0 ms  (projections + policies + querying procedures — pinned to the fold lane)
+    pool-eligible  178.0 ms  (query-free procedures)
+      / 2 workers  89.0 ms
+      / 4 workers  44.5 ms
+      / 8 workers  22.2 ms
+    Serial-bound work is the floor: even at 8 workers the pool-eligible share falls below it, so the fold lane bounds this workload.
+  '''
+# ---

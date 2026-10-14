@@ -1,0 +1,20 @@
+description: >-
+  foogle_shindig with its query-free fan-out work on process pools: every fold, every
+  policy and every reader stays on the inline main lane (rules 1, 3, 6), the snarf
+  ratings — most of the 1024 commands — go to a wide pool, and the foogle pipeline to a
+  narrow one.
+groups:
+  - name: main
+    catch_all: true
+  - name: ratings
+    include:
+      - {kind: procedures, names: [rate_snarf]}
+    executor: pool
+    workers: 4
+  - name: foogles
+    include:
+      - {kind: procedures, names: [toss_foogle, sniff_foogle, shred_foogle]}
+    executor: pool
+    workers: 2
+priority:
+  interactive: [throw_shindig]

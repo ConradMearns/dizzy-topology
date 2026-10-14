@@ -1,0 +1,27 @@
+[project]
+name = "dizzy-topology"
+version = "0.1.0"
+description = "Deployment topology for DIZZY features: validate a placement against the feature-file and resolve it to placement data"
+requires-python = ">=3.11"
+authors = [{ name = "Conrad Mearns", email = "conradmearns@pm.me" }]
+# A BUILD-time package: it reads feature-files, so it depends on DIZZY. Its output
+# (placement data) is what crosses to run time; this package never does.
+dependencies = [
+    "dizzy",
+    "pyyaml>=6.0",
+    "pydantic>=2.0",
+    "typer>=0.20.0",
+]
+
+[project.scripts]
+dizzy-topology = "dizzy_topology.cli:main"
+
+[tool.uv.sources]
+dizzy = { path = "../ext/dizzy", editable = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dizzy_topology"]
