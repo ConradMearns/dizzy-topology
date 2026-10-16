@@ -400,3 +400,16 @@ def test_bottleneck_counts_undeclared_procedures_as_serial(profile_feat) -> None
 
     assert serial == pytest.approx(9.0)
     assert eligible == 0.0
+
+
+def test_read_only_models_make_their_readers_pool_eligible(profile_feat) -> None:
+    """With the topology's read-only models passed in, a procedure that queries only
+    those is pool-eligible, and the report says which reads it is exempt for."""
+    assert procedure_queries(profile_feat, ["results"])["summarize_run"] == []
+    profile = aggregate(profile_feat, RECORDS)
+    serial, eligible = bottleneck_totals(profile_feat, profile, ["results"])
+    assert serial == pytest.approx(15.0)
+    assert eligible == pytest.approx(198.0)
+    report = render_profile(profile_feat, RECORDS, ["results"])
+    assert "yes (read-only: get_progress)" in report
+    assert "readers of read-only models" in report

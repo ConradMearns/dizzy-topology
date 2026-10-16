@@ -1,11 +1,18 @@
 description: >-
-  foogle_shindig with its query-free fan-out work on process pools: every fold, every
-  policy and every reader stays on the inline main lane (rules 1, 3, 6), the snarf
-  ratings — most of the 1024 commands — go to a wide pool, and the foogle pipeline to a
-  narrow one.
+  foogle_shindig with its fan-out work on process pools: every fold, every policy and
+  every reader of a model the log folds stays on the inline main lane (rules 1, 3, 6);
+  the snarf pokes, which read only the read-only gronk_values reference table, go to one
+  pool; the snarf ratings — most of the 1024 commands — to a wide pool; and the foogle
+  pipeline to a narrow one.
+read_only_models: [gronk_values]
 groups:
   - name: main
     catch_all: true
+  - name: pokes
+    include:
+      - {kind: procedures, names: [poke_snarf]}
+    executor: pool
+    workers: 3
   - name: ratings
     include:
       - {kind: procedures, names: [rate_snarf]}

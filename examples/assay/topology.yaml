@@ -1,0 +1,38 @@
+description: >-
+  Placement for the assay pipeline: one serial main lane holding every fold and every
+  reader of the ledger (rules 1, 3, 6), a wide process pool for the query-free CPU work,
+  and a one-worker pool for the exclusive classifier so it never blocks a fold. The
+  classifier reads the reference panel, which is read-only, so it may leave the fold
+  lane. Queries are reads and are never placed (rule 4).
+read_only_models: [panel]
+groups:
+  - name: main
+    description: >-
+      Inline and serial — every projection, every policy, and the one procedure that
+      reads the ledger. Rule 6 keeps summarize_run (and the two finalize policies, via
+      their queries) fused with the fold they trail.
+    include:
+      - {kind: projections}
+      - {kind: policies}
+      - {kind: procedures, names: [summarize_run]}
+  - name: compute
+    description: >-
+      The wide CPU pool. Only procedures that read nothing the log folds may live here
+      (rule 3): the fan-out policy already moved the reads into the command payloads.
+    include:
+      - {kind: procedures, names: [compute_metrics, render_run_plot]}
+    executor: pool
+    workers: 4
+  - name: classify
+    description: >-
+      The exclusive resource. A pool so classification never blocks the fold lane; one
+      worker so jobs stay serial against the instrument. Its one query reads the
+      read-only reference panel, which every worker opens for itself.
+    include:
+      - {kind: procedures, names: [classify_sample]}
+    executor: pool
+    workers: 1
+  - name: default
+    catch_all: true
+priority:
+  interactive: [ingest_run]

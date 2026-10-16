@@ -6,8 +6,11 @@ requires-python = ">=3.11"
 authors = [{ name = "Conrad Mearns", email = "conradmearns@pm.me" }]
 # A BUILD-time package: it reads feature-files, so it depends on DIZZY. Its output
 # (placement data) is what crosses to run time; this package never does.
+# It also depends on the run-time engine, but only to ship it: `dizzy-topology vendor`
+# copies dizzy_topology_engine into an app's workspace and never imports it.
 dependencies = [
     "dizzy",
+    "dizzy-topology-engine",
     "pyyaml>=6.0",
     "pydantic>=2.0",
     "typer>=0.20.0",
@@ -18,6 +21,7 @@ dizzy-topology = "dizzy_topology.cli:main"
 
 [tool.uv.sources]
 dizzy = { path = "../ext/dizzy", editable = true }
+dizzy-topology-engine = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

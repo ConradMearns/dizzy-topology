@@ -1,0 +1,44 @@
+# Dizzy library configuration — assign runtimes to each element
+# Supported runtimes: python-uv | rust-cargo | typescript-npm
+
+procedures:
+  parse_run:
+    runtimes: [python-uv]
+  split_samples:
+    runtimes: [python-uv]
+  compute_metrics:
+    runtimes: [python-uv]
+  classify_sample:
+    runtimes: [python-uv]
+  render_run_plot:
+    runtimes: [python-uv]
+  summarize_run:
+    runtimes: [python-uv]
+
+policies:
+  start_pipeline:
+    runtimes: [python-uv]
+  fan_out_analysis:
+    runtimes: [python-uv]
+  finalize_when_complete:
+    runtimes: [python-uv]
+  finalize_when_analyzed:
+    runtimes: [python-uv]
+
+queries:
+  get_run_progress:
+    runtimes: [python-uv]
+  get_run_results:
+    runtimes: [python-uv]
+  get_cutoffs:
+    runtimes: [python-uv]
+
+projections:
+  run_ledger:
+    runtimes: [python-uv]
+  sample_ledger:
+    runtimes: [python-uv]
+  classification_ledger:
+    runtimes: [python-uv]
+  summary_store:
+    runtimes: [python-uv]

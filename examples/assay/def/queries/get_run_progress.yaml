@@ -1,0 +1,26 @@
+id: https://example.org/queries/get_run_progress
+name: get_run_progress
+description: How many samples a run expects vs how many have analyzed and classified
+prefixes:
+  linkml: https://w3id.org/linkml/
+default_range: string
+imports:
+  - linkml:types
+classes:
+  GetRunProgressInput:
+    description: Input for get_run_progress
+    attributes:
+      run_id: { range: string, required: true }
+  GetRunProgressOutput:
+    description: Output for get_run_progress
+    attributes:
+      expected:
+        range: integer
+        required: true
+        description: The run's declared sample count, or 0 if the run is unknown
+      analyzed: { range: integer, required: true }
+      classified: { range: integer, required: true }
+      complete:
+        range: boolean
+        required: true
+        description: True once every expected sample is both analyzed and classified

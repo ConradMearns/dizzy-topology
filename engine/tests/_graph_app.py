@@ -8,7 +8,15 @@ spec's invariants (``_spec.py``):
 - a procedure emits one event per kind it emits, in KIND order, each carrying a unique
   ``tag`` and the VIEW it read: the tags folded into each model it reads;
 - a policy dispatches one command per procedure it dispatches, carrying the view IT read;
-- a projection folds an event's tag into its model.
+- a projection appends an event's tag to its model — a LIST, so a model also records the
+  order it was folded in (engine.qnt's foldSeq), which is what a reopen can change;
+- each procedure and policy belongs to a DOMAIN (graph.qnt's domainOf), built as its own
+  ``Domain`` with its own store; projections belong to the first (core) domain. A
+  policy may dispatch a command another domain owns, and reacts to events from any;
+- a READ-ONLY model (reference data, folded by nothing) holds one tag the host seeds
+  before the engine opens, ``seed:<model>`` — the spec's SEED, the position -1. Its set
+  is frozen, so a write to it would raise; the host seeds the host's copy and each pool
+  worker builds its own.
 
 So a model's contents are a set of event tags (the spec uses log positions; a tag maps to
 exactly one position through the store). Elements are deterministic in (command, view),
@@ -22,6 +30,7 @@ Run as a script, it is the crash child: ``python _graph_app.py SCENARIO_JSON``.
 
 from __future__ import annotations
 
+import dataclasses
 import functools
 import json
 import random
@@ -32,6 +41,8 @@ from typing import Any
 
 from dizzy_kit.domain import Domain
 from pydantic import BaseModel, create_model
+
+from dizzy_topology_engine import TopologyEngine
 
 
 @dataclass(frozen=True)
@@ -46,6 +57,12 @@ class Graph:
     reacts: dict[str, list[str]]  # policies -> kinds
     dispatches: dict[str, list[str]]  # policies -> procs, in PROC order
     interactive: list[str]
+    read_only: list[str]  # models nothing folds, seeded by the host
+    domains: list[str] = dataclasses.field(default_factory=lambda: ["graph"])  # load order
+    domain_of: dict[str, str] = dataclasses.field(default_factory=dict)  # procs, policies
+
+    def domain(self, elem: str) -> str:
+        return self.domain_of.get(elem, self.domains[0])
 
     def dumps(self) -> str:
         return json.dumps(asdict(self))
@@ -80,6 +97,14 @@ def random_graph(rng: random.Random, procs=4, policies=2, models=3, kinds=3) -> 
             reacts={y: _small_subset(rng, K) for y in Y},
             dispatches={y: _small_subset(rng, P) for y in Y},
             interactive=[p for p in P if rng.random() < 0.3],
+            read_only=[],
+        )
+        unfolded = [m for m in M if not graph.folds[m]]
+        graph = dataclasses.replace(
+            graph,
+            read_only=[m for m in unfolded if rng.random() < 0.7],
+            domains=["d1", "d2"],
+            domain_of={e: rng.choice(["d1", "d2"]) for e in P + Y},
         )
         if _acyclic(graph):
             return graph
@@ -108,9 +133,25 @@ def _acyclic(g: Graph) -> bool:
 View = dict[str, list[str]]
 
 
-def build_domain(graph: Graph, model: dict[str, set[str]] | None = None) -> Domain:
-    """The graph as Domain tables, over *model* (model name -> folded tags)."""
-    model = {m: set() for m in graph.models} if model is None else model
+def seed_tag(m: str) -> str:
+    return f"seed:{m}"
+
+
+def fresh_model(graph: Graph) -> dict[str, list[str] | frozenset[str]]:
+    """What the host hands an engine it opens: empty, but for the read-only models it
+    seeds — frozen, so nothing can write them. A folded model is a list: its fold order."""
+    return {m: frozenset({seed_tag(m)}) if m in graph.read_only else [] for m in graph.models}
+
+
+def build_domains(
+    graph: Graph, model: dict[str, set[str]] | None = None, fail: set[str] | None = None
+) -> list[Domain]:
+    """The graph as Domain tables, one per domain in load order, over *model* (model name
+    -> folded tags). A procedure raises when its command's id is in *fail* (the
+    model-based tests inject failures)."""
+    model = fresh_model(graph) if model is None else model
+    # One class per command and event, shared by every domain: the engine maps a command
+    # instance back to its name by class.
     commands = {p: create_model(_cls(p), __base__=BaseModel, view=(View, {})) for p in graph.procs}
     events = {
         k: create_model(
@@ -118,20 +159,29 @@ def build_domain(graph: Graph, model: dict[str, set[str]] | None = None) -> Doma
         )
         for k in graph.kinds
     }
-    domain = Domain(name="graph", commands=commands, events=events)
+    domains = {
+        d: Domain(
+            name=d,
+            commands={p: c for p, c in commands.items() if graph.domain(p) == d},
+            events=events,
+        )
+        for d in graph.domains
+    }
 
     def view_of(elem: str) -> View:
-        return {m: sorted(model[m]) for m in graph.reads[elem]}
+        return {m: sorted(set(model[m])) for m in graph.reads[elem]}
 
     for p in graph.procs:
 
         def run(command: Any, call: Any, p: str = p) -> None:
+            if fail and call.attempt.command_id in fail:
+                raise RuntimeError(f"injected failure of {call.attempt.command_id}")
             view = view_of(p)
             for i, k in enumerate(graph.emits[p]):
                 tag = f"{call.attempt.attempt_id}:{i}"
                 call.emitter(k)(events[k](tag=tag, view=view, dispatch_view=command.view))
 
-        domain.procedure(p, p, graph.emits[p], run)
+        domains[graph.domain(p)].procedure(p, p, graph.emits[p], run)
 
     for y in graph.policies:
         for k in graph.reacts[y]:
@@ -141,13 +191,14 @@ def build_domain(graph: Graph, model: dict[str, set[str]] | None = None) -> Doma
                 for q in graph.dispatches[y]:
                     call.emitter(q)(commands[q](view=view))
 
-            domain.policy(y, k, graph.dispatches[y], react)
+            domains[graph.domain(y)].policy(y, k, graph.dispatches[y], react)
 
     for m in graph.models:
         for k in graph.folds[m]:
-            domain.projection(f"{m}_{k}", k, lambda event, m=m: model[m].add(event.tag))
+            core = domains[graph.domains[0]]
+            core.projection(f"{m}_{k}", k, lambda event, m=m: model[m].append(event.tag))
 
-    return domain
+    return list(domains.values())
 
 
 def _cls(name: str) -> str:
@@ -155,12 +206,13 @@ def _cls(name: str) -> str:
 
 
 def _pool_domains(graph_json: str) -> list[Domain]:
-    return [build_domain(Graph.loads(graph_json))]
+    return build_domains(Graph.loads(graph_json))
 
 
 def pool_domains_for(graph: Graph) -> functools.partial:
-    """A picklable ``pool_domains``: pool procedures are query-free (rule 3), so the
-    worker's model is never read."""
+    """A picklable ``pool_domains``. A worker builds its own model: its own seeded copy
+    of every read-only model, and empty folded ones — which a pool procedure never reads
+    (rule 3: it reads nothing, or only read-only models)."""
     return functools.partial(_pool_domains, graph.dumps())
 
 
@@ -190,8 +242,8 @@ class Scenario:
 
 def random_scenario(rng: random.Random, pools: bool) -> Scenario:
     graph = random_graph(rng)
-    # Topology rule 3: only a procedure that reads nothing may be pooled.
-    eligible = [p for p in graph.procs if not graph.reads[p]]
+    # Topology rule 3: only a procedure that reads nothing that can change may be pooled.
+    eligible = [p for p in graph.procs if set(graph.reads[p]) <= set(graph.read_only)]
     pooled = [p for p in eligible if pools and rng.random() < 0.7]
     lanes = {"main": {"executor": "inline", "workers": 1}}
     if pooled:
@@ -213,15 +265,58 @@ class Crash(BaseException):
     Exception`` in the engine can swallow it."""
 
 
-def _crashing_engine(after: int):
-    from dizzy_topology_engine import TopologyEngine
+ORDER = "append-order.jsonl"
+"""Beside the stores: ``[domain, seq]`` per append, the order the host thread appended in
+ACROSS stores. Each store keeps only its own chain (Simple Engine §5.2), so the spec's one
+log is these chains, interleaved as recorded here."""
 
-    class CrashingEngine(TopologyEngine):
+
+class RecordingEngine(TopologyEngine):
+    """The topology engine, recording its cross-store append order (test instrumentation
+    only: the engine needs no such record, and keeps none). Every append is followed by a
+    crash point before anything else runs, so at each point at most one store has grown,
+    and recording there — before the point can crash — never misses or reorders one."""
+
+    def _point(self) -> None:
+        self.record_appends()
+        super()._point()
+
+    def record_appends(self) -> None:
+        path = self.data_dir / ORDER
+        if not hasattr(self, "_recorded"):
+            self._recorded = {}
+            if path.exists():
+                for line in path.read_text().splitlines():
+                    domain, seq = json.loads(line)
+                    self._recorded[domain] = seq
+        for name, store in self.stores.items():
+            head = store.scalar("SELECT max(seq) FROM events") or 0
+            if head > self._recorded.get(name, 0):
+                with path.open("a") as out:
+                    out.write(json.dumps([name, head]) + "\n")
+                self._recorded[name] = head
+
+
+def global_order(data: Path) -> list[tuple[str, int]]:
+    """Every event as ``(domain, seq)``, in the order the host thread appended them."""
+    order: list[tuple[str, int]] = []
+    seen: dict[str, int] = {}
+    path = data / ORDER
+    for line in path.read_text().splitlines() if path.exists() else []:
+        domain, head = json.loads(line)
+        order += [(domain, seq) for seq in range(seen.get(domain, 0) + 1, head + 1)]
+        seen[domain] = head
+    return order
+
+
+def _crashing_engine(after: int):
+    class CrashingEngine(RecordingEngine):
         """Dies at the *after*-th claim, append or enqueue — the points ``crash_at`` uses,
         each just after a transaction committed, so the store is left exactly as an
         ``os._exit`` there would leave it. Memory is dropped by never reusing the object."""
 
         def _point(self) -> None:
+            self.record_appends()
             self._points += 1
             if self._points == after:
                 raise Crash
@@ -237,21 +332,22 @@ def drive(
 
     *crash_at* is the engine's own (``os._exit``, for a child process); *crash_after*
     raises :class:`Crash` in-process at the same points."""
-    from dizzy_topology_engine import Placement, TopologyEngine
+    from dizzy_topology_engine import Placement
 
-    model: dict[str, set[str]] = {m: set() for m in scenario.graph.models}
-    domain = build_domain(scenario.graph, model)
-    cls = TopologyEngine if crash_after is None else _crashing_engine(crash_after)
+    model = fresh_model(scenario.graph)
+    domains = build_domains(scenario.graph, model)
+    commands = {k: v for d in domains for k, v in d.commands.items()}
+    cls = RecordingEngine if crash_after is None else _crashing_engine(crash_after)
     engine = cls(
         data,
-        [domain],
+        domains,
         Placement.parse(scenario.placement),
         pool_domains=pool_domains_for(scenario.graph),
         telemetry=False,
         crash_at=crash_at,
     )
     for n, p in enumerate(scenario.submissions):
-        engine.submit(domain.commands[p](), id=f"host/{n}")
+        engine.submit(commands[p](), id=f"host/{n}")
     engine.run()
     points = engine._points
     engine.close()

@@ -102,3 +102,77 @@ def test_a_real_process_crash_still_satisfies_the_spec(
 
     model, _ = drive(data, scenario)
     _assert(check_idle(scenario.graph, Store.read(data), model), seed, scenario)
+
+
+def test_the_seeds_reach_a_pooled_reader_of_a_read_only_model(tmp_path: Path) -> None:
+    """engine.qnt's witnessPooledReadOnly, on the real engine: the clean pooled seeds
+    must commit blocks of pooled procedures that read a read-only model — each from its
+    worker's own seeded copy — or the conformance runs above prove nothing about them."""
+    reached = 0
+    for seed in SEEDS:
+        scenario = random_scenario(random.Random(seed), True)
+        g = scenario.graph
+        commands = scenario.placement["commands"]
+        if not any(g.reads[p] and commands[p]["lane"] == "pool" for p in g.procs):
+            continue
+        drive(tmp_path / str(seed), scenario)
+        store = Store.read(tmp_path / str(seed))
+        reached += any(
+            commands[store.commands[e.command_id].proc]["lane"] == "pool" and e.view
+            for e in store.log
+        )
+    assert reached >= 3, f"only {reached} seeds ran a pooled read-only reader"
+
+
+def _harm_scenario(domain_of: dict[str, str]):
+    """engine.qnt's HARM_GRAPH: p2 emits e1; p1 emits e1 then e2; m1 folds e1; y1 reacts
+    to e2, reads m1 and dispatches p2. The host submits p2, then p1."""
+    from _graph_app import Graph, Scenario
+
+    graph = Graph(
+        procs=["p1", "p2"],
+        policies=["y1"],
+        models=["m1"],
+        kinds=["e1", "e2"],
+        reads={"p1": [], "p2": [], "y1": ["m1"]},
+        emits={"p1": ["e1", "e2"], "p2": ["e1"]},
+        folds={"m1": ["e1"]},
+        reacts={"y1": ["e2"]},
+        dispatches={"y1": ["p2"]},
+        interactive=[],
+        read_only=[],
+        domains=["d1", "d2"],
+        domain_of=domain_of,
+    )
+    lanes = {"main": {"executor": "inline", "workers": 1}}
+    placement = {"format": 1, "lanes": lanes, "default_lane": "main", "commands": {}}
+    return Scenario(graph, placement, ["p2", "p1"])
+
+
+@pytest.mark.parametrize(
+    ("p2_domain", "reordered"), [("d2", True), ("d1", False)], ids=["two_stores", "one_store"]
+)
+def test_a_reopen_reorders_a_model_fed_by_two_stores(
+    tmp_path: Path, p2_domain: str, reordered: bool
+) -> None:
+    """engine.qnt's reopenReordersTest / oneStoreKeepsOrderTest, on the real engine.
+
+    Crash at y1's enqueue while settling p1's e2 (crash point 7: two submits, then claim,
+    append, claim, append, enqueue): p1's e1 is settled, its e2 is not. The reopen refolds
+    the core store (d1) first, then the plugin's — so m1, fed by p2 in d2 and p1 in d1,
+    comes back as [p1's e1, p2's e1], out of append order, and y1 re-settles e2 reading it.
+    With both procedures in one store the refold is in append order."""
+    scenario = _harm_scenario({"p1": "d1", "p2": p2_domain, "y1": "d1"})
+    with pytest.raises(Crash):
+        drive(tmp_path, scenario, crash_after=7)
+    store = Store.read(tmp_path)
+    settled = [store.settled(e) for e in store.log]
+    assert [e.kind for e in store.log] == ["e1", "e1", "e2"] and settled == [True, True, False]
+
+    model, _ = drive(tmp_path, scenario)  # reopen and drain
+    pos = {e.tag: e.pos for e in Store.read(tmp_path).log}
+    m1 = [pos[t] for t in model["m1"]]
+    assert m1[:2] == ([1, 0] if reordered else [0, 1]), m1
+    assert (
+        check_idle(scenario.graph, Store.read(tmp_path), model) == []
+    )  # rule 7 is about decisions

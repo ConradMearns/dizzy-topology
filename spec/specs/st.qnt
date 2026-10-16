@@ -61,7 +61,7 @@ module st {
     nondet interactive = INTERACTIVE.oneOf()
     nondet gd = Set(true, false).oneOf()
     all {
-      g' = { reads: reads, emits: emits, folds: folds, reacts: reacts, dispatches: dispatches, interactive: interactive },
+      g' = { reads: reads, emits: emits, folds: folds, reacts: reacts, dispatches: dispatches, interactive: interactive, readOnly: Set(), domainOf: ONE_DOMAIN },
       guarded' = gd,
       queue' = [], log' = [], cursor' = 0, models' = emptyView, ran' = Set(), submitted' = 0, noops' = 0,
     }

@@ -1,5 +1,5 @@
 """``dizzy-topology`` — the build-time verbs: check a topology, resolve it to placement
-data for the engine, and profile a captured run.
+data for the engine, install the engine into a generated app, and profile a captured run.
 
 Ported from the ``engine-topology-v2`` branch of DIZZY, where the check ran inside
 ``dizzy generate wiring`` and ``profile`` was a ``dizzy`` verb.
@@ -20,6 +20,7 @@ from dizzy_topology.placement import resolve_placement
 from dizzy_topology.profiler import parse_records, render_profile
 from dizzy_topology.topology_loader import load_topology, validate_topology
 from dizzy_topology.topology_schema import Topology
+from dizzy_topology.vendor import VendorError, vendor
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -96,6 +97,22 @@ def place(
         logger.info("Wrote %s — %d lanes", output, len(placement["lanes"]))
 
 
+@app.command(name="vendor")
+def vendor_engine(
+    app_dir: Annotated[
+        Path, typer.Argument(help="The app's output directory, as given to `dizzy generate`")
+    ],
+) -> None:
+    """Install the topology engine into an app's generated lib/python-uv workspace, as
+    `dizzy generate wiring` installs the Simple Engine. Run it after `generate wiring`."""
+    try:
+        target = vendor(app_dir)
+    except VendorError as exc:
+        logger.error("%s", exc)
+        raise typer.Exit(code=1) from exc
+    logger.info("Vendored the topology engine into %s — `uv sync` installs it", target)
+
+
 @app.command()
 def profile(
     feat_file: Annotated[Path, typer.Argument(help="Path to the .feat.yaml file")],
@@ -103,10 +120,20 @@ def profile(
         Path,
         typer.Argument(help="JSONL bus capture written by a JsonlBusSink during the run"),
     ],
+    topology_file: Annotated[
+        Path | None,
+        typer.Option(
+            "--topology",
+            help="The topology.yaml: its read_only_models make their readers pool-eligible",
+        ),
+    ] = None,
 ) -> None:
     """Stage profile of a captured run: where the wall clock went per element, policy
     fan-out, and whether the workload is serial-bound or pool-eligible."""
     feat = _load_valid_feat(feat_file)
+    read_only: list[str] = []
+    if topology_file is not None:
+        read_only = _load_valid_topology(topology_file, feat).read_only_models or []
     try:
         # errors="replace": one binary-garbage byte (a crashed writer, shell noise) must
         # cost that line — parse_records skips and counts it — never the whole capture.
@@ -124,7 +151,7 @@ def profile(
         logger.error("no parseable records in %s — is it a JsonlBusSink capture?", capture)
         raise typer.Exit(code=1)
 
-    typer.echo(render_profile(feat, records))
+    typer.echo(render_profile(feat, records, read_only))
 
 
 def main() -> None:

@@ -1,9 +1,11 @@
 """The child side of a pool lane: run one procedure, return what it emitted.
 
 A pool child is a PURE function of its command. It holds no store, appends nothing,
-dispatches nothing, and never sees the read model: the build only lets a query-free
-procedure into a pool (topology rule 3), and the parent — the one writer — appends what
-the child returns. So a child that dies mid-procedure has written nothing anywhere.
+dispatches nothing, and never sees the read model: the build only lets a procedure into a
+pool that reads nothing the log folds (topology rule 3) — it declares no queries, or
+queries only READ-ONLY models, reference data that never changes, which the child opens
+its own read-only copy of. The parent — the one writer — appends what the child returns.
+So a child that dies mid-procedure has written nothing anywhere.
 
 The child cannot be handed the host's ``Domain``: its procedures close over the host's
 resources and do not pickle. The host instead names a module-level factory
@@ -51,9 +53,34 @@ class Outcome:
     emitted: list[tuple[str, dict[str, Any]]]
     """``(event name, payload dict)`` in emit order; empty unless ``done``."""
     procedure_ms: float
+    # Telemetry, on the worker's wall clock (``time.time_ns``, comparable with the host's
+    # on one machine). Zero when no worker ran it (a pool that broke).
+    started_ns: int = 0
+    finished_ns: int = 0
+    pid: int = 0
+    worker_start: tuple[int, int] | None = None
+    """This worker's start, ``(process started, tables built)`` — on its first job only."""
 
 
 _TABLES: dict[str, tuple[Procedure, type[BaseModel], dict[str, type[BaseModel]]]] = {}
+_STARTED: list[tuple[int, int]] = []  # this worker's start, until its first job reports it
+
+
+def _process_start_ns() -> int:
+    """When this process started, on the wall clock: from /proc on Linux (to a clock tick,
+    ~10 ms), otherwise when this module was imported (after interpreter startup)."""
+    imported = time.time_ns()
+    try:
+        stat = open("/proc/self/stat").read()  # noqa: SIM115 — read once, at import
+        started_ticks = int(stat.rsplit(")", 1)[1].split()[19])  # field 22: starttime
+        uptime = float(open("/proc/uptime").read().split()[0])  # noqa: SIM115
+        age = uptime - started_ticks / os.sysconf("SC_CLK_TCK")
+        return imported - int(max(age, 0.0) * 1e9)
+    except (OSError, ValueError, IndexError):
+        return imported
+
+
+_PROCESS_START = _process_start_ns()
 
 
 def _exit_with_parent() -> None:
@@ -79,11 +106,13 @@ def init_worker(pool_domains: Callable[[], Sequence[Domain]]) -> None:
     for domain in pool_domains():
         for proc in domain.procedures:
             _TABLES[proc.command] = (proc, domain.commands[proc.command], dict(domain.events))
+    _STARTED[:] = [(_PROCESS_START, time.time_ns())]
 
 
 def run_job(job: Job) -> Outcome:
     """Run *job*'s procedure exactly as the Simple Engine's ``_unit`` does, minus the
     append — that is the parent's."""
+    started_ns = time.time_ns()
     started = time.perf_counter()
     status, reason, error, emitted = "done", None, None, []
     try:
@@ -106,4 +135,16 @@ def run_job(job: Job) -> Outcome:
             ]
     except Exception as exc:
         status, error, emitted = "failed", f"{type(exc).__name__}: {exc}", []
-    return Outcome(status, reason, error, emitted, (time.perf_counter() - started) * 1000)
+    elapsed_ns = int((time.perf_counter() - started) * 1e9)  # one figure for both fields
+    worker_start = _STARTED.pop() if _STARTED else None
+    return Outcome(
+        status,
+        reason,
+        error,
+        emitted,
+        elapsed_ns / 1e6,
+        started_ns,
+        started_ns + elapsed_ns,
+        os.getpid(),
+        worker_start,
+    )

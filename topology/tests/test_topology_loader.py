@@ -3076,3 +3076,116 @@ def test_validate_priority_needs_no_procedure_to_be_placed_anywhere_special(
         )
     )
     assert validate_topology(topology, _one_procedure_feat()) == []
+
+
+# --- read-only models -----------------------------------------------------------------
+
+
+def _reference_feat() -> FeatureDefinition:
+    """A procedure and a policy reading reference data nothing folds, and a procedure
+    reading both that and a model a projection folds."""
+    return _feat(
+        models=[{"name": "elements"}, {"name": "batches"}],
+        queries=[
+            {"name": "get_element", "description": "d", "model": "elements"},
+            {"name": "get_batch", "description": "d", "model": "batches"},
+        ],
+        procedures=[
+            {"name": "weigh_sample", "command": "weigh", "queries": ["get_element"]},
+            {
+                "name": "close_batch",
+                "command": "close",
+                "queries": ["get_element", "get_batch"],
+            },
+        ],
+        policies=[{"name": "flag_heavy", "event": "sample_weighed", "queries": ["get_element"]}],
+        projections=[
+            {"name": "batch_ledger", "description": "d", "event": "e", "model": "batches"}
+        ],
+    )
+
+
+def _reference_topology(tmp_path: Path, read_only: str) -> Topology:
+    return load_topology(
+        _write(
+            tmp_path,
+            f"""
+            read_only_models: {read_only}
+            groups:
+              - name: main
+                catch_all: true
+              - name: lookups
+                include:
+                  - {{kind: procedures, names: [weigh_sample]}}
+                executor: pool
+                workers: 4
+              - name: flags
+                include:
+                  - {{kind: policies, names: [flag_heavy]}}
+                workers: 3
+            """,
+        )
+    )
+
+
+def test_read_only_models_let_their_readers_partition(tmp_path: Path) -> None:
+    """A read of a model that never changes is no read-modify-write: a procedure whose
+    every query reads reference data may go to a pool, and such a policy may run wide."""
+    topology = _reference_topology(tmp_path, "[elements]")
+    assert topology.read_only_models == ["elements"]
+    assert validate_topology(topology, _reference_feat()) == []
+
+
+def test_without_the_declaration_rule_3_still_pins_them(tmp_path: Path) -> None:
+    """Nothing folding a model is not enough on its own: only the deployment can promise
+    nothing outside the stream writes it, so an undeclared model keeps rule 3."""
+    errors = validate_topology(_reference_topology(tmp_path, "[]"), _reference_feat())
+    assert len(errors) == 2, errors
+    assert any("'lookups'" in e and "weigh_sample" in e and "get_element" in e for e in errors)
+    assert any("'flags'" in e and "flag_heavy" in e for e in errors)
+
+
+def test_a_reader_of_a_mutable_model_too_stays_pinned(tmp_path: Path) -> None:
+    """Read-only reads are exempt, not the reader: a procedure that also queries a
+    folded model is still a read-modify-write, and the message names that query only."""
+    topology = load_topology(
+        _write(
+            tmp_path,
+            """
+            read_only_models: [elements]
+            groups:
+              - name: main
+                catch_all: true
+              - name: closers
+                include:
+                  - {kind: procedures, names: [close_batch]}
+                  - {kind: projections, names: [batch_ledger]}
+                workers: 2
+            """,
+        )
+    )
+    errors = validate_topology(topology, _reference_feat())
+    assert any("batch_ledger" in e for e in errors), errors  # rule 1, the fold
+    topology.groups[1].include = topology.groups[1].include[:1]
+    errors = validate_topology(topology, _reference_feat())
+    rule3 = [e for e in errors if "must run serially" in e]
+    assert len(rule3) == 1 and "'get_batch'" in rule3[0], errors
+    assert "get_element" not in rule3[0]
+
+
+def test_read_only_model_must_be_declared(tmp_path: Path) -> None:
+    errors = validate_topology(_reference_topology(tmp_path, "[elemnts]"), _reference_feat())
+    assert errors == [
+        "topology read_only_models names 'elemnts', not declared in models",
+    ]
+
+
+def test_read_only_model_must_not_be_folded(tmp_path: Path) -> None:
+    """A fold is an update. Declaring a folded model read-only would let a pool reader
+    decide on whatever the fold had reached — engine.qnt's mutant of exactly this breaks
+    freshReads — so it is refused, naming the projection."""
+    errors = validate_topology(
+        _reference_topology(tmp_path, "[elements, batches]"), _reference_feat()
+    )
+    assert len(errors) == 1, errors
+    assert "'batches'" in errors[0] and "projection 'batch_ledger'" in errors[0]

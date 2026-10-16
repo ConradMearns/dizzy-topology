@@ -34,6 +34,11 @@ CHECKS = [
   ("engine.qnt", "invariant", "idsDistinct",      "ok", "E10 one row per command id (INSERT OR IGNORE)"),
   ("engine.qnt", "invariant", "memorySound",      "ok", "E11 the host's in-flight units are rows really running; pools within their width"),
   ("engine.qnt", "invariant", "noLostWork",       "ok", "E12 an idle engine has finished every command"),
+  ("engine.qnt", "invariant", "readOnlyConstant", "ok", "E13 read-only models never change: nothing folds them, and every reader of one — pooled too — read exactly the seed"),
+  ("engine.qnt", "invariant", "oneStoreUnsettled", "ok", "E14 at most one domain's store is unsettled, its events the last appended: per-store cursors are the global prefix"),
+  ("engine.qnt", "invariant", "foldSeqSound",     "ok", "E15 the fold-order ghost is the read model, ordered: each folded event once"),
+  ("engine.qnt", "invariant", "liveFoldsInOrder", "ok", "E16 live, every model folds in append order: reordering needs a reopen"),
+  ("engine.qnt", "invariant", "readsInLogOrder",  "ok", "E17 under rule 7 (a model fed by two stores is order-free) no decision is taken on a model folded out of append order"),
   ("engine.qnt", "witness",   "witnessCascade",          "violation", "a policy-dispatched command ran"),
   ("engine.qnt", "witness",   "witnessReader",           "violation", "a procedure observed a non-empty model"),
   ("engine.qnt", "witness",   "witnessPooledRun",        "violation", "a pooled procedure's block was committed"),
@@ -46,7 +51,15 @@ CHECKS = [
   ("engine.qnt", "witness",   "witnessFailed",           "violation", "an element raised; its attempt failed and appended nothing"),
   ("engine.qnt", "witness",   "witnessRetried",          "violation", "a failure was retried by the host and the run finished clean"),
   ("engine.qnt", "witness",   "witnessBound",            "violation", "the log bound was reached (cascades are bounded, not absent)"),
-  ("engine.qnt", "witness",   "witnessStalePool",        "violation", "rule 3 is NECESSARY: a pooled reader decided on a stale model"),
+  ("engine.qnt", "witness",   "witnessPooledReadOnly",   "violation", "rule 3 admits a reader of read-only models to a pool, and it ran there"),
+  ("engine.qnt", "witness",   "witnessTwoStores",        "violation", "both domains' stores hold events"),
+  ("engine.qnt", "witness",   "witnessCrossDomain",      "violation", "a policy of one domain dispatched a command the other domain's procedure ran"),
+  ("engine.qnt", "reopen",    "allInvariants",           "ok", "every invariant, sampled where reopens reorder (engineReopen: a model fed by both stores, crashes after folds)"),
+  ("engine.qnt", "reopen",    "not(witnessReorderedRead)", "violation", "THE HARM is reachable by sampling there too: a decision on a model refolded out of append order"),
+  ("engine.qnt", "scenario",  "reopenReordersTest",      "ok", "THE HARM (witnessReorderedRead): a reopen refolds a model fed by two stores out of order, and a policy decides on it"),
+  ("engine.qnt", "scenario",  "orderFreeAbsorbsTest",    "ok", "the same reopen with the model declared order-free (witnessOrderFreeReordered): rule 7 holds, nothing misread"),
+  ("engine.qnt", "scenario",  "oneStoreKeepsOrderTest",  "ok", "the same run with both procedures in one store: the reopen refolds in append order"),
+  ("engine.qnt", "witness",   "witnessStalePool",        "violation", "rule 3 is NECESSARY: a pooled reader of a mutable model decided on a stale one"),
   ("engine.qnt", "verify",    "allInvariants",           "ok", "Apalache: all invariants, every graph × placement, 5 steps"),
 
   ("st.qnt", "invariant", "zeroLag",          "ok", "I1 no lag: cursor == log.length()"),
@@ -99,7 +112,14 @@ CHECKS = [
 ]
 
 def run(spec, kind, target):
-  if kind == "verify":
+  if kind == "reopen":
+    cmd = [QUINT, "run", spec, "--main=engineReopen", "--init=initCrossStore", "--step=reopenStep",
+           f"--invariant={target}", f"--max-samples={SAMPLES}", "--max-steps=20", "--seed=7"]
+    timeout = 900
+  elif kind == "scenario":
+    cmd = [QUINT, "test", spec, "--main=engine", f"--match=^{target}$"]
+    timeout = 300
+  elif kind == "verify":
     depth = {"st.qnt": "4", "engine.qnt": "5"}.get(spec, "3")
     cmd = [QUINT, "verify", spec, f"--invariant={target}", f"--max-steps={depth}"]
     timeout = 3000
@@ -117,6 +137,8 @@ def run(spec, kind, target):
   secs = round(time.time() - t0, 1)
   m = re.search(r"^\[(ok|violation)\]", out, re.M)
   result = m.group(1) if m else ("deadlock" if "deadlock" in out else "error")
+  if kind == "scenario":
+    result = "ok" if re.search(r"\b1 passing\b", out) and "failing" not in out else "failed"
   log = LOGS / f"{spec}.{kind}.{target}.log"
   log.write_text(" ".join(cmd) + "\n\n" + out)
   # keep the last state of a counterexample for the report

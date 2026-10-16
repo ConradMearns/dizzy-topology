@@ -500,6 +500,7 @@ version = "0.1.0"
 source = { editable = "topology" }
 dependencies = [
     { name = "dizzy" },
+    { name = "dizzy-topology-engine" },
     { name = "pydantic" },
     { name = "pyyaml" },
     { name = "typer" },
@@ -508,6 +509,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "dizzy", editable = "ext/dizzy" },
+    { name = "dizzy-topology-engine", editable = "engine" },
     { name = "pydantic", specifier = ">=2.0" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "typer", specifier = ">=0.20.0" },

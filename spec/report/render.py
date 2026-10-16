@@ -20,9 +20,11 @@ SPEC_INTRO = {
   "engine.qnt": ("Spec 4 — the topology engine (as shipped)",
     "The Simple Engine with lanes: an inline lane on the host thread and a process-pool lane, over the Simple Engine "
     "store. Every transaction boundary is its own step — claim, append+ack, fold+enqueue, cursor — and a crash may fall "
-    "between any two, losing the read model and in-flight pool work but never the store. Graph and rule-3 placement are "
-    "drawn at <code>init</code>. Headline: exactly-once effects hold <em>unconditionally</em> (st needed an application "
-    "guard), and reads stay fresh with pools although the log leaves claim order. The Python engine is held to the same "
+    "between any two, losing the read model and in-flight pool work but never the store. Graph, read-only models and "
+    "rule-3 placement are drawn at <code>init</code>. Headline: exactly-once effects hold <em>unconditionally</em> (st "
+    "needed an application guard), reads stay fresh with pools although the log leaves claim order, read-only "
+    "reference models never change, so their readers may be pooled, and a core domain and a plugin, each with its "
+    "own store, recover store by store to the same state. The Python engine is held to the same "
     "invariants by <code>engine/tests/test_spec_conformance.py</code>."),
   "st.qnt": ("Spec 1 — single-threaded engine",
     "One hybrid group, one lane, one cursor. <code>run_command</code> is a single atomic step: "
@@ -38,11 +40,12 @@ SPEC_INTRO = {
 
 def badge(c):
     if c["passed"]:
-        return f'<span class="pill pass">{"holds" if c["kind"]!="witness" else "reachable"}</span>'
+        reached = c["kind"] == "witness" or c["expect"] == "violation"
+        return f'<span class="pill pass">{"reachable" if reached else "holds"}</span>'
     return f'<span class="pill fail">{esc(c["result"])}</span>'
 
 def kind_label(k):
-    return {"invariant": "invariant · simulation", "witness": "witness · reachability", "verify": "Apalache · bounded"}[k]
+    return {"invariant": "invariant · simulation", "witness": "witness · reachability", "verify": "Apalache · bounded", "scenario": "scenario · quint test", "reopen": "reopen · biased sampling"}[k]
 
 def table(spec):
     rows = [c for c in checks if c["spec"] == spec]
@@ -177,6 +180,8 @@ Generated {esc(meta['generated'])} · quint {esc(meta['quint'])} · dizzy @ <cod
 <dl class="method">
 <dt>invariant · simulation</dt><dd>Random traces from the nondeterministic step relation; a violation prints a concrete counterexample.</dd>
 <dt>witness · reachability</dt><dd>Runs <code>--invariant=not(X)</code>. A violation is the desired outcome: it is a trace that reaches X, proving the invariants are not vacuous.</dd>
+<dt>reopen · biased sampling</dt><dd>Simulation of <code>engineReopen</code> from <code>initCrossStore</code> with <code>reopenStep</code>: only graphs where a model is fed by both stores and read, and reopens only once something is folded — the region where a reopen can reorder a fold. Every behaviour sampled is one the plain spec has.</dd>
+<dt>scenario · quint test</dt><dd>A scripted <code>run</code>: a behaviour too precise for random sampling to find (the reopen harm), stepped through and checked at its end.</dd>
 <dt>Apalache · bounded</dt><dd>Symbolic model checking of every behaviour up to the stated depth, across every graph (and placement) the <code>init</code> can draw.</dd>
 </dl>
 {''.join(sections)}

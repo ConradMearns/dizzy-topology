@@ -16,6 +16,7 @@ after the run, possibly on another machine.
 import json
 import math
 from collections import Counter
+from collections.abc import Collection
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -25,7 +26,8 @@ from dizzy.validation import pascal_case as _pascal
 # The bucket split of the bottleneck statement. Projections and policies observe the
 # stream and so never leave the fold lane; a procedure joins them the moment it declares
 # a query (topology rules 3 and 6 — a reader shares a group with what it reads). Only a
-# query-free procedure computes from its command alone and may move to a pool lane.
+# query-free procedure computes from its command alone and may move to a pool lane — or
+# one whose every query reads a model the topology declares read-only, which never changes.
 _SERIAL_KINDS = ("projection", "policy")
 _ELEMENT_KINDS = ("procedure", "projection", "policy", "query")
 _WORKER_COUNTS = (2, 4, 8)
@@ -67,13 +69,20 @@ def command_owner(feat: FeatureDefinition) -> dict[str, str]:
     return {_pascal(p.command): p.name for p in feat.procedures or []}
 
 
-def procedure_queries(feat: FeatureDefinition) -> dict[str, list[str]]:
-    """Map each procedure's feat name to the queries it declares — its pool eligibility.
+def procedure_queries(
+    feat: FeatureDefinition, read_only: Collection[str] = ()
+) -> dict[str, list[str]]:
+    """Map each procedure's feat name to the queries it declares over a model that can
+    change — its pool eligibility. Queries over *read_only* models are left out.
 
     A procedure with an empty list partitions freely; a non-empty list is the exact
     reason it cannot leave the fold lane, so the report prints the list, not a bare "no".
     """
-    return {p.name: list(p.queries or []) for p in feat.procedures or []}
+    query_model = {q.name: q.model for q in feat.queries or []}
+    return {
+        p.name: [q for q in p.queries or [] if query_model.get(q) not in read_only]
+        for p in feat.procedures or []
+    }
 
 
 @dataclass
@@ -162,16 +171,19 @@ def aggregate(feat: FeatureDefinition, records: list[dict]) -> Profile:
     )
 
 
-def bottleneck_totals(feat: FeatureDefinition, profile: Profile) -> tuple[float, float]:
+def bottleneck_totals(
+    feat: FeatureDefinition, profile: Profile, read_only: Collection[str] = ()
+) -> tuple[float, float]:
     """The two totals of the bottleneck statement: ``(serial_bound_ms, pool_eligible_ms)``.
 
     Serial-bound is every projection, every policy, and every procedure that declares
-    queries — the work topology rules 3 and 6 pin to the fold lane. Pool-eligible is the
-    rest of the procedures. A procedure the feat does not declare (a stale capture, or a
+    queries over a model that can change — the work topology rules 3 and 6 pin to the fold
+    lane. Pool-eligible is the rest of the procedures, including those that query only
+    *read_only* models. A procedure the feat does not declare (a stale capture, or a
     capture from a different feature) is counted serial-bound: eligibility is a promise
     read from the feat, and an element the feat cannot vouch for gets none.
     """
-    queries = procedure_queries(feat)
+    queries = procedure_queries(feat, read_only)
     serial = 0.0
     eligible = 0.0
     for (kind, name), stats in profile.elements.items():
@@ -231,15 +243,19 @@ def _table(headers: list[str], rows: list[list[str]], numeric_from: int) -> list
     return [render(headers), render(["-" * w for w in widths])] + [render(r) for r in rows]
 
 
-def render_profile(feat: FeatureDefinition, records: list[dict]) -> str:
+def render_profile(
+    feat: FeatureDefinition, records: list[dict], read_only: Collection[str] = ()
+) -> str:
     """Render the stage profile of *records* against *feat* as a plain-text report.
 
     The layout is the requirements doc's (``dizzy docs cli``, "dizzy profile"): capture
     span, the per-element table sorted by total time, fan-out counts, then the
-    bottleneck statement — the one fact a topology decision needs first.
+    bottleneck statement — the one fact a topology decision needs first. *read_only* is
+    the topology's read-only models: a procedure querying only those is pool-eligible.
     """
     profile = aggregate(feat, records)
-    queries = procedure_queries(feat)
+    queries = procedure_queries(feat, read_only)
+    declared = procedure_queries(feat)
     lines: list[str] = []
 
     # -- 1. Header -------------------------------------------------------------------
@@ -265,6 +281,8 @@ def render_profile(feat: FeatureDefinition, records: list[dict]) -> str:
             eligible = "?"  # the feat does not declare this procedure
         elif queries[stats.name]:
             eligible = f"no (queries: {', '.join(queries[stats.name])})"
+        elif declared[stats.name]:
+            eligible = f"yes (read-only: {', '.join(declared[stats.name])})"
         else:
             eligible = "yes"
         timed = stats.durations
@@ -332,13 +350,14 @@ def render_profile(feat: FeatureDefinition, records: list[dict]) -> str:
     lines.append("")
 
     # -- 4. The bottleneck statement ---------------------------------------------------
-    serial, eligible_ms = bottleneck_totals(feat, profile)
+    serial, eligible_ms = bottleneck_totals(feat, profile, read_only)
     lines.append("Bottleneck:")
     lines.append(
         f"  serial-bound   {_fmt_ms(serial)} ms"
         "  (projections + policies + querying procedures — pinned to the fold lane)"
     )
-    lines.append(f"  pool-eligible  {_fmt_ms(eligible_ms)} ms  (query-free procedures)")
+    free = "query-free procedures" + (", and readers of read-only models" if read_only else "")
+    lines.append(f"  pool-eligible  {_fmt_ms(eligible_ms)} ms  ({free})")
     for workers in _WORKER_COUNTS:
         lines.append(f"    / {workers} workers  {_fmt_ms(eligible_ms / workers)} ms")
     if serial == 0.0 and eligible_ms == 0.0:

@@ -25,6 +25,16 @@ DIZZY's `engine-topology-v2` branch. `docs/topology.md` is the design.
 - `topology/src/dizzy_topology/topology_schema.py` is generated. Edit
   `def/topology.yaml` and run `just gen-topology-pydantic`.
 
+## Telemetry
+
+The engine's spans are the Simple Engine's trace (spec §9) plus lanes, pools and workers,
+and two up/down counters per lane (`dizzy.lane.queued`, `dizzy.lane.in_flight`;
+`docs/telemetry.md`). Two rules: no decision ever reads telemetry (the `_claims` and
+`_pool_spans` bookkeeping and the counters are write-only), and the engine reaches past the tracer's `span`
+only in `engine/src/dizzy_topology_engine/telemetry.py`. `engine/tests/test_telemetry.py`
+pins the span tree. A worker reports its times in `Outcome`, never through telemetry
+of its own.
+
 ## The spec is part of the engine
 
 `spec/specs/engine.qnt` specifies `engine/src/dizzy_topology_engine` at the level of its
@@ -36,6 +46,19 @@ store transactions. **Change one, change the other in the same commit.**
 - `engine/tests/_spec.py` ports the Quint invariants to Python, checked against the real
   engine's store by `test_spec_conformance.py`. A new invariant in `engine.qnt` gets a
   port there.
+- `engine/tests/test_mbt.py` replays Quint's traces of `engine.qnt` on the real engine
+  and compares the state after **every step** (`_mbt.py`). Each spec action ends at one
+  engine pause (`_ENDS_AT`), and `Driver.abstract` maps the engine to the spec's
+  variables. A new spec variable or action needs both updated. A replay failure names the
+  step where the engine and the spec diverged. Fix whichever one is wrong. Don't loosen
+  the comparison.
+- With several domains the spec's `log` is the append order ACROSS stores, which the
+  engine never records (each store keeps its own chain). The test engines record it
+  (`_graph_app.RecordingEngine`, `append-order.jsonl` beside the stores) so `_spec.py` and
+  `_mbt.py` can interleave the stores. Test instrumentation only: never add it to the
+  engine.
+- `engine.qnt` is `engineSpec` with its bounds as constants, instantiated as `engine`
+  (proved; the default main) and `engineNarrow` (a one-wide pool, for the replay).
 - A spec change that weakens an invariant needs a reason in the commit message. Proving
   less is a design decision, not a fix.
 - Crash coverage is a sweep, never a sample: a bug between two transactions is one crash
@@ -64,8 +87,10 @@ DIZZY is a git submodule at `ext/dizzy`. Its commit pointer is the version pin.
 
 ## Quality gates
 
-`just test` (both packages, including the spec conformance sweep), `just lint`,
-`just spec-engine`, `just foogle` (DIZZY's conformance scenario on
+`just test` (both packages, including the spec conformance sweep and the step-by-step
+replay of the spec's traces, which needs `quint` on `PATH`), `just lint`,
+`just spec-engine`, `just assay` (the worked example, installed into a generated app
+with `dizzy-topology vendor`), `just foogle` (DIZZY's conformance scenario on
 the topology engine: inline must match the golden log byte for byte; pooled must hold its
 facts, crash runs included). `just test-update` re-snapshots intentionally.
 

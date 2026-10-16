@@ -1,0 +1,19 @@
+id: https://example.org/models/panel
+name: panel
+description: >-
+  The classifier's reference panel: score cutoffs per label. Reference data — the host
+  seeds it before the engine opens and nothing writes it while the engine runs. No
+  projection folds it, and the topology declares it read-only (read_only_models).
+prefixes:
+  linkml: https://w3id.org/linkml/
+default_range: string
+imports:
+  - linkml:types
+classes:
+  Cutoff:
+    description: The lowest score a panel gives one label
+    attributes:
+      cutoff_id: { range: string, required: true, identifier: true }
+      panel: { range: string, required: true }
+      label: { range: string, required: true }
+      min_score: { range: decimal, required: true }

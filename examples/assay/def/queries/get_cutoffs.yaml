@@ -1,0 +1,22 @@
+id: https://example.org/queries/get_cutoffs
+name: get_cutoffs
+description: A reference panel's cutoffs, highest first
+prefixes:
+  linkml: https://w3id.org/linkml/
+default_range: string
+imports:
+  - linkml:types
+classes:
+  GetCutoffsInput:
+    description: Input for get_cutoffs
+    attributes:
+      panel: { range: string, required: true }
+  GetCutoffsOutput:
+    description: Output for get_cutoffs — parallel lists, highest min_score first
+    attributes:
+      labels:
+        range: string
+        multivalued: true
+      min_scores:
+        range: decimal
+        multivalued: true

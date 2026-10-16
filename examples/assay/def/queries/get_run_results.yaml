@@ -1,0 +1,28 @@
+id: https://example.org/queries/get_run_results
+name: get_run_results
+description: Every folded metric and classification for a run, as parallel lists
+prefixes:
+  linkml: https://w3id.org/linkml/
+default_range: string
+imports:
+  - linkml:types
+classes:
+  GetRunResultsInput:
+    description: Input for get_run_results
+    attributes:
+      run_id: { range: string, required: true }
+  GetRunResultsOutput:
+    description: Output for get_run_results — parallel lists ordered by sample_id
+    attributes:
+      sample_ids:
+        range: string
+        multivalued: true
+      metrics:
+        range: decimal
+        multivalued: true
+      labels:
+        range: string
+        multivalued: true
+      scores:
+        range: decimal
+        multivalued: true

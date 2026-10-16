@@ -34,6 +34,10 @@ class WhoAmI(BaseModel):
     tag: str
 
 
+class Die(BaseModel):
+    """Kill the process running the procedure: in a pool, the worker dies mid-job."""
+
+
 class Started(BaseModel):
     n: int
 
@@ -63,6 +67,7 @@ def build_domain(model: dict | None = None) -> Domain:
             "slow": Slow,
             "fail": Fail,
             "who_am_i": WhoAmI,
+            "die": Die,
         },
         events={
             "started": Started,
@@ -88,6 +93,9 @@ def build_domain(model: dict | None = None) -> Domain:
     def who_am_i(command, call):
         call.emitter("ran")(Ran(tag=command.tag, pid=os.getpid()))
 
+    def die(command, call):
+        os._exit(1)
+
     def fan_out(event, call):
         for i in range(event.n):
             call.emitter("square")(Square(i=i))
@@ -104,6 +112,7 @@ def build_domain(model: dict | None = None) -> Domain:
     domain.procedure("slow", "slow", ["slow_done"], slow)
     domain.procedure("fail", "fail", [], fail)
     domain.procedure("who_am_i", "who_am_i", ["ran"], who_am_i)
+    domain.procedure("die", "die", [], die)
     domain.policy("fan_out", "started", ["square"], fan_out)
     domain.projection("total", "squared", total)
     domain.projection("record_pid", "ran", record_pid)

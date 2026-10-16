@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-10-14 10:35:43",
+    "generated": "2026-10-14 17:38:47",
     "quint": "0.32.0",
     "samples": "8000",
     "dizzy": "1527342d"
@@ -13,7 +13,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 5.2,
+      "seconds": 7.6,
       "note": "E1 the read model is a fold of the log, across crashes (refold on open)",
       "log": "logs/engine.qnt.invariant.modelsAreFold.log",
       "trace": null
@@ -25,7 +25,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 5.2,
+      "seconds": 7.0,
       "note": "E2 the cursor never claims ground the read model has not covered",
       "log": "logs/engine.qnt.invariant.cursorSound.log",
       "trace": null
@@ -37,7 +37,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 6.0,
+      "seconds": 8.2,
       "note": "E3 every run leaves one complete, contiguous, ordered block",
       "log": "logs/engine.qnt.invariant.blocksWellFormed.log",
       "trace": null
@@ -49,7 +49,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 5.5,
+      "seconds": 7.3,
       "note": "E4 EXACTLY-ONCE effects, unconditionally: append and ack are one transaction",
       "log": "logs/engine.qnt.invariant.effectsOnce.log",
       "trace": null
@@ -61,7 +61,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 7.1,
+      "seconds": 8.9,
       "note": "E5 a block's command is done; a done command has its block; nothing else appended",
       "log": "logs/engine.qnt.invariant.ackAtomic.log",
       "trace": null
@@ -73,7 +73,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 5.8,
+      "seconds": 7.0,
       "note": "E6 policy-dispatched effects follow a trigger the policy reacts to",
       "log": "logs/engine.qnt.invariant.causal.log",
       "trace": null
@@ -85,7 +85,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 6.2,
+      "seconds": 7.9,
       "note": "E7 with rule 3, every procedure read the fold of everything before its block \u2014 pools included",
       "log": "logs/engine.qnt.invariant.freshReads.log",
       "trace": null
@@ -97,7 +97,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 7.5,
+      "seconds": 7.4,
       "note": "E8 every dispatching policy read exactly the fold through its trigger, across crashes",
       "log": "logs/engine.qnt.invariant.freshDispatch.log",
       "trace": null
@@ -109,7 +109,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 7.3,
+      "seconds": 8.1,
       "note": "E8' the same, for commands still queued",
       "log": "logs/engine.qnt.invariant.freshQueue.log",
       "trace": null
@@ -133,7 +133,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 6.2,
+      "seconds": 7.0,
       "note": "E10 one row per command id (INSERT OR IGNORE)",
       "log": "logs/engine.qnt.invariant.idsDistinct.log",
       "trace": null
@@ -145,7 +145,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 5.6,
+      "seconds": 7.5,
       "note": "E11 the host's in-flight units are rows really running; pools within their width",
       "log": "logs/engine.qnt.invariant.memorySound.log",
       "trace": null
@@ -157,9 +157,69 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 6.7,
+      "seconds": 6.9,
       "note": "E12 an idle engine has finished every command",
       "log": "logs/engine.qnt.invariant.noLostWork.log",
+      "trace": null
+    },
+    {
+      "spec": "engine.qnt",
+      "kind": "invariant",
+      "target": "readOnlyConstant",
+      "expect": "ok",
+      "result": "ok",
+      "passed": true,
+      "seconds": 7.2,
+      "note": "E13 read-only models never change: nothing folds them, and every reader of one \u2014 pooled too \u2014 read exactly the seed",
+      "log": "logs/engine.qnt.invariant.readOnlyConstant.log",
+      "trace": null
+    },
+    {
+      "spec": "engine.qnt",
+      "kind": "invariant",
+      "target": "oneStoreUnsettled",
+      "expect": "ok",
+      "result": "ok",
+      "passed": true,
+      "seconds": 7.1,
+      "note": "E14 at most one domain's store is unsettled, its events the last appended: per-store cursors are the global prefix",
+      "log": "logs/engine.qnt.invariant.oneStoreUnsettled.log",
+      "trace": null
+    },
+    {
+      "spec": "engine.qnt",
+      "kind": "invariant",
+      "target": "foldSeqSound",
+      "expect": "ok",
+      "result": "ok",
+      "passed": true,
+      "seconds": 8.3,
+      "note": "E15 the fold-order ghost is the read model, ordered: each folded event once",
+      "log": "logs/engine.qnt.invariant.foldSeqSound.log",
+      "trace": null
+    },
+    {
+      "spec": "engine.qnt",
+      "kind": "invariant",
+      "target": "liveFoldsInOrder",
+      "expect": "ok",
+      "result": "ok",
+      "passed": true,
+      "seconds": 7.2,
+      "note": "E16 live, every model folds in append order: reordering needs a reopen",
+      "log": "logs/engine.qnt.invariant.liveFoldsInOrder.log",
+      "trace": null
+    },
+    {
+      "spec": "engine.qnt",
+      "kind": "invariant",
+      "target": "readsInLogOrder",
+      "expect": "ok",
+      "result": "ok",
+      "passed": true,
+      "seconds": 7.4,
+      "note": "E17 under rule 7 (a model fed by two stores is order-free) no decision is taken on a model folded out of append order",
+      "log": "logs/engine.qnt.invariant.readsInLogOrder.log",
       "trace": null
     },
     {
@@ -181,7 +241,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.7,
+      "seconds": 2.0,
       "note": "a procedure observed a non-empty model",
       "log": "logs/engine.qnt.witness.witnessReader.log",
       "trace": null
@@ -193,7 +253,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 2.0,
+      "seconds": 1.7,
       "note": "a pooled procedure's block was committed",
       "log": "logs/engine.qnt.witness.witnessPooledRun.log",
       "trace": null
@@ -205,7 +265,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.6,
+      "seconds": 1.9,
       "note": "the pool lane was full: jobs genuinely in flight together",
       "log": "logs/engine.qnt.witness.witnessConcurrent.log",
       "trace": null
@@ -217,7 +277,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.7,
+      "seconds": 1.8,
       "note": "under rule 3 the log left claim order \u2014 and every read was still fresh",
       "log": "logs/engine.qnt.witness.witnessOutOfOrder.log",
       "trace": null
@@ -229,7 +289,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.8,
+      "seconds": 1.7,
       "note": "an interactive command was claimed ahead of an older batch one",
       "log": "logs/engine.qnt.witness.witnessPriority.log",
       "trace": null
@@ -241,7 +301,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.6,
+      "seconds": 1.8,
       "note": "an interrupted attempt re-ran under its own id after a crash",
       "log": "logs/engine.qnt.witness.witnessRecovered.log",
       "trace": null
@@ -277,7 +337,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.7,
+      "seconds": 1.6,
       "note": "an element raised; its attempt failed and appended nothing",
       "log": "logs/engine.qnt.witness.witnessFailed.log",
       "trace": null
@@ -301,9 +361,105 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 2.0,
+      "seconds": 1.7,
       "note": "the log bound was reached (cascades are bounded, not absent)",
       "log": "logs/engine.qnt.witness.witnessBound.log",
+      "trace": null
+    },
+    {
+      "spec": "engine.qnt",
+      "kind": "witness",
+      "target": "witnessPooledReadOnly",
+      "expect": "violation",
+      "result": "violation",
+      "passed": true,
+      "seconds": 1.7,
+      "note": "rule 3 admits a reader of read-only models to a pool, and it ran there",
+      "log": "logs/engine.qnt.witness.witnessPooledReadOnly.log",
+      "trace": null
+    },
+    {
+      "spec": "engine.qnt",
+      "kind": "witness",
+      "target": "witnessTwoStores",
+      "expect": "violation",
+      "result": "violation",
+      "passed": true,
+      "seconds": 1.8,
+      "note": "both domains' stores hold events",
+      "log": "logs/engine.qnt.witness.witnessTwoStores.log",
+      "trace": null
+    },
+    {
+      "spec": "engine.qnt",
+      "kind": "witness",
+      "target": "witnessCrossDomain",
+      "expect": "violation",
+      "result": "violation",
+      "passed": true,
+      "seconds": 1.7,
+      "note": "a policy of one domain dispatched a command the other domain's procedure ran",
+      "log": "logs/engine.qnt.witness.witnessCrossDomain.log",
+      "trace": null
+    },
+    {
+      "spec": "engine.qnt",
+      "kind": "reopen",
+      "target": "allInvariants",
+      "expect": "ok",
+      "result": "ok",
+      "passed": true,
+      "seconds": 18.8,
+      "note": "every invariant, sampled where reopens reorder (engineReopen: a model fed by both stores, crashes after folds)",
+      "log": "logs/engine.qnt.reopen.allInvariants.log",
+      "trace": null
+    },
+    {
+      "spec": "engine.qnt",
+      "kind": "reopen",
+      "target": "not(witnessReorderedRead)",
+      "expect": "violation",
+      "result": "violation",
+      "passed": true,
+      "seconds": 1.9,
+      "note": "THE HARM is reachable by sampling there too: a decision on a model refolded out of append order",
+      "log": "logs/engine.qnt.reopen.not(witnessReorderedRead).log",
+      "trace": "     status: \"queued\"\n      }\n    ]\n}\n\n[State 16]\n{\n  engineReopen::engineSpec::crashes: 1,\n  engineReopen::engineSpec::current: [1],\n  engineReopen::engineSpec::cursor: 3,\n  engineReopen::engineSpec::fails: 0,\n  engineReopen::engineSpec::foldSeq: Map(\"m1\" -> [1, 0, 2], \"m2\" -> [1, 0, 2]),\n  engineReopen::engineSpec::folded: 3,\n  engineReopen::engineSpec::g:\n    {\n      dispatches: Map(\"y1\" -> Set(\"p2\")),\n      domainOf: Map(\"p1\" -> \"d1\", \"p2\" -> \"d2\", \"y1\" -> \"d1\"),\n      emits: Map(\"p1\" -> Set(\"e1\", \"e2\"), \"p2\" -> Set(\"e1\")),\n      folds: Map(\"m1\" -> Set(\"e1\", \"e2\"), \"m2\" -> Set(\"e1\", \"e2\")),\n      interactive: Set(\"p1\"),\n      reacts: Map(\"y1\" -> Set(\"e1\")),\n      readOnly: Set(),\n      reads: Map(\"p1\" -> Set(\"m1\", \"m2\"), \"p2\" -> Set(\"m1\"), \"y1\" -> Set())\n    },\n  engineReopen::engineSpec::ignored: 0,\n  engineReopen::engineSpec::inflight: Set(),\n  engineReopen::engineSpec::log:\n    [\n      {\n        at: 0,\n        cause: { at: 0, origin: \"host\", target: \"p2\" },\n        dispatchView: Map(\"m1\" -> Set(), \"m2\" -> Set()),\n        kind: \"e1\",\n        view: Map(\"m1\" -> Set(), \"m2\" -> Set())\n      },\n      {\n        at: 1,\n        cause: { at: 1, origin: \"host\", target: \"p1\" },\n        dispatchView: Map(\"m1\" -> Set(), \"m2\" -> Set()),\n        kind: \"e1\",\n        view: Map(\"m1\" -> Set(0), \"m2\" -> Set(0))\n      },\n      {\n        at: 1,\n        cause: { at: 1, origin: \"host\", target: \"p1\" },\n        dispatchView: Map(\"m1\" -> Set(), \"m2\" -> Set()),\n        kind: \"e2\",\n        view: Map(\"m1\" -> Set(0), \"m2\" -> Set(0))\n      }\n    ],\n  engineReopen::engineSpec::misreads: 0,\n  engineReopen::engineSpec::models:\n    Map(\"m1\" -> Set(0, 1, 2), \"m2\" -> Set(0, 1, 2)),\n  engineReopen::engineSpec::orderFree: Set(\"m2\"),\n  engineReopen::engineSpec::pending: [],\n  engineReopen::engineSpec::pooled: Set(),\n  engineReopen::engineSpec::reran: 0,\n  engineReopen::engineSpec::rule3: true,\n  engineReopen::engineSpec::submitted: 2,\n  engineReopen::engineSpec::table:\n    [\n      {\n        cmd:\n          {\n            id: { at: 0, origin: \"host\", target: \"p2\" },\n            proc: \"p2\",\n            view: Map(\"m1\" -> Set(), \"m2\" -> Set())\n          },\n        status: \"done\"\n      },\n      {\n        cmd:\n          {\n            id: { at: 0, origin: \"y1\", target: \"p2\" },\n            proc: \"p2\",\n            view: Map(\"m1\" -> Set(), \"m2\" -> Set())\n          },\n        status: \"running\"\n      },\n      {\n        cmd:\n          {\n            id: { at: 1, origin: \"host\", target: \"p1\" },\n            proc: \"p1\",\n            view: Map(\"m1\" -> Set(), \"m2\" -> Set())\n          },\n        status: \"done\"\n      },\n      {\n        cmd:\n          {\n            id: { at: 1, origin: \"y1\", target: \"p2\" },\n            proc: \"p2\",\n            view: Map(\"m1\" -> Set(), \"m2\" -> Set())\n          },\n        status: \"queued\"\n      }\n    ]\n}\n\n[State 17]\n{\n  engineReopen::engineSpec::crashes: 1,\n  engineReopen::engineSpec::current: [],\n  engineReopen::engineSpec::cursor: 3,\n  engineReopen::engineSpec::fails: 0,\n  engineReopen::engineSpec::foldSeq: Map(\"m1\" -> [1, 0, 2], \"m2\" -> [1, 0, 2]),\n  engineReopen::engineSpec::folded: 3,\n  engineReopen::engineSpec::g:\n    {\n      dispatches: Map(\"y1\" -> Set(\"p2\")),\n      domainOf: Map(\"p1\" -> \"d1\", \"p2\" -> \"d2\", \"y1\" -> \"d1\"),\n      emits: Map(\"p1\" -> Set(\"e1\", \"e2\"), \"p2\" -> Set(\"e1\")),\n      folds: Map(\"m1\" -> Set(\"e1\", \"e2\"), \"m2\" -> Set(\"e1\", \"e2\")),\n      interactive: Set(\"p1\"),\n      reacts: Map(\"y1\" -> Set(\"e1\")),\n      readOnly: Set(),\n      reads: Map(\"p1\" -> Set(\"m1\", \"m2\"), \"p2\" -> Set(\"m1\"), \"y1\" -> Set())\n    },\n  engineReopen::engineSpec::ignored: 0,\n  engineReopen::engineSpec::inflight: Set(),\n  engineReopen::engineSpec::log:\n    [\n      {\n        at: 0,\n        cause: { at: 0, origin: \"host\", target: \"p2\" },\n        dispatchView: Map(\"m1\" -> Set(), \"m2\" -> Set()),\n        kind: \"e1\",\n        view: Map(\"m1\" -> Set(), \"m2\" -> Set())\n      },\n      {\n        at: 1,\n        cause: { at: 1, origin: \"host\", target: \"p1\" },\n        dispatchView: Map(\"m1\" -> Set(), \"m2\" -> Set()),\n        kind: \"e1\",\n        view: Map(\"m1\" -> Set(0), \"m2\" -> Set(0))\n      },\n      {\n        at: 1,\n        cause: { at: 1, origin: \"host\", target: \"p1\" },\n        dispatchView: Map(\"m1\" -> Set(), \"m2\" -> Set()),\n        kind: \"e2\",\n        view: Map(\"m1\" -> Set(0), \"m2\" -> Set(0))\n      },\n      {\n        at: 3,\n        cause: { at: 0, origin: \"y1\", target: \"p2\" },\n        dispatchView: Map(\"m1\" -> Set(), \"m2\" -> Set()),\n        kind: \"e1\",\n        view: Map(\"m1\" -> Set(0, 1, 2), \"m2\" -> Set())\n      }\n    ],\n  engineReopen::engineSpec::misreads: 1,\n  engineReopen::engineSpec::models:\n    Map(\"m1\" -> Set(0, 1, 2), \"m2\" -> Set(0, 1, 2)),\n  engineReopen::engineSpec::orderFree: Set(\"m2\"),\n  engineReopen::engineSpec::pending: [],\n  engineReopen::engineSpec::pooled: Set(),\n  engineReopen::engineSpec::reran: 0,\n  engineReopen::engineSpec::rule3: true,\n  engineReopen::engineSpec::submitted: 2,\n  engineReopen::engineSpec::table:\n    [\n      {\n        cmd:\n          {\n            id: { at: 0, origin: \"host\", target: \"p2\" },\n            proc: \"p2\",\n            view: Map(\"m1\" -> Set(), \"m2\" -> Set())\n          },\n        status: \"done\"\n      },\n      {\n        cmd:\n          {\n            id: { at: 0, origin: \"y1\", target: \"p2\" },\n            proc: \"p2\",\n            view: Map(\"m1\" -> Set(), \"m2\" -> Set())\n          },\n        status: \"done\"\n      },\n      {\n        cmd:\n          {\n            id: { at: 1, origin: \"host\", target: \"p1\" },\n            proc: \"p1\",\n            view: Map(\"m1\" -> Set(), \"m2\" -> Set())\n          },\n        status: \"done\"\n      },\n      {\n        cmd:\n          {\n            id: { at: 1, origin: \"y1\", target: \"p2\" },\n            proc: \"p2\",\n            view: Map(\"m1\" -> Set(), \"m2\" -> Set())\n          },\n        status: \"queued\"\n      }\n    ]\n}\n\n[violation] Found an issue (204ms at 1235 traces/second).\nUse --verbosity=3 to show executions.\nUse --seed=0xcc74 --backend=rust to reproduce.\nerror: Invariant violated\n"
+    },
+    {
+      "spec": "engine.qnt",
+      "kind": "scenario",
+      "target": "reopenReordersTest",
+      "expect": "ok",
+      "result": "ok",
+      "passed": true,
+      "seconds": 2.1,
+      "note": "THE HARM (witnessReorderedRead): a reopen refolds a model fed by two stores out of order, and a policy decides on it",
+      "log": "logs/engine.qnt.scenario.reopenReordersTest.log",
+      "trace": null
+    },
+    {
+      "spec": "engine.qnt",
+      "kind": "scenario",
+      "target": "orderFreeAbsorbsTest",
+      "expect": "ok",
+      "result": "ok",
+      "passed": true,
+      "seconds": 1.7,
+      "note": "the same reopen with the model declared order-free (witnessOrderFreeReordered): rule 7 holds, nothing misread",
+      "log": "logs/engine.qnt.scenario.orderFreeAbsorbsTest.log",
+      "trace": null
+    },
+    {
+      "spec": "engine.qnt",
+      "kind": "scenario",
+      "target": "oneStoreKeepsOrderTest",
+      "expect": "ok",
+      "result": "ok",
+      "passed": true,
+      "seconds": 1.8,
+      "note": "the same run with both procedures in one store: the reopen refolds in append order",
+      "log": "logs/engine.qnt.scenario.oneStoreKeepsOrderTest.log",
       "trace": null
     },
     {
@@ -313,8 +469,8 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.8,
-      "note": "rule 3 is NECESSARY: a pooled reader decided on a stale model",
+      "seconds": 1.7,
+      "note": "rule 3 is NECESSARY: a pooled reader of a mutable model decided on a stale one",
       "log": "logs/engine.qnt.witness.witnessStalePool.log",
       "trace": null
     },
@@ -325,7 +481,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 60.8,
+      "seconds": 276.0,
       "note": "Apalache: all invariants, every graph \u00d7 placement, 5 steps",
       "log": "logs/engine.qnt.verify.allInvariants.log",
       "trace": null
@@ -337,7 +493,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 3.8,
+      "seconds": 2.4,
       "note": "I1 no lag: cursor == log.length()",
       "log": "logs/st.qnt.invariant.zeroLag.log",
       "trace": null
@@ -349,7 +505,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 4.0,
+      "seconds": 3.3,
       "note": "I2 carried models are a refold of the log (the rebuild guarantee)",
       "log": "logs/st.qnt.invariant.modelsAreFold.log",
       "trace": null
@@ -361,7 +517,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 6.7,
+      "seconds": 4.4,
       "note": "I3 every run leaves one complete, contiguous, ordered block",
       "log": "logs/st.qnt.invariant.blocksWellFormed.log",
       "trace": null
@@ -373,7 +529,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 5.4,
+      "seconds": 3.4,
       "note": "I3' exactly-once effects for GUARDABLE procedures, when the application guards",
       "log": "logs/st.qnt.invariant.effectsOnce.log",
       "trace": null
@@ -385,7 +541,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 4.0,
+      "seconds": 2.8,
       "note": "I4 policy-dispatched effects follow a trigger the policy reacts to",
       "log": "logs/st.qnt.invariant.causal.log",
       "trace": null
@@ -397,7 +553,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 7.3,
+      "seconds": 6.3,
       "note": "I5 every procedure read the fold of everything before its block",
       "log": "logs/st.qnt.invariant.freshReads.log",
       "trace": null
@@ -409,7 +565,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 4.7,
+      "seconds": 3.8,
       "note": "I6 every dispatching policy read the fold through its trigger",
       "log": "logs/st.qnt.invariant.freshDispatch.log",
       "trace": null
@@ -421,7 +577,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 6.5,
+      "seconds": 4.5,
       "note": "I6' the same, for commands still queued",
       "log": "logs/st.qnt.invariant.freshQueue.log",
       "trace": null
@@ -433,7 +589,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 3.4,
+      "seconds": 3.0,
       "note": "I7 every reacting policy of every event has dispatched",
       "log": "logs/st.qnt.invariant.dispatchComplete.log",
       "trace": null
@@ -445,7 +601,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 3.5,
+      "seconds": 3.0,
       "note": "I7' every command that ran left its block",
       "log": "logs/st.qnt.invariant.emitComplete.log",
       "trace": null
@@ -457,7 +613,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 3.8,
+      "seconds": 2.7,
       "note": "I8 one DB row per command",
       "log": "logs/st.qnt.invariant.queueIdsDistinct.log",
       "trace": null
@@ -469,7 +625,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.5,
+      "seconds": 1.1,
       "note": "a policy-dispatched command ran",
       "log": "logs/st.qnt.witness.witnessCascade.log",
       "trace": null
@@ -481,7 +637,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.3,
+      "seconds": 1.1,
       "note": "a procedure observed a non-empty model",
       "log": "logs/st.qnt.witness.witnessReader.log",
       "trace": null
@@ -493,7 +649,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.3,
+      "seconds": 1.2,
       "note": "a policy observed a non-empty model",
       "log": "logs/st.qnt.witness.witnessPolicyReader.log",
       "trace": null
@@ -505,7 +661,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.3,
+      "seconds": 1.1,
       "note": "an interactive command was claimed ahead of the queue head",
       "log": "logs/st.qnt.witness.witnessPriority.log",
       "trace": null
@@ -517,7 +673,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.5,
+      "seconds": 1.1,
       "note": "the log bound was reached (cascades are bounded, not absent)",
       "log": "logs/st.qnt.witness.witnessBound.log",
       "trace": null
@@ -529,7 +685,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.3,
+      "seconds": 1.1,
       "note": "a claimed row was recovered and re-queued",
       "log": "logs/st.qnt.witness.witnessRedelivered.log",
       "trace": null
@@ -541,7 +697,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.5,
+      "seconds": 1.1,
       "note": "a guarding procedure saw its own block and no-op'd its redelivery",
       "log": "logs/st.qnt.witness.witnessGuardNoop.log",
       "trace": null
@@ -553,7 +709,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.6,
+      "seconds": 1.1,
       "note": "a guarding application still double-appended: the procedure was not guardable",
       "log": "logs/st.qnt.witness.witnessUnguardable.log",
       "trace": null
@@ -565,7 +721,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.6,
+      "seconds": 1.1,
       "note": "an unguarded redelivery appended a second block (executor.py:49-56)",
       "log": "logs/st.qnt.witness.witnessDoubleAppend.log",
       "trace": null
@@ -577,7 +733,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 213.9,
+      "seconds": 524.2,
       "note": "Apalache: all invariants, every graph \u00d7 guard, 4 steps",
       "log": "logs/st.qnt.verify.allInvariants.log",
       "trace": null
@@ -589,7 +745,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 4.6,
+      "seconds": 4.9,
       "note": "each model == its owner's fold up to the owner's high-water mark",
       "log": "logs/groups.qnt.invariant.substrateIsFold.log",
       "trace": null
@@ -601,7 +757,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 4.1,
+      "seconds": 3.7,
       "note": "a rewound cursor never exceeds what was folded",
       "log": "logs/groups.qnt.invariant.cursorBelowHwm.log",
       "trace": null
@@ -649,7 +805,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 4.3,
+      "seconds": 4.6,
       "note": "a command sits only in its procedure's owner lane / pending slot",
       "log": "logs/groups.qnt.invariant.routed.log",
       "trace": null
@@ -673,7 +829,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 3.9,
+      "seconds": 4.3,
       "note": "every command that ran left its block",
       "log": "logs/groups.qnt.invariant.emitComplete.log",
       "trace": null
@@ -685,7 +841,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 4.2,
+      "seconds": 3.9,
       "note": "T1: rule 6 \u21d2 model committed through the cause before the run; no policy dispatched behind its trigger",
       "log": "logs/groups.qnt.invariant.rule6Guarantee.log",
       "trace": null
@@ -709,7 +865,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 4.6,
+      "seconds": 4.1,
       "note": "T2: one group \u21d2 st's fresh reads",
       "log": "logs/groups.qnt.invariant.singleGroupIsSt.log",
       "trace": null
@@ -721,7 +877,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.6,
+      "seconds": 1.4,
       "note": "a rule-6-LEGAL split read behind the tail (the claim\u2192execute window, groups.py:44-50)",
       "log": "logs/groups.qnt.witness.witnessClaimWindow.log",
       "trace": null
@@ -733,7 +889,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.8,
+      "seconds": 1.5,
       "note": "WRITE SKEW under rule 6: two decisions, neither saw the other \u2014 no serial order explains both",
       "log": "logs/groups.qnt.witness.witnessWriteSkew.log",
       "trace": null
@@ -745,7 +901,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.5,
+      "seconds": 1.4,
       "note": "a rule-6-violating split broke even the weak guarantee",
       "log": "logs/groups.qnt.witness.witnessStaleRead.log",
       "trace": null
@@ -757,7 +913,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 2.1,
+      "seconds": 1.4,
       "note": "a rule-6-violating policy read stale or ahead",
       "log": "logs/groups.qnt.witness.witnessStalePolicy.log",
       "trace": null
@@ -769,7 +925,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.7,
+      "seconds": 1.5,
       "note": "a legal multi-group split with real inter-group lag",
       "log": "logs/groups.qnt.witness.witnessLegalLag.log",
       "trace": null
@@ -781,7 +937,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.5,
+      "seconds": 1.3,
       "note": "a policy in one group dispatched to a procedure in another",
       "log": "logs/groups.qnt.witness.witnessCrossGroup.log",
       "trace": null
@@ -793,7 +949,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.6,
+      "seconds": 1.5,
       "note": "an at-least-once redelivery occurred",
       "log": "logs/groups.qnt.witness.witnessRedelivered.log",
       "trace": null
@@ -805,7 +961,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.6,
+      "seconds": 1.3,
       "note": "a cursor was lost and rewound",
       "log": "logs/groups.qnt.witness.witnessRewound.log",
       "trace": null
@@ -817,7 +973,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.5,
+      "seconds": 1.4,
       "note": "a rewound cursor re-dispatched an already-run command",
       "log": "logs/groups.qnt.witness.witnessRedispatch.log",
       "trace": null
@@ -829,7 +985,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.5,
+      "seconds": 1.4,
       "note": "an unguarded replay appended a second block",
       "log": "logs/groups.qnt.witness.witnessDoubleAppend.log",
       "trace": null
@@ -841,7 +997,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.5,
+      "seconds": 1.4,
       "note": "a guarding application still double-appended: procedure not guardable",
       "log": "logs/groups.qnt.witness.witnessUnguardable.log",
       "trace": null
@@ -853,7 +1009,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.8,
+      "seconds": 1.4,
       "note": "a guarding, guardable procedure double-appended because rule 6 was broken",
       "log": "logs/groups.qnt.witness.witnessGuardMissed.log",
       "trace": null
@@ -865,7 +1021,7 @@
       "expect": "violation",
       "result": "violation",
       "passed": true,
-      "seconds": 1.8,
+      "seconds": 1.3,
       "note": "the one-group (st) topology was exercised",
       "log": "logs/groups.qnt.witness.witnessOneGroupRun.log",
       "trace": null
@@ -877,7 +1033,7 @@
       "expect": "ok",
       "result": "ok",
       "passed": true,
-      "seconds": 13.3,
+      "seconds": 12.2,
       "note": "Apalache: all invariants, every graph \u00d7 placement \u00d7 guard, 3 steps",
       "log": "logs/groups.qnt.verify.allInvariants.log",
       "trace": null

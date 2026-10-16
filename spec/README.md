@@ -5,7 +5,7 @@ model-checks them, and (in `../engine/tests/`) the bridge that holds the real to
 engine to the same invariants. Merged in from `dizzy-quint` with its history
 (`git log dizzy-quint/main`).
 
-**How "the engine is correct" is established, in three layers:**
+**How "the engine is correct" is established, in four layers:**
 
 1. **The design is proved.** `specs/engine.qnt` models the topology engine as it ships:
    the Simple Engine store's transaction boundaries, inline and pool lanes, crashes
@@ -21,6 +21,25 @@ engine to the same invariants. Merged in from `dizzy-quint` with its history
    random rule-3 placements. It crashes at **every** claim/append/enqueue point and drains,
    then evaluates `_spec.py`, a line-for-line port of the Quint predicates, on the store
    the engine wrote. The split-ack mutant of the *Python* engine fails it.
+4. **Every step of the implementation is a step of the spec** (model-based testing).
+   `engine/tests/test_mbt.py` has Quint generate traces (`quint run --mbt`: each state
+   records the action taken and its nondeterministic choices) from two instances of the
+   spec: `engine` (what is proved) and `engineNarrow` (a one-wide pool, where lane
+   capacity is exercised). `_mbt.py` replays each action on a real `TopologyEngine`.
+   The engine runs on its own thread and pauses after every claim, append+ack, enqueue,
+   fold and cursor write. The test chooses which pool job finishes (`ManualPool`) and
+   which element raises, so the engine's deterministic choice is the trace's. After every
+   step, one abstraction function maps the store and process memory to the spec's
+   variables, and they must equal the trace's state. Layer 3 checks end states against
+   invariants. This layer checks the transitions: claim order, recovery first, lane
+   capacity, commit order, what a crash leaves, the elements' semantics. Mutants of each
+   pass layer 3 and fail here.
+
+What it is not: a proof about the Python. Coverage is the traces' coverage, which
+`test_the_traces_exercise_every_action` checks action by action, and the bounds are the
+spec's (two submissions, six events). The other direction is still open
+(`dizzy-quint-2630`): checking that a run the spec did *not* drive, with real OS
+scheduling, is a legal behaviour.
 
 The thesis carried over from dizzy-quint: define DIZZY's semantics at the *weakest*
 topology (every edge async, projections settling with arbitrary lag) and treat the
@@ -33,14 +52,15 @@ notes are in `../docs/topology.md`.
 
 | file | what |
 |---|---|
-| `specs/graph.qnt` | The abstract shape of a feature: `reads / emits / folds / reacts / dispatches / interactive` over a bounded universe. Models are sets of folded log positions; events carry the views their emitter and dispatcher read. Every engine draws a graph nondeterministically at `init`, so a check ranges over every feature of that size. Also holds the log predicates every engine shares (`freshReadsOf`, `causeFoldedOf`, …). |
-| `specs/engine.qnt` | **Spec 4 — the topology engine as shipped** (`engine/src/dizzy_topology_engine`). Store (log, command table, cursor) vs process memory (read model, current unit, in-flight pool jobs). Steps: `claim`, `runInline` / `completePool` (append **and** ack, one transaction), `settleFold` (fold + policies enqueue with `INSERT OR IGNORE`), `advance` (cursor), `crash` (memory lost, refold to cursor), `failInline`/`failPool`, host `retry`. Proved: `effectsOnce` **unconditionally**, `freshReads` under rule 3 even though pools take the log out of claim order (`witnessOutOfOrder`), `freshDispatch`/`dispatchComplete` across crashes including re-settles (`witnessResettle`). `witnessStalePool`: rule 3 is necessary. |
+| `specs/graph.qnt` | The abstract shape of a feature: `reads / emits / folds / reacts / dispatches / interactive / readOnly / domainOf` over a bounded universe. Models are sets of folded log positions; events carry the views their emitter and dispatcher read. Every engine draws a graph nondeterministically at `init`, so a check ranges over every feature of that size. Also holds the log predicates every engine shares (`freshReadsOf`, `causeFoldedOf`, …). |
+| `specs/engine.qnt` | **Spec 4 — the topology engine as shipped** (`engine/src/dizzy_topology_engine`). Store (log, command table, cursor) vs process memory (read model, current unit, in-flight pool jobs). Steps: `claim`, `runInline` / `completePool` (append **and** ack, one transaction), `settleFold` (fold + policies enqueue with `INSERT OR IGNORE`), `advance` (cursor), `crash` (memory lost, refold to cursor), `failInline`/`failPool`, host `retry`. Proved: `effectsOnce` **unconditionally**, `freshReads` under rule 3 even though pools take the log out of claim order (`witnessOutOfOrder`), `freshDispatch`/`dispatchComplete` across crashes including re-settles (`witnessResettle`). `witnessStalePool`: rule 3 is necessary. Read-only models (reference data the host seeds and nothing folds, `graph.qnt`'s `readOnly` and `SEED`): `readOnlyConstant` proves they never change, across crashes too, and rule 3 admits their readers to a pool (`witnessPooledReadOnly`). Several domains (`graph.qnt`'s `domainOf`: a core and a plugin, each with its own store): `log` is the host thread's append order across stores, each store holds its slice, a crash refolds store by store (`refoldStores`), and `oneStoreUnsettled` proves that equals the global prefix. Fold order: `foldSeq` (ghost) shows that a model fed by two stores is refolded out of append order by every reopen, and `misreads` counts decisions taken on one. `reopenReordersTest` scripts the harm, `engineReopen` (biased: `initCrossStore`, `reopenStep`) samples where it lives, and candidate rule 7 (a two-store model is `orderFree`) prevents it (`foldsInLogOrder`, `readsInLogOrder`). The harm needs about 13 steps, beyond Apalache's depth, so rule 7 rests on the biased sampling. |
 | `specs/st.qnt` | **Spec 1** — the pre-Simple-Engine single-threaded engine (`dizzy.engine.st`, removed from DIZZY main; kept as the baseline `engine.qnt` improves on). `run_command` is one atomic step; `cursor == log.length()` is an invariant. At-least-once redelivery is modelled as the code has it; `guarded` (application dedupes on ids) is a nondet named assumption. |
 | `specs/groups.qnt` | **Spec 2** — consumer groups (v2's `GroupWorker`, not yet re-founded on the Simple Engine; this is its design spec). Same graph split across groups with per-group cursors and lanes, shared substrate, cursor loss, redelivery. `claim` and `execute` are separate steps because `GroupWorker` has no lock between them — and `witnessClaimWindow` shows that a rule-6-legal split can therefore still read behind the tail. The provable theorem is `rule6 ⇒ causeFolded ∧ dispatchCauseFolded` — what `groups.py:27-29` promises — and `witnessWriteSkew` shows two rule-6-legal decisions that never saw each other. Exactly-once is a graph property: only `guardable` procedures (they read a model that folds their own emits) can dedupe a replay, and only with rule 6. |
 | `specs/feature.qnt` | The first, concrete feature (`register`/`welcome`) kept as a readable witness. |
 | `dizzy_topology.qnt` | Motivating example: unique-username registration under unsafe vs safe topologies. |
 | `report/` | `run_checks.py` runs every simulation / witness / Apalache check into `results.json`; `render.py` renders `index.html`. |
 | `../engine/tests/_spec.py`, `_graph_app.py`, `test_spec_conformance.py` | The bridge: the spec's graph semantics as real Domain tables, the spec's invariants over a real store, and the crash sweep. |
+| `../engine/tests/_mbt.py`, `test_mbt.py` | Model-based testing: Quint's traces replayed step by step on a real engine, compared through one abstraction function after every step. |
 
 ## Setup
 
@@ -64,7 +84,7 @@ just test             # includes the engine ↔ spec conformance suite
 (`witnessClaimWindow`, `witnessWriteSkew`, `witnessStaleRead`, `witnessStalePolicy`); the
 full 8000 reach them all.
 
-`engine.qnt` proofs on this machine: depth 3 in 11 s, 4 in 19 s, 5 in 44 s, 6 in 3.7 min.
+`engine.qnt` proofs on this machine: depth 5 in 4.5 min, 6 in 17 min (the fold-order ghost costs most of that; before it, 1 and 3 min).
 For `st`: 4 s / 17 s / 5 min at depths 2 / 3 / 4, so the suite proves depth 4 for `st` and
 3 for `groups`. Simulation covers 8000 traces × 20 steps (25 for `engine.qnt`, whose
 crashes and re-settles need the extra steps).

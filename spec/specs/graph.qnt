@@ -11,6 +11,14 @@
 //   reacts    : policy → event kinds it reacts to
 //   dispatches: policy → procedures (command kinds) it dispatches
 //   interactive: procedures whose command kind is `priority: interactive`
+//   domainOf  : element (procedure | policy) → the DOMAIN (feat) that declares it. An
+//               engine loads a core domain and its plugins, each with its own store: a
+//               command lives in the store of its procedure's domain, and so do the
+//               events that procedure appends. Projections and policies react to an
+//               event from ANY domain (Simple Engine §3.4).
+//   readOnly  : models the deployment declares READ-ONLY — reference data the host
+//               seeds before the engine opens and nothing writes while it runs. No
+//               projection folds one (a read-only model folds nothing by construction).
 //
 // No names, no payloads, no business logic. Model *contents* are opaque to the
 // engine, so a model is represented by the SET OF LOG POSITIONS it has folded,
@@ -18,6 +26,12 @@
 // folded positions of every model it reads. Two topologies produce
 // byte-identical models iff every reader saw the same view, which is exactly
 // the property topology.md asks for, stated without semantics.
+//
+// A read-only model also holds what the host seeded outside the log: SEED, the one
+// position no event has (-1). So its view is always exactly SEED — constant, across
+// every append, settle and crash — and a reader of one sees the same thing wherever,
+// and whenever, it runs. That is the property that lets such a reader leave the lane
+// that folds.
 //
 // A graph is chosen nondeterministically at init over a bounded universe, so a
 // bounded model-check is a check over EVERY feature of that size — not over an
@@ -38,6 +52,11 @@ module graph {
   pure val KIND_LIST   = ["e1", "e2"]
   // @universe-end
   pure val ELEMS    = PROCS.union(POLICIES)  // things that may declare `queries:`
+  // Domains: a core (d1) and one plugin. Outside the generated block, so every scale
+  // rung keeps them. DOMAIN_LIST is load order — core first.
+  pure val DOMAINS     = Set("d1", "d2")
+  pure val DOMAIN_LIST = ["d1", "d2"]
+  pure val CORE        = "d1"
 
   type Graph = {
     reads:      str -> Set[str],   // ELEMS    → ⊆ MODELS
@@ -46,6 +65,8 @@ module graph {
     reacts:     str -> Set[str],   // POLICIES → ⊆ KINDS
     dispatches: str -> Set[str],   // POLICIES → ⊆ PROCS
     interactive: Set[str],         // ⊆ PROCS
+    readOnly:   Set[str],          // ⊆ MODELS, each folding nothing
+    domainOf:   str -> str,        // ELEMS → DOMAINS
   }
 
   // The candidate sets for each relation. An engine's `init` draws one of each
@@ -67,11 +88,22 @@ module graph {
   pure val REACTS     = POLICIES.setOfMaps(smallSubsets(KINDS))
   pure val DISPATCHES = POLICIES.setOfMaps(smallSubsets(PROCS))
   pure val INTERACTIVE = PROCS.powerset()
+  pure val DOMAIN_OF   = ELEMS.setOfMaps(DOMAINS)
+  // A feature with one domain: what every spec before engine.qnt's multi-domain model has.
+  pure val ONE_DOMAIN  = ELEMS.mapBy(e => CORE)
+  // Read-only models are drawn among the models nothing folds.
+  pure def readOnlyCandidates(folds: str -> Set[str]): Set[Set[str]] =
+    MODELS.filter(m => folds.get(m) == Set()).powerset()
 
   // --- Runtime vocabulary ------------------------------------------------
   // A view: for each model, the log positions folded into it.
   type View = str -> Set[int]
   pure val emptyView: View = MODELS.mapBy(m => Set())
+  // What the host seeds into a read-only model: one position outside the log.
+  pure val SEED: Set[int] = Set(-1)
+  // A freshly opened read model: empty, but for the read-only models the host seeded.
+  pure def seedView(g: Graph): View =
+    MODELS.mapBy(m => if (g.readOnly.contains(m)) SEED else Set())
 
   // A command id is deterministic: host-submitted ids are numbered by the
   // host; policy-dispatched ids are (policy, trigger position, target).
@@ -90,10 +122,10 @@ module graph {
     MODELS.mapBy(m =>
       if (g.folds.get(m).contains(e.kind)) v.get(m).union(Set(pos)) else v.get(m))
 
-  // The view a fold of log[0, upto) produces — the reference "truth".
+  // The view a fold of log[0, upto) produces — the reference "truth" — over the seed.
   pure def foldPrefix(g: Graph, log: List[Event], upto: int): View =
-    MODELS.mapBy(m =>
-      log.indices().filter(i => i < upto and g.folds.get(m).contains(log[i].kind)))
+    MODELS.mapBy(m => seedView(g).get(m).union(
+      log.indices().filter(i => i < upto and g.folds.get(m).contains(log[i].kind))))
 
   // All prefix folds at once: prefixViews(g, l).get(p) == foldPrefix(g, l, p).
   // Invariants that compare many events against prefixes use this so the
@@ -114,19 +146,26 @@ module graph {
         acc.append({ kind: k, cause: cmd.id, at: at, view: restrict(g, cmd.proc, v), dispatchView: cmd.view })
       else acc)
 
-  // Run every policy of `g` that reacts to event `e` at position `pos`,
-  // reading view `v`. Yields the commands they dispatch, ordered (policy, target).
+  // Run every policy of `g` that reacts to event `e` at position `pos`, reading view
+  // `v`, from every domain. Yields the commands they dispatch, ordered (domain, policy,
+  // target): feat order, core domain first (Simple Engine §3.4).
   pure def runPolicies(g: Graph, e: Event, pos: int, v: View): List[Command] =
-    POLICY_LIST.foldl([], (acc, y) =>
-      if (g.reacts.get(y).contains(e.kind))
-        PROC_LIST.foldl(acc, (acc2, p) =>
-          if (g.dispatches.get(y).contains(p))
-            acc2.append({ id: { origin: y, at: pos, target: p }, proc: p, view: restrict(g, y, v) })
-          else acc2)
-      else acc)
+    DOMAIN_LIST.foldl([], (acc0, d) =>
+      POLICY_LIST.foldl(acc0, (acc, y) =>
+        if (g.domainOf.get(y) == d and g.reacts.get(y).contains(e.kind))
+          PROC_LIST.foldl(acc, (acc2, p) =>
+            if (g.dispatches.get(y).contains(p))
+              acc2.append({ id: { origin: y, at: pos, target: p }, proc: p, view: restrict(g, y, v) })
+            else acc2)
+        else acc))
+
+  // The store an event lives in: its procedure's domain's.
+  pure def domainOfEvent(g: Graph, e: Event): str = g.domainOf.get(e.cause.target)
 
   // --- Rule vocabulary (topology.md) ----------------------------------------
   pure def isReader(g: Graph, elem: str): bool = g.reads.get(elem) != Set()
+  // Reads something that can change: a model that is not read-only (topology rule 3).
+  pure def readsMutable(g: Graph, elem: str): bool = g.reads.get(elem).exists(m => not(g.readOnly.contains(m)))
   pure def readersOf(g: Graph): Set[str] = ELEMS.filter(e => isReader(g, e))
 
   // --- Log vocabulary shared by every engine spec ---------------------------
@@ -202,7 +241,7 @@ module graph {
 
   // The implementable guard: "my own earlier block is already in a model I read".
   pure def seesOwnBlock(g: Graph, l: List[Event], v: View, c: Command): bool =
-    g.reads.get(c.proc).exists(m => v.get(m).exists(pos => l[pos].cause == c.id))
+    g.reads.get(c.proc).exists(m => v.get(m).exists(pos => pos >= 0 and l[pos].cause == c.id))
 
   // Exactly-once effects, for the procedures that CAN guard.
   pure def effectsOnceGuardableOf(g: Graph, l: List[Event]): bool =

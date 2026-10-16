@@ -1,0 +1,191 @@
+description: >-
+  Assay pipeline — a fan-out/fan-in scientific workflow, and the first shipped
+  feature with a topology. One ingested run parses into N samples; every sample
+  is analyzed (CPU-bound math) and classified (an exclusive instrument) in
+  parallel lanes, while the read model on the main lane counts them home; a
+  policy fires the summary exactly once when the last result lands.
+
+      ingest_run ─▶ run_parsed ─┬─▶ split_run ─▶ sample_extracted × N
+                                └─▶ render_plot ─▶ plot_rendered
+      sample_extracted ─┬─▶ analyze_sample  ─▶ sample_analyzed     (CPU pool)
+                        └─▶ classify_sample ─▶ sample_classified   (instrument)
+      last result home  ─▶ summarize_run ─▶ run_summarized
+
+  The star of this example is the TOPOLOGY (topology.yaml). compute_metrics
+  declares no queries — the fan-out policy reads nothing either and passes
+  everything it needs inside the command. classify_sample reads only the
+  reference panel, which the topology declares read-only. So the placement rules
+  let both leave the fold lane for process pools, while every projection, every
+  policy, and the one procedure that reads results stay serial on `main`.
+
+# Write intents
+commands:
+  # The external trigger — everything downstream is dispatched by policies.
+  ingest_run: Ingest one instrument run from a manifest file (run_id, input_path)
+  # Dispatched by the pipeline policies as the cascade unfolds.
+  split_run: Split a parsed run into its individual samples
+  analyze_sample: Compute the numeric metrics for one sample (self-contained payload)
+  classify_sample: Score one sample on the classifier — the exclusive instrument — and label it from the reference panel (panel)
+  render_plot: Render the run's overview plot to a file
+  summarize_run: Summarize a finished run from its folded results
+
+# Immutable facts
+events:
+  run_parsed: A run manifest was parsed — run_id, paths, and how many samples it holds
+  sample_extracted: One sample (sample_id, measurement) was extracted from a run
+  sample_analyzed: A sample's metric was computed
+  sample_classified: A sample was scored and labeled by the classifier
+  plot_rendered: The run's overview plot was written to plot_path
+  run_summarized: A run's results were aggregated into a summary
+
+# Command handlers (command → procedure → event)
+procedures:
+  parse_run:
+    description: >-
+      Parse the run manifest named by the command's input_path — one
+      `sample_id,measurement` line per sample — and emit run_parsed carrying
+      the run_id, the sample count, and the plot_path derived from the input
+      path. The sample count is the completion target the finalize policies
+      later compare progress against.
+    command: ingest_run
+    emits: [run_parsed]
+
+  split_samples:
+    description: >-
+      Re-read the manifest and emit one sample_extracted per line, each
+      carrying the sample's id and raw measurement. This is the fan-out point:
+      one command in, N facts out.
+    command: split_run
+    emits: [sample_extracted]
+
+  compute_metrics:
+    description: >-
+      CPU-bound analysis of one sample — an iterated numeric map over the raw
+      measurement (real arithmetic, tens of milliseconds of it). Declares no
+      queries, so the topology may fork it onto a process pool; everything it
+      needs rides in the command.
+    command: analyze_sample
+    emits: [sample_analyzed]
+
+  classify_sample:
+    description: >-
+      Score one sample on the classifier — the stand-in for an exclusive
+      instrument (a GPU, a plate reader) that admits one job at a time — and
+      label the score from the reference panel's cutoffs. Its one query reads a
+      read-only model, so it can leave the fold lane; its topology group runs one
+      worker, so it stays serial without ever blocking a fold.
+    command: classify_sample
+    queries: [get_cutoffs]
+    emits: [sample_classified]
+
+  render_run_plot:
+    description: >-
+      Write a trivial ASCII overview plot for the run to the command's
+      plot_path and emit plot_rendered. Query-free by design: the fork off
+      run_parsed lets it render while the samples are still being analyzed.
+    command: render_plot
+    emits: [plot_rendered]
+
+  summarize_run:
+    description: >-
+      Aggregate a finished run: read every folded metric and classification
+      via get_run_results and emit run_summarized with the counts, the mean
+      metric, and how many samples classified as hits. It reads the ledger, so
+      rule 6 pins it to the lane that folds the ledger.
+    command: summarize_run
+    queries: [get_run_results]
+    emits: [run_summarized]
+
+# Read-optimized schema (classes authored under def/models/ledger.yaml)
+models:
+  ledger:
+    description: >-
+      The run ledger — runs, per-sample metrics and classifications, and the
+      final summary. One model on purpose: progress and results are answered
+      by joining these tables, and a query reads exactly one model.
+    adapters: [sqla]
+  panel:
+    description: >-
+      The classifier's reference panel — score cutoffs per label. Reference
+      data: seeded by the host, folded by no projection, read-only in the
+      topology.
+    adapters: [sqla]
+
+# Build read state: fold each fact into the ledger
+projections:
+  run_ledger:
+    description: Record each parsed run with its expected sample count
+    event: run_parsed
+    model: ledger
+    adapter: sqla
+  sample_ledger:
+    description: Record each sample's computed metric (merge on sample_id — idempotent)
+    event: sample_analyzed
+    model: ledger
+    adapter: sqla
+  classification_ledger:
+    description: Record each sample's label and score (merge on sample_id — idempotent)
+    event: sample_classified
+    model: ledger
+    adapter: sqla
+  summary_store:
+    description: Record the run summary (merge on run_id, so a replayed summary is absorbed)
+    event: run_summarized
+    model: ledger
+    adapter: sqla
+
+# Read state back out (Input/Output authored under def/queries/)
+queries:
+  get_run_progress:
+    description: How many samples a run expects vs how many have analyzed and classified
+    model: ledger
+    adapter: sqla
+  get_run_results:
+    description: Every folded metric and classification for a run, as parallel lists
+    model: ledger
+    adapter: sqla
+  get_cutoffs:
+    description: A reference panel's cutoffs, highest first
+    model: panel
+    adapter: sqla
+
+# The reactivity loop. The fan-out policies read nothing (rule 3's licence:
+# they pass everything the analysis procedures need inside the command, which
+# is what makes those procedures pool-eligible). The finalize policies DO read
+# — so rule 6 keeps them on the lane that folds the ledger they consult.
+policies:
+  start_pipeline:
+    description: >-
+      When a run parses, fork the graph: dispatch split_run to fan the samples
+      out and render_plot to draw the overview — two commands the shell may
+      now schedule on different lanes.
+    event: run_parsed
+    emits: [split_run, render_plot]
+
+  fan_out_analysis:
+    description: >-
+      For every extracted sample, dispatch analyze_sample AND classify_sample.
+      Reads nothing: the event already carries the measurement, and copying it
+      into both commands is what lets both procedures run off the fold lane.
+    event: sample_extracted
+    emits: [analyze_sample, classify_sample]
+
+  finalize_when_complete:
+    description: >-
+      On each classification, consult get_run_progress and dispatch
+      summarize_run once every sample is both analyzed and classified. The
+      main lane folds before it dispatches, so exactly one invocation — the
+      one triggered by the run's last result — sees the counts complete.
+    event: sample_classified
+    queries: [get_run_progress]
+    emits: [summarize_run]
+
+  finalize_when_analyzed:
+    description: >-
+      The same completion check, triggered by sample_analyzed. The two
+      analysis lanes race, so either kind of result can be the run's last one
+      home; without this twin the summary would never fire when an analysis
+      trails the final classification.
+    event: sample_analyzed
+    queries: [get_run_progress]
+    emits: [summarize_run]

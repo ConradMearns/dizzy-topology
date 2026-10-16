@@ -58,6 +58,26 @@ def _universe(feat: FeatureDefinition) -> list[tuple[str, str]]:
     return universe
 
 
+def reader_queries(feat: FeatureDefinition) -> dict[tuple[str, str], list[str]]:
+    """Map each procedure and policy, as ``(kind, name)``, to the queries it declares."""
+    reads = {("procedure", p.name): list(p.queries or []) for p in feat.procedures or []}
+    reads.update({("policy", y.name): list(y.queries or []) for y in feat.policies or []})
+    return reads
+
+
+def mutable_queries(
+    feat: FeatureDefinition, read_only: set[str] | list[str] | None
+) -> dict[tuple[str, str], list[str]]:
+    """``reader_queries`` without the queries over *read_only* models — what rules 3 and
+    6 discriminate on. A query naming no model is kept: it may read anything."""
+    query_model = {q.name: q.model for q in feat.queries or []}
+    ro = set(read_only or [])
+    return {
+        element: [q for q in queries if query_model.get(q) not in ro]
+        for element, queries in reader_queries(feat).items()
+    }
+
+
 def _models(feat: FeatureDefinition) -> dict[tuple[str, str], str | None]:
     """Map each element to the model it folds, or ``None`` for non-projections."""
     folds: dict[tuple[str, str], str | None] = dict.fromkeys(_universe(feat))
@@ -361,6 +381,26 @@ def validate_topology(topology: Topology, feat: FeatureDefinition) -> list[str]:
             "every command would be batch, which is what omitting the section says"
         )
 
+    # Read-only models. "Never updates" has two halves. The feature-file can vouch for the
+    # first — no projection folds the model — and it is checked here. The second, that
+    # nothing outside the event stream writes it while the engine runs, is a promise only
+    # the deployment can make, which is why the list lives in the topology and not here.
+    folded_by: dict[str, list[str]] = {}
+    for projection in feat.projections or []:
+        if projection.model:
+            folded_by.setdefault(projection.model, []).append(projection.name)
+    for model_name in dict.fromkeys(topology.read_only_models or []):
+        if model_name not in model_names:
+            errors.append(f"topology read_only_models names '{model_name}', not declared in models")
+        elif model_name in folded_by:
+            rendered = _and_list([f"'{p}'" for p in folded_by[model_name]])
+            noun = "projection" if len(folded_by[model_name]) == 1 else "projections"
+            errors.append(
+                f"topology read_only_models names '{model_name}', but {noun} {rendered} "
+                "fold it — a fold is an update, and a reader of a model that updates "
+                "decides on whatever the fold has reached, so it cannot be read-only"
+            )
+
     if errors:
         logger.debug("validated topology", extra={"errors": len(errors)})
         return errors
@@ -413,10 +453,11 @@ def validate_topology(topology: Topology, feat: FeatureDefinition) -> list[str]:
     # about the model it reads, and the generated policy context carries a real `query:`
     # handle. Keyed on the (kind, name) PAIR because nothing makes names unique across
     # kinds. Rules 3 and 6 are the same fact on two axes and read it from here both times.
-    reads: dict[tuple[str, str], list[str]] = {
-        ("procedure", p.name): list(p.queries or []) for p in feat.procedures or []
-    }
-    reads.update({("policy", y.name): list(y.queries or []) for y in feat.policies or []})
+    # A query over a read-only model is left out: a read of a model that never changes is
+    # the same wherever and whenever it runs, so it is no read-modify-write and has no
+    # fold to trail. A query naming no model stays in — it may read anything.
+    reads = mutable_queries(feat, topology.read_only_models)
+    query_model = {q.name: q.model for q in feat.queries or []}
 
     # Rule 6. Rule 3 pins a reader's group to one lane; this pins the reader to one GROUP —
     # the one folding what it reads. The asymmetry is the point: what the log records about
@@ -445,7 +486,6 @@ def validate_topology(topology: Topology, feat: FeatureDefinition) -> list[str]:
             group_name,
             who,
         )
-    query_model = {q.name: q.model for q in feat.queries or []}
     for kind, name in universe:
         claimants = claims[(kind, name)]
         if len(claimants) != 1:

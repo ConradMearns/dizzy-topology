@@ -185,7 +185,9 @@ so has acceptance tests instead — there is nothing for it to reject:
    feature-file there is nothing to serialise it by, so a group holding one runs
    serially. The discriminator is the `queries:` list, never the kind of the element
    that declares it. Per-aggregate keys are what would relax that second case, and until
-   they exist a reader is the only thing that pins a group to one lane.
+   they exist a reader is the only thing that pins a group to one lane. A query over a
+   **read-only model** does not count (see *Read-only models* below): nothing can change
+   it underneath the reader, so a reader of reference data partitions freely.
 4. **Queries are not in groups.** They are reads over a model. Placement is a
    question about the read substrate, not the log — which is why `ElementKind`
    has no `queries` value. A selector reaching a query name is refused, with the one
@@ -680,6 +682,59 @@ Two things named earlier are still not designed:
   need not share a group with each other, and a reader may sit apart from a fold it
   provably never races — so rule 6 should be written as a predicate an aggregate key
   later *narrows*, not one it replaces.
+
+## Rule 7 (candidate): a model fed by two stores is order-independent
+
+When an engine loads several domains, each keeps its own store, and the order events were
+appended across stores is recorded nowhere. Every open rebuilds the read model store by
+store, core first. A model folded from events of more than one store comes back
+reordered. If its projection is order-sensitive, a reader after the restart decides on a
+value no uninterrupted run could produce. `spec/specs/engine.qnt` shows this
+(`reopenReordersTest`, `witnessReorderedRead`) and shows that this rule is enough to
+prevent it (`foldsInLogOrder`, `readsInLogOrder`):
+
+> A model whose projections fold events from more than one domain's store must be
+> declared order-independent: its folds commute.
+
+A plugin folding the core's events into the plugin's own model is untouched, since it
+reads one store. Only a model fed by both the core's events and a plugin's needs the
+declaration, or a redesign. Enforcing it needs every loaded feature-file at once: the
+event's store is its emitting procedure's domain. Today `dizzy-topology` reads one
+feature-file.
+
+## Read-only models
+
+Often a procedure looks something up in reference data: a table of element masses, a
+catalogue of reagents, a genome. Nothing in the feature writes it, and nothing outside
+should while the engine runs. A topology declares such models:
+
+```yaml
+read_only_models: [gronk_values]
+```
+
+"Never updates" has two halves, and the declaration covers both:
+
+- **Nothing in the stream writes it.** No projection may fold a read-only model. The
+  validator refuses one that does, naming the projections, because a fold is an update.
+- **Nothing outside the stream writes it.** Only the deployment can promise this, which is
+  why the list lives in the topology and not in the feature-file. The host seeds the data
+  before the engine opens, and again into the fresh read model a reopen starts from
+  (Simple Engine §4: reference data "must survive").
+
+What it buys: a query over a read-only model is not a read-modify-write, and it has no
+fold to trail. Rules 3 and 6 ignore it. A procedure whose every query reads read-only
+models may run on a pool lane, and a policy that only reads them may run wide. A pool
+worker never sees the host's read model. It opens its own read-only copy of the reference
+data in `pool_domains`, which is as good as the host's because neither ever changes. A
+query naming no model still pins its element, because it may read anything.
+
+`engine.qnt` proves this (E13 `readOnlyConstant`, `witnessPooledReadOnly`): a read-only
+model holds exactly what the host seeded through every append, settle and crash, and every
+reader of one read exactly that, pooled or not. Declaring a folded model read-only breaks
+`freshReads`, and a host that doesn't re-seed after a crash breaks `readOnlyConstant`.
+foogle's `gronk_values` is the worked example (`engine/conformance/foogle.py`): a SQLite
+file the host ATTACHes read-only and each pool worker opens read-only, with `poke_snarf`
+on a pool. A write to it raises.
 
 ## The open question is multi-node
 

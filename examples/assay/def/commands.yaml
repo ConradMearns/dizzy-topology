@@ -1,0 +1,47 @@
+id: https://example.org/commands
+name: commands
+prefixes:
+  linkml: https://w3id.org/linkml/
+default_range: string
+imports:
+  - linkml:types
+classes:
+  ingest_run:
+    description: Ingest one instrument run from a manifest file (run_id, input_path)
+    attributes:
+      run_id: { range: string, required: true }
+      input_path:
+        range: string
+        required: true
+        description: Path to the manifest — one `sample_id,measurement` line per sample
+  split_run:
+    description: Split a parsed run into its individual samples
+    attributes:
+      run_id: { range: string, required: true }
+      input_path: { range: string, required: true }
+      sample_count: { range: integer, required: true }
+  analyze_sample:
+    description: Compute the numeric metrics for one sample (self-contained payload)
+    attributes:
+      run_id: { range: string, required: true }
+      sample_id: { range: string, required: true }
+      measurement:
+        range: decimal
+        required: true
+        description: Copied off sample_extracted by the fan-out policy — the read that moved to the dispatcher
+  classify_sample:
+    description: Score one sample on the classifier — the exclusive instrument
+    attributes:
+      run_id: { range: string, required: true }
+      sample_id: { range: string, required: true }
+      measurement: { range: decimal, required: true }
+  render_plot:
+    description: Render the run's overview plot to a file
+    attributes:
+      run_id: { range: string, required: true }
+      plot_path: { range: string, required: true }
+      sample_count: { range: integer, required: true }
+  summarize_run:
+    description: Summarize a finished run from its folded results
+    attributes:
+      run_id: { range: string, required: true }

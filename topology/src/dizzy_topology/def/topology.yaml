@@ -61,6 +61,23 @@ classes:
           batch, which is the order a queue with no priority already had.
         range: CommandPriority
         inlined: true
+      read_only_models:
+        description: >-
+          Models this deployment provides as READ-ONLY reference data: lookups that
+          never update. The host seeds one before the engine opens (and into the
+          fresh read model a reopen starts from), and nothing writes it while the
+          engine runs — no projection in the feature-file folds it, which generation
+          checks, and nothing outside the event stream changes it, which is the
+          deployment's promise and the reason this list lives here.
+
+          A read of a model that never changes is the same wherever and whenever it
+          happens, so it is not the read-modify-write rules 3 and 6 guard against: an
+          element whose every query reads a read-only model partitions freely, and a
+          procedure that reads only reference data may run on a pool lane, where each
+          worker opens its own read-only copy. Naming a model the feature-file does
+          not declare, or one a projection folds, is a generation error.
+        range: string
+        multivalued: true
       groups:
         description: >-
           The declared consumer groups. Every element the feature-file declares

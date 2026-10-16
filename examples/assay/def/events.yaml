@@ -1,0 +1,54 @@
+id: https://example.org/events
+name: events
+prefixes:
+  linkml: https://w3id.org/linkml/
+default_range: string
+imports:
+  - linkml:types
+classes:
+  run_parsed:
+    description: A run manifest was parsed
+    attributes:
+      run_id: { range: string, required: true }
+      input_path: { range: string, required: true }
+      plot_path: { range: string, required: true }
+      sample_count:
+        range: integer
+        required: true
+        description: The completion target the finalize policies compare progress against
+  sample_extracted:
+    description: One sample was extracted from a run
+    attributes:
+      run_id: { range: string, required: true }
+      sample_id: { range: string, required: true }
+      measurement: { range: decimal, required: true }
+  sample_analyzed:
+    description: A sample's metric was computed
+    attributes:
+      run_id: { range: string, required: true }
+      sample_id: { range: string, required: true }
+      metric: { range: decimal, required: true }
+  sample_classified:
+    description: A sample was scored and labeled by the classifier
+    attributes:
+      run_id: { range: string, required: true }
+      sample_id: { range: string, required: true }
+      label: { range: string, required: true }
+      score: { range: decimal, required: true }
+  plot_rendered:
+    description: The run's overview plot was written
+    attributes:
+      run_id: { range: string, required: true }
+      plot_path: { range: string, required: true }
+  run_summarized:
+    description: A run's results were aggregated into a summary
+    attributes:
+      run_id: { range: string, required: true }
+      sample_count: { range: integer, required: true }
+      analyzed_count: { range: integer, required: true }
+      classified_count: { range: integer, required: true }
+      mean_metric: { range: decimal, required: true }
+      hit_count:
+        range: integer
+        required: true
+        description: How many samples the classifier labeled a hit

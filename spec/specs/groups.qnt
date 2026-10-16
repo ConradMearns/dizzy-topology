@@ -87,7 +87,7 @@ module groups {
     nondet gd = Set(true, false).oneOf()
     nondet placement = PLACEMENTS.oneOf()
     all {
-      g' = { reads: reads, emits: emits, folds: folds, reacts: reacts, dispatches: dispatches, interactive: interactive },
+      g' = { reads: reads, emits: emits, folds: folds, reacts: reacts, dispatches: dispatches, interactive: interactive, readOnly: Set(), domainOf: ONE_DOMAIN },
       guarded' = gd,
       owner' = placement,
       log' = [], substrate' = emptyView,

@@ -1,10 +1,11 @@
 """foogle_shindig on the topology engine: the Simple Engine conformance scenario (spec §8).
 
-    PYTHONPATH=engine/src:engine/conformance uv run --project <gen>/lib/python-uv \
+    uv run --project <gen>/lib/python-uv \
         python engine/conformance/foogle.py <golden log.jsonl> [placement.json]
 
-Run inside a generated foogle tree's environment (``just foogle`` builds one), so the
-engine runs on exactly the wiring and vendored ``dizzy_kit``/``dizzy_engine`` an app gets.
+Run inside a generated foogle tree's environment (``just foogle`` builds one, and
+``dizzy-topology vendor`` installs the engine into it), so the engine runs exactly as an
+app gets it: vendored beside the wiring, ``dizzy_kit`` and ``dizzy_engine``.
 
 - **No placement** (all inline): the log must equal DIZZY's golden byte for byte — the
   topology engine's inline lane IS the Simple Engine — including after a crash at each
@@ -13,12 +14,21 @@ engine runs on exactly the wiring and vendored ``dizzy_kit``/``dizzy_engine`` an
   land when they finish), so it must hold the golden's events and commands as a multiset
   — every derived fact, none extra, none missing — and the queries must read the same
   read model.
+
+``gronk_values`` is reference data: nothing in the feature folds it, and the topology
+declares it read-only (``read_only_models``). So it lives in its own SQLite file, seeded
+once, and is only ever opened read-only — the host ATTACHes it under its in-memory read
+model, and each pool worker opens its own read-only connection, which is what lets
+``poke_snarf`` (whose one query reads it) run on a pool. A write to it raises; the run
+checks that it does.
 """
 
 from __future__ import annotations
 
+import functools
 import json
 import os
+import sqlite3
 import subprocess
 import sys
 import tempfile
@@ -36,7 +46,9 @@ from gen_def.sqla.models.gronk_values import GronkValue
 from gen_def.sqla.models.shindig_progress import Base as ShindigProgressBase
 from gen_int.python.adapters.sqla import SqlaAdapter
 from sqlalchemy import create_engine
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
+from sqlalchemy.pool import StaticPool
 
 from dizzy_topology_engine import Placement, TopologyEngine
 
@@ -51,26 +63,51 @@ def expected_snarf_count(i: int) -> int:
     return max(10, min(100, 10 + (i * 37) % 91))
 
 
-def pool_domains() -> list:
-    """A pool worker's tables. Its procedures are query-free (the build checked), so it
-    gets no adapters: a pool child never reads the read model."""
-    return [wiring.build_domain(wiring.Resources())]
+def seed_reference(path: Path) -> Path:
+    """Write the reference database: gronk_values, once, before any engine opens."""
+    db = create_engine(f"sqlite:///{path}")
+    GronkValuesBase.metadata.create_all(db)
+    with Session(db) as session:
+        session.add_all(GronkValue(snarf_id=str(i), value=i * 3 + 5) for i in range(100))
+        session.commit()
+    db.dispose()
+    return path
 
 
-def drive(data: Path, placement: Placement | None) -> wiring.Queries:
-    db = create_engine("sqlite://")
-    for base in (FoogleProgressBase, ShindigProgressBase, GronkValuesBase):
+def _read_only_url(reference: Path) -> str:
+    return f"file:{reference}?mode=ro"
+
+
+def pool_domains(reference: str) -> list:
+    """A pool worker's tables. Its procedures read nothing the log folds (the build
+    checked, rule 3), so it gets no read model — only its own read-only connection to
+    the reference database, which is all ``poke_snarf`` queries."""
+    db = create_engine(f"sqlite:///{_read_only_url(Path(reference))}&uri=true")
+    resources = wiring.Resources(adapters={"sqla": SqlaAdapter(session=Session(db))})
+    return [wiring.build_domain(resources)]
+
+
+def drive(data: Path, placement: Placement | None, reference: Path) -> wiring.Queries:
+    """A fresh, empty in-memory read model with the reference database ATTACHed
+    read-only beneath it: SQLite resolves ``gronk_values`` to the attached file, since
+    the main database has no such table."""
+
+    def connect() -> sqlite3.Connection:
+        conn = sqlite3.connect(":memory:", uri=True, check_same_thread=False)
+        conn.execute("ATTACH DATABASE ? AS reference", (_read_only_url(reference),))
+        return conn
+
+    db = create_engine("sqlite://", creator=connect, poolclass=StaticPool)
+    for base in (FoogleProgressBase, ShindigProgressBase):
         base.metadata.create_all(db)
     session = Session(db)
-    session.add_all(GronkValue(snarf_id=str(i), value=i * 3 + 5) for i in range(100))
-    session.commit()
     resources = wiring.Resources(adapters={"sqla": SqlaAdapter(session=session)})
     crash_at = os.environ.get(CRASH_ENV)
     engine = TopologyEngine(
         data,
         [wiring.build_domain(resources)],
         placement,
-        pool_domains=pool_domains,
+        pool_domains=functools.partial(pool_domains, str(reference)),
         commit=session.commit,
         crash_at=int(crash_at) if crash_at else None,
     )
@@ -78,6 +115,14 @@ def drive(data: Path, placement: Placement | None) -> wiring.Queries:
     engine.run()
     assert not engine.failures(), engine.failures()
     engine.close()
+    try:  # read-only means read-only: the reference database refuses a write
+        session.add(GronkValue(snarf_id="written", value=0))
+        session.commit()
+    except OperationalError as exc:
+        assert "readonly" in str(exc), exc
+        session.rollback()
+    else:
+        raise AssertionError("the reference database accepted a write")
     return wiring.build_queries(resources)
 
 
@@ -108,15 +153,17 @@ def unordered(log: str) -> Counter:
 
 def main() -> None:
     if sys.argv[1:2] == ["--crash-child"]:
-        drive(Path(sys.argv[2]), Placement.load(sys.argv[3]) if len(sys.argv) > 3 else None)
+        placement = Placement.load(sys.argv[4]) if len(sys.argv) > 4 else None
+        drive(Path(sys.argv[2]), placement, Path(sys.argv[3]))
         sys.exit("the crash point was never reached")
 
     golden = Path(sys.argv[1]).read_text()
     placement = Placement.load(sys.argv[2]) if len(sys.argv) > 2 else None
 
     with tempfile.TemporaryDirectory() as tmp:
+        reference = seed_reference(Path(tmp) / "reference.db")
         data = Path(tmp) / "clean"
-        log = check(data, drive(data, placement))
+        log = check(data, drive(data, placement, reference))
         print(f"ran {EXPECTED_COMMANDS} commands to idle, grand_total={EXPECTED_GRAND_TOTAL}")
 
         if placement is not None:
@@ -130,11 +177,18 @@ def main() -> None:
             for k in CRASH_SAMPLE:
                 data = Path(tmp) / f"pooled-crash-{k}"
                 child = subprocess.run(
-                    [sys.executable, __file__, "--crash-child", str(data), sys.argv[2]],
+                    [
+                        sys.executable,
+                        __file__,
+                        "--crash-child",
+                        str(data),
+                        str(reference),
+                        sys.argv[2],
+                    ],
                     env={**os.environ, CRASH_ENV: str(k)},
                 )
                 assert child.returncode == CRASH_EXIT, (k, child.returncode)
-                recovered = check(data, drive(data, placement))
+                recovered = check(data, drive(data, placement, reference))
                 assert unordered(recovered) == unordered(golden), f"crash at {k}: facts differ"
             print(f"pooled crash runs {list(CRASH_SAMPLE)}: every log holds the golden's facts")
             print("ALL CHECKS PASSED")
@@ -145,11 +199,12 @@ def main() -> None:
         for k in CRASH_SAMPLE:
             data = Path(tmp) / f"crash-{k}"
             child = subprocess.run(
-                [sys.executable, __file__, "--crash-child", str(data)],
+                [sys.executable, __file__, "--crash-child", str(data), str(reference)],
                 env={**os.environ, CRASH_ENV: str(k)},
             )
             assert child.returncode == CRASH_EXIT, (k, child.returncode)
-            assert check(data, drive(data, None)) == log, f"crash at {k}: the log differs"
+            recovered = check(data, drive(data, None, reference))
+            assert recovered == log, f"crash at {k}: the log differs"
         print(f"crash runs {list(CRASH_SAMPLE)}: every log matches")
     print("ALL CHECKS PASSED")
 

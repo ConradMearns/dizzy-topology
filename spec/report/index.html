@@ -39,73 +39,75 @@ details.src{margin-top:1.5rem} details.src pre{max-height:32rem}
 <main>
 <h1>Dizzy Engine Ledger</h1>
 <p class="lede">Every check run against the Quint engine specifications: what was asked, how it was checked, and what came back.
-Generated 2026-10-14 10:35:43 · quint 0.32.0 · dizzy @ <code>1527342d</code> · 8000 samples × 20 steps per simulation.</p>
-<div class="strip"><div><b>73/73</b><span>checks as expected</span></div>
-<div><b>35</b><span>invariants holding</span></div>
-<div><b>35</b><span>witnesses reachable</span></div>
+Generated 2026-10-14 17:38:47 · quint 0.32.0 · dizzy @ <code>1527342d</code> · 8000 samples × 20 steps per simulation.</p>
+<div class="strip"><div><b>86/86</b><span>checks as expected</span></div>
+<div><b>40</b><span>invariants holding</span></div>
+<div><b>38</b><span>witnesses reachable</span></div>
 <div><b>3/3</b><span>bounded proofs</span></div></div>
 <dl class="method">
 <dt>invariant · simulation</dt><dd>Random traces from the nondeterministic step relation; a violation prints a concrete counterexample.</dd>
 <dt>witness · reachability</dt><dd>Runs <code>--invariant=not(X)</code>. A violation is the desired outcome: it is a trace that reaches X, proving the invariants are not vacuous.</dd>
+<dt>reopen · biased sampling</dt><dd>Simulation of <code>engineReopen</code> from <code>initCrossStore</code> with <code>reopenStep</code>: only graphs where a model is fed by both stores and read, and reopens only once something is folded — the region where a reopen can reorder a fold. Every behaviour sampled is one the plain spec has.</dd>
+<dt>scenario · quint test</dt><dd>A scripted <code>run</code>: a behaviour too precise for random sampling to find (the reopen harm), stepped through and checked at its end.</dd>
 <dt>Apalache · bounded</dt><dd>Symbolic model checking of every behaviour up to the stated depth, across every graph (and placement) the <code>init</code> can draw.</dd>
 </dl>
 <section>
-<h2>Spec 4 — the topology engine (as shipped) <span class="count">27/27</span></h2>
-<p class="intro">The Simple Engine with lanes: an inline lane on the host thread and a process-pool lane, over the Simple Engine store. Every transaction boundary is its own step — claim, append+ack, fold+enqueue, cursor — and a crash may fall between any two, losing the read model and in-flight pool work but never the store. Graph and rule-3 placement are drawn at <code>init</code>. Headline: exactly-once effects hold <em>unconditionally</em> (st needed an application guard), and reads stay fresh with pools although the log leaves claim order. The Python engine is held to the same invariants by <code>engine/tests/test_spec_conformance.py</code>.</p>
+<h2>Spec 4 — the topology engine (as shipped) <span class="count">40/40</span></h2>
+<p class="intro">The Simple Engine with lanes: an inline lane on the host thread and a process-pool lane, over the Simple Engine store. Every transaction boundary is its own step — claim, append+ack, fold+enqueue, cursor — and a crash may fall between any two, losing the read model and in-flight pool work but never the store. Graph, read-only models and rule-3 placement are drawn at <code>init</code>. Headline: exactly-once effects hold <em>unconditionally</em> (st needed an application guard), reads stay fresh with pools although the log leaves claim order, read-only reference models never change, so their readers may be pooled, and a core domain and a plugin, each with its own store, recover store by store to the same state. The Python engine is held to the same invariants by <code>engine/tests/test_spec_conformance.py</code>.</p>
 <div class="tbl"><table><thead><tr><th>check</th><th>method</th><th>what it says</th><th class="num">time</th><th>result</th></tr></thead>
 <tbody><tr>
 <td><code>modelsAreFold</code></td>
 <td class="kind">invariant · simulation</td>
 <td>E1 the read model is a fold of the log, across crashes (refold on open)</td>
-<td class="num">5.2s</td>
+<td class="num">7.6s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>cursorSound</code></td>
 <td class="kind">invariant · simulation</td>
 <td>E2 the cursor never claims ground the read model has not covered</td>
-<td class="num">5.2s</td>
+<td class="num">7.0s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>blocksWellFormed</code></td>
 <td class="kind">invariant · simulation</td>
 <td>E3 every run leaves one complete, contiguous, ordered block</td>
-<td class="num">6.0s</td>
+<td class="num">8.2s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>effectsOnce</code></td>
 <td class="kind">invariant · simulation</td>
 <td>E4 EXACTLY-ONCE effects, unconditionally: append and ack are one transaction</td>
-<td class="num">5.5s</td>
+<td class="num">7.3s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>ackAtomic</code></td>
 <td class="kind">invariant · simulation</td>
 <td>E5 a block&#x27;s command is done; a done command has its block; nothing else appended</td>
-<td class="num">7.1s</td>
+<td class="num">8.9s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>causal</code></td>
 <td class="kind">invariant · simulation</td>
 <td>E6 policy-dispatched effects follow a trigger the policy reacts to</td>
-<td class="num">5.8s</td>
+<td class="num">7.0s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>freshReads</code></td>
 <td class="kind">invariant · simulation</td>
 <td>E7 with rule 3, every procedure read the fold of everything before its block — pools included</td>
-<td class="num">6.2s</td>
+<td class="num">7.9s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>freshDispatch</code></td>
 <td class="kind">invariant · simulation</td>
 <td>E8 every dispatching policy read exactly the fold through its trigger, across crashes</td>
-<td class="num">7.5s</td>
+<td class="num">7.4s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>freshQueue</code></td>
 <td class="kind">invariant · simulation</td>
 <td>E8&#x27; the same, for commands still queued</td>
-<td class="num">7.3s</td>
+<td class="num">8.1s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>dispatchComplete</code></td>
@@ -117,19 +119,49 @@ Generated 2026-10-14 10:35:43 · quint 0.32.0 · dizzy @ <code>1527342d</code> �
 <td><code>idsDistinct</code></td>
 <td class="kind">invariant · simulation</td>
 <td>E10 one row per command id (INSERT OR IGNORE)</td>
-<td class="num">6.2s</td>
+<td class="num">7.0s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>memorySound</code></td>
 <td class="kind">invariant · simulation</td>
 <td>E11 the host&#x27;s in-flight units are rows really running; pools within their width</td>
-<td class="num">5.6s</td>
+<td class="num">7.5s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>noLostWork</code></td>
 <td class="kind">invariant · simulation</td>
 <td>E12 an idle engine has finished every command</td>
-<td class="num">6.7s</td>
+<td class="num">6.9s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>readOnlyConstant</code></td>
+<td class="kind">invariant · simulation</td>
+<td>E13 read-only models never change: nothing folds them, and every reader of one — pooled too — read exactly the seed</td>
+<td class="num">7.2s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>oneStoreUnsettled</code></td>
+<td class="kind">invariant · simulation</td>
+<td>E14 at most one domain&#x27;s store is unsettled, its events the last appended: per-store cursors are the global prefix</td>
+<td class="num">7.1s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>foldSeqSound</code></td>
+<td class="kind">invariant · simulation</td>
+<td>E15 the fold-order ghost is the read model, ordered: each folded event once</td>
+<td class="num">8.3s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>liveFoldsInOrder</code></td>
+<td class="kind">invariant · simulation</td>
+<td>E16 live, every model folds in append order: reordering needs a reopen</td>
+<td class="num">7.2s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>readsInLogOrder</code></td>
+<td class="kind">invariant · simulation</td>
+<td>E17 under rule 7 (a model fed by two stores is order-free) no decision is taken on a model folded out of append order</td>
+<td class="num">7.4s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>witnessCascade</code></td>
@@ -141,37 +173,37 @@ Generated 2026-10-14 10:35:43 · quint 0.32.0 · dizzy @ <code>1527342d</code> �
 <td><code>witnessReader</code></td>
 <td class="kind">witness · reachability</td>
 <td>a procedure observed a non-empty model</td>
-<td class="num">1.7s</td>
+<td class="num">2.0s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessPooledRun</code></td>
 <td class="kind">witness · reachability</td>
 <td>a pooled procedure&#x27;s block was committed</td>
-<td class="num">2.0s</td>
+<td class="num">1.7s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessConcurrent</code></td>
 <td class="kind">witness · reachability</td>
 <td>the pool lane was full: jobs genuinely in flight together</td>
-<td class="num">1.6s</td>
+<td class="num">1.9s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessOutOfOrder</code></td>
 <td class="kind">witness · reachability</td>
 <td>under rule 3 the log left claim order — and every read was still fresh</td>
-<td class="num">1.7s</td>
+<td class="num">1.8s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessPriority</code></td>
 <td class="kind">witness · reachability</td>
 <td>an interactive command was claimed ahead of an older batch one</td>
-<td class="num">1.8s</td>
+<td class="num">1.7s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessRecovered</code></td>
 <td class="kind">witness · reachability</td>
 <td>an interrupted attempt re-ran under its own id after a crash</td>
-<td class="num">1.6s</td>
+<td class="num">1.8s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessCrashAfterAppend</code></td>
@@ -189,7 +221,7 @@ Generated 2026-10-14 10:35:43 · quint 0.32.0 · dizzy @ <code>1527342d</code> �
 <td><code>witnessFailed</code></td>
 <td class="kind">witness · reachability</td>
 <td>an element raised; its attempt failed and appended nothing</td>
-<td class="num">1.7s</td>
+<td class="num">1.6s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessRetried</code></td>
@@ -201,19 +233,273 @@ Generated 2026-10-14 10:35:43 · quint 0.32.0 · dizzy @ <code>1527342d</code> �
 <td><code>witnessBound</code></td>
 <td class="kind">witness · reachability</td>
 <td>the log bound was reached (cascades are bounded, not absent)</td>
-<td class="num">2.0s</td>
+<td class="num">1.7s</td>
 <td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessPooledReadOnly</code></td>
+<td class="kind">witness · reachability</td>
+<td>rule 3 admits a reader of read-only models to a pool, and it ran there</td>
+<td class="num">1.7s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessTwoStores</code></td>
+<td class="kind">witness · reachability</td>
+<td>both domains&#x27; stores hold events</td>
+<td class="num">1.8s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>witnessCrossDomain</code></td>
+<td class="kind">witness · reachability</td>
+<td>a policy of one domain dispatched a command the other domain&#x27;s procedure ran</td>
+<td class="num">1.7s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>allInvariants</code></td>
+<td class="kind">reopen · biased sampling</td>
+<td>every invariant, sampled where reopens reorder (engineReopen: a model fed by both stores, crashes after folds)</td>
+<td class="num">18.8s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>not(witnessReorderedRead)</code><details><summary>counterexample</summary><pre>     status: &quot;queued&quot;
+      }
+    ]
+}
+
+[State 16]
+{
+  engineReopen::engineSpec::crashes: 1,
+  engineReopen::engineSpec::current: [1],
+  engineReopen::engineSpec::cursor: 3,
+  engineReopen::engineSpec::fails: 0,
+  engineReopen::engineSpec::foldSeq: Map(&quot;m1&quot; -&gt; [1, 0, 2], &quot;m2&quot; -&gt; [1, 0, 2]),
+  engineReopen::engineSpec::folded: 3,
+  engineReopen::engineSpec::g:
+    {
+      dispatches: Map(&quot;y1&quot; -&gt; Set(&quot;p2&quot;)),
+      domainOf: Map(&quot;p1&quot; -&gt; &quot;d1&quot;, &quot;p2&quot; -&gt; &quot;d2&quot;, &quot;y1&quot; -&gt; &quot;d1&quot;),
+      emits: Map(&quot;p1&quot; -&gt; Set(&quot;e1&quot;, &quot;e2&quot;), &quot;p2&quot; -&gt; Set(&quot;e1&quot;)),
+      folds: Map(&quot;m1&quot; -&gt; Set(&quot;e1&quot;, &quot;e2&quot;), &quot;m2&quot; -&gt; Set(&quot;e1&quot;, &quot;e2&quot;)),
+      interactive: Set(&quot;p1&quot;),
+      reacts: Map(&quot;y1&quot; -&gt; Set(&quot;e1&quot;)),
+      readOnly: Set(),
+      reads: Map(&quot;p1&quot; -&gt; Set(&quot;m1&quot;, &quot;m2&quot;), &quot;p2&quot; -&gt; Set(&quot;m1&quot;), &quot;y1&quot; -&gt; Set())
+    },
+  engineReopen::engineSpec::ignored: 0,
+  engineReopen::engineSpec::inflight: Set(),
+  engineReopen::engineSpec::log:
+    [
+      {
+        at: 0,
+        cause: { at: 0, origin: &quot;host&quot;, target: &quot;p2&quot; },
+        dispatchView: Map(&quot;m1&quot; -&gt; Set(), &quot;m2&quot; -&gt; Set()),
+        kind: &quot;e1&quot;,
+        view: Map(&quot;m1&quot; -&gt; Set(), &quot;m2&quot; -&gt; Set())
+      },
+      {
+        at: 1,
+        cause: { at: 1, origin: &quot;host&quot;, target: &quot;p1&quot; },
+        dispatchView: Map(&quot;m1&quot; -&gt; Set(), &quot;m2&quot; -&gt; Set()),
+        kind: &quot;e1&quot;,
+        view: Map(&quot;m1&quot; -&gt; Set(0), &quot;m2&quot; -&gt; Set(0))
+      },
+      {
+        at: 1,
+        cause: { at: 1, origin: &quot;host&quot;, target: &quot;p1&quot; },
+        dispatchView: Map(&quot;m1&quot; -&gt; Set(), &quot;m2&quot; -&gt; Set()),
+        kind: &quot;e2&quot;,
+        view: Map(&quot;m1&quot; -&gt; Set(0), &quot;m2&quot; -&gt; Set(0))
+      }
+    ],
+  engineReopen::engineSpec::misreads: 0,
+  engineReopen::engineSpec::models:
+    Map(&quot;m1&quot; -&gt; Set(0, 1, 2), &quot;m2&quot; -&gt; Set(0, 1, 2)),
+  engineReopen::engineSpec::orderFree: Set(&quot;m2&quot;),
+  engineReopen::engineSpec::pending: [],
+  engineReopen::engineSpec::pooled: Set(),
+  engineReopen::engineSpec::reran: 0,
+  engineReopen::engineSpec::rule3: true,
+  engineReopen::engineSpec::submitted: 2,
+  engineReopen::engineSpec::table:
+    [
+      {
+        cmd:
+          {
+            id: { at: 0, origin: &quot;host&quot;, target: &quot;p2&quot; },
+            proc: &quot;p2&quot;,
+            view: Map(&quot;m1&quot; -&gt; Set(), &quot;m2&quot; -&gt; Set())
+          },
+        status: &quot;done&quot;
+      },
+      {
+        cmd:
+          {
+            id: { at: 0, origin: &quot;y1&quot;, target: &quot;p2&quot; },
+            proc: &quot;p2&quot;,
+            view: Map(&quot;m1&quot; -&gt; Set(), &quot;m2&quot; -&gt; Set())
+          },
+        status: &quot;running&quot;
+      },
+      {
+        cmd:
+          {
+            id: { at: 1, origin: &quot;host&quot;, target: &quot;p1&quot; },
+            proc: &quot;p1&quot;,
+            view: Map(&quot;m1&quot; -&gt; Set(), &quot;m2&quot; -&gt; Set())
+          },
+        status: &quot;done&quot;
+      },
+      {
+        cmd:
+          {
+            id: { at: 1, origin: &quot;y1&quot;, target: &quot;p2&quot; },
+            proc: &quot;p2&quot;,
+            view: Map(&quot;m1&quot; -&gt; Set(), &quot;m2&quot; -&gt; Set())
+          },
+        status: &quot;queued&quot;
+      }
+    ]
+}
+
+[State 17]
+{
+  engineReopen::engineSpec::crashes: 1,
+  engineReopen::engineSpec::current: [],
+  engineReopen::engineSpec::cursor: 3,
+  engineReopen::engineSpec::fails: 0,
+  engineReopen::engineSpec::foldSeq: Map(&quot;m1&quot; -&gt; [1, 0, 2], &quot;m2&quot; -&gt; [1, 0, 2]),
+  engineReopen::engineSpec::folded: 3,
+  engineReopen::engineSpec::g:
+    {
+      dispatches: Map(&quot;y1&quot; -&gt; Set(&quot;p2&quot;)),
+      domainOf: Map(&quot;p1&quot; -&gt; &quot;d1&quot;, &quot;p2&quot; -&gt; &quot;d2&quot;, &quot;y1&quot; -&gt; &quot;d1&quot;),
+      emits: Map(&quot;p1&quot; -&gt; Set(&quot;e1&quot;, &quot;e2&quot;), &quot;p2&quot; -&gt; Set(&quot;e1&quot;)),
+      folds: Map(&quot;m1&quot; -&gt; Set(&quot;e1&quot;, &quot;e2&quot;), &quot;m2&quot; -&gt; Set(&quot;e1&quot;, &quot;e2&quot;)),
+      interactive: Set(&quot;p1&quot;),
+      reacts: Map(&quot;y1&quot; -&gt; Set(&quot;e1&quot;)),
+      readOnly: Set(),
+      reads: Map(&quot;p1&quot; -&gt; Set(&quot;m1&quot;, &quot;m2&quot;), &quot;p2&quot; -&gt; Set(&quot;m1&quot;), &quot;y1&quot; -&gt; Set())
+    },
+  engineReopen::engineSpec::ignored: 0,
+  engineReopen::engineSpec::inflight: Set(),
+  engineReopen::engineSpec::log:
+    [
+      {
+        at: 0,
+        cause: { at: 0, origin: &quot;host&quot;, target: &quot;p2&quot; },
+        dispatchView: Map(&quot;m1&quot; -&gt; Set(), &quot;m2&quot; -&gt; Set()),
+        kind: &quot;e1&quot;,
+        view: Map(&quot;m1&quot; -&gt; Set(), &quot;m2&quot; -&gt; Set())
+      },
+      {
+        at: 1,
+        cause: { at: 1, origin: &quot;host&quot;, target: &quot;p1&quot; },
+        dispatchView: Map(&quot;m1&quot; -&gt; Set(), &quot;m2&quot; -&gt; Set()),
+        kind: &quot;e1&quot;,
+        view: Map(&quot;m1&quot; -&gt; Set(0), &quot;m2&quot; -&gt; Set(0))
+      },
+      {
+        at: 1,
+        cause: { at: 1, origin: &quot;host&quot;, target: &quot;p1&quot; },
+        dispatchView: Map(&quot;m1&quot; -&gt; Set(), &quot;m2&quot; -&gt; Set()),
+        kind: &quot;e2&quot;,
+        view: Map(&quot;m1&quot; -&gt; Set(0), &quot;m2&quot; -&gt; Set(0))
+      },
+      {
+        at: 3,
+        cause: { at: 0, origin: &quot;y1&quot;, target: &quot;p2&quot; },
+        dispatchView: Map(&quot;m1&quot; -&gt; Set(), &quot;m2&quot; -&gt; Set()),
+        kind: &quot;e1&quot;,
+        view: Map(&quot;m1&quot; -&gt; Set(0, 1, 2), &quot;m2&quot; -&gt; Set())
+      }
+    ],
+  engineReopen::engineSpec::misreads: 1,
+  engineReopen::engineSpec::models:
+    Map(&quot;m1&quot; -&gt; Set(0, 1, 2), &quot;m2&quot; -&gt; Set(0, 1, 2)),
+  engineReopen::engineSpec::orderFree: Set(&quot;m2&quot;),
+  engineReopen::engineSpec::pending: [],
+  engineReopen::engineSpec::pooled: Set(),
+  engineReopen::engineSpec::reran: 0,
+  engineReopen::engineSpec::rule3: true,
+  engineReopen::engineSpec::submitted: 2,
+  engineReopen::engineSpec::table:
+    [
+      {
+        cmd:
+          {
+            id: { at: 0, origin: &quot;host&quot;, target: &quot;p2&quot; },
+            proc: &quot;p2&quot;,
+            view: Map(&quot;m1&quot; -&gt; Set(), &quot;m2&quot; -&gt; Set())
+          },
+        status: &quot;done&quot;
+      },
+      {
+        cmd:
+          {
+            id: { at: 0, origin: &quot;y1&quot;, target: &quot;p2&quot; },
+            proc: &quot;p2&quot;,
+            view: Map(&quot;m1&quot; -&gt; Set(), &quot;m2&quot; -&gt; Set())
+          },
+        status: &quot;done&quot;
+      },
+      {
+        cmd:
+          {
+            id: { at: 1, origin: &quot;host&quot;, target: &quot;p1&quot; },
+            proc: &quot;p1&quot;,
+            view: Map(&quot;m1&quot; -&gt; Set(), &quot;m2&quot; -&gt; Set())
+          },
+        status: &quot;done&quot;
+      },
+      {
+        cmd:
+          {
+            id: { at: 1, origin: &quot;y1&quot;, target: &quot;p2&quot; },
+            proc: &quot;p2&quot;,
+            view: Map(&quot;m1&quot; -&gt; Set(), &quot;m2&quot; -&gt; Set())
+          },
+        status: &quot;queued&quot;
+      }
+    ]
+}
+
+[violation] Found an issue (204ms at 1235 traces/second).
+Use --verbosity=3 to show executions.
+Use --seed=0xcc74 --backend=rust to reproduce.
+error: Invariant violated
+</pre></details></td>
+<td class="kind">reopen · biased sampling</td>
+<td>THE HARM is reachable by sampling there too: a decision on a model refolded out of append order</td>
+<td class="num">1.9s</td>
+<td><span class="pill pass">reachable</span></td></tr>
+<tr>
+<td><code>reopenReordersTest</code></td>
+<td class="kind">scenario · quint test</td>
+<td>THE HARM (witnessReorderedRead): a reopen refolds a model fed by two stores out of order, and a policy decides on it</td>
+<td class="num">2.1s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>orderFreeAbsorbsTest</code></td>
+<td class="kind">scenario · quint test</td>
+<td>the same reopen with the model declared order-free (witnessOrderFreeReordered): rule 7 holds, nothing misread</td>
+<td class="num">1.7s</td>
+<td><span class="pill pass">holds</span></td></tr>
+<tr>
+<td><code>oneStoreKeepsOrderTest</code></td>
+<td class="kind">scenario · quint test</td>
+<td>the same run with both procedures in one store: the reopen refolds in append order</td>
+<td class="num">1.8s</td>
+<td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>witnessStalePool</code></td>
 <td class="kind">witness · reachability</td>
-<td>rule 3 is NECESSARY: a pooled reader decided on a stale model</td>
-<td class="num">1.8s</td>
+<td>rule 3 is NECESSARY: a pooled reader of a mutable model decided on a stale one</td>
+<td class="num">1.7s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>allInvariants</code></td>
 <td class="kind">Apalache · bounded</td>
 <td>Apalache: all invariants, every graph × placement, 5 steps</td>
-<td class="num">60.8s</td>
+<td class="num">276.0s</td>
 <td><span class="pill pass">holds</span></td></tr></tbody></table></div>
 
 <details class="src"><summary>source · <code>specs/engine.qnt</code></summary><pre>// specs/engine.qnt — Spec 4: the topology engine (engine/src/dizzy_topology_engine),
@@ -227,8 +513,9 @@ Generated 2026-10-14 10:35:43 · quint 0.32.0 · dizzy @ <code>1527342d</code> �
 //
 //   claim        attempt `running`, durably, before anything runs  (_claim_next)
 //   append+ack   the block AND the command&#x27;s `done`, ONE transaction (_unit, _commit)
-//   settleFold   fold one event, then its policies enqueue by derived id with
-//                INSERT OR IGNORE                                  (Engine._settle)
+//   settleFold   fold one event and run its policies, in memory     (Engine._settle)
+//   enqueue      one command a policy dispatched, INSERT OR IGNORE by its derived id
+//                — each command its own transaction                (Engine._enqueue)
 //   advance      the cursor moves past that event — its own transaction
 //
 // and a CRASH may fall between any two of them. The store (log, command table,
@@ -240,40 +527,82 @@ Generated 2026-10-14 10:35:43 · quint 0.32.0 · dizzy @ <code>1527342d</code> �
 // What the host thread serialises, and why claims wait for `settled`: after an
 // append the engine settles the new events before it does anything else, and a
 // reopen settles before its first claim. So a claim always sees cursor == log
-// length — zero lag at the moment a procedure reads.
+// length — zero lag at the moment a procedure reads. The host API (submit, retry)
+// runs on that same thread, so it is only ever called between runs: never with a unit
+// in hand, pool work in flight, or a settle unfinished (hostIdle).
 //
 // Placement: `pooled` ⊆ PROCS is drawn at init. Topology rule 3 says only a
-// procedure that declares no `queries:` may be pooled; `rule3` is drawn too, so the
-// suite can show the rule is NECESSARY (witnessStalePool) as well as sufficient
-// (freshReads). A pool child never sees the host&#x27;s read model; when rule 3 is broken
-// it is modelled as reading the snapshot taken when its job was dispatched — the most
-// charitable thing an implementation could do — and that is still stale.
+// procedure that reads nothing that can change may be pooled: it declares no
+// `queries:`, or queries only READ-ONLY models (reference data the host seeds and
+// nothing writes; graph.qnt). `rule3` is drawn too, so the suite can show the rule is
+// NECESSARY (witnessStalePool) as well as sufficient (freshReads). A pool child never
+// sees the host&#x27;s read model: it has its own copy of every read-only model and nothing
+// else (pool_domains). So when rule 3 is broken, a pooled reader of a mutable model
+// reads it empty — stale as soon as anything has been folded into it.
+//
+// Domains: the graph&#x27;s elements are split between a core domain and a plugin, drawn at
+// init (graph.qnt&#x27;s domainOf). Each domain has its own store: its procedures&#x27; commands
+// and the events they append, and its own reaction cursor. Command seq is one counter
+// across the stores (§5.1), so `table` stays one list in seq order; `log` is the order
+// the host thread appended in, across stores, and each store holds its slice of it. The
+// engine never records that interleaving durably — a reopen refolds each store up to its
+// own cursor (crash, refoldStores) and settles each store past it. That is only the
+// global prefix fold if at most one store is ever unsettled, and the unsettled events
+// are the last ones appended anywhere: oneStoreUnsettled proves it, and modelsAreFold
+// after a crash leans on it.
+//
+// Fold ORDER, and the harm a reopen can do. A model above is a SET of folded events,
+// which hides order. A real projection may care (last write wins, a status machine, a
+// list), so `foldSeq` records the order each model was folded in since the engine
+// opened: live, that is append order; a reopen refolds store by store, which is append
+// order only within a store. A model fed by two stores therefore comes back REORDERED
+// after any reopen, and a reader that decides on it (`misreads`) — taking the worst case,
+// a projection whose value depends on order — saw a value no run without that reopen
+// could have produced: it emits a different event, and nothing repairs the log.
+// witnessReorderedRead reaches that. The candidate rule (`rule7`, drawn at init like
+// rule 3): a model folded from more than one store must be declared order-independent
+// (`orderFree`). readsInLogOrder proves the rule sufficient; the witness, necessary.
+//
+// Read-only models: the host seeds them before the engine opens, and again into the
+// empty read model a reopen hands the engine (spec §4: reference data &quot;must survive&quot;).
+// readOnlyConstant proves nothing the engine does — append, settle, crash — moves them,
+// and witnessPooledReadOnly shows a pooled reader of one running, fresh.
 //
 // The headline results, against st.qnt&#x27;s:
 //   • effectsOnce holds UNCONDITIONALLY. st needed the application to guard, and
 //     only guardable procedures could (witnessDoubleAppend there). Here the append
 //     and the ack are one transaction, so a replay can never append a second block.
 //   • freshReads holds with pools (given rule 3), although the log&#x27;s ORDER is no
-//     longer the claim order (witnessOutOfOrder).
+//     longer the claim order (witnessOutOfOrder), and a pooled procedure may read a
+//     read-only model (witnessPooledReadOnly).
 //   • freshDispatch and dispatchComplete survive crashes, including a crash
-//     between a policy&#x27;s enqueue and the cursor (witnessResettle): the re-settle
-//     re-derives the same ids and the store ignores them.
+//     between two enqueues of one settle, or between the last and the cursor
+//     (witnessResettle): the re-settle re-derives the same ids and the store ignores
+//     the ones it holds.
+//
+// The bounds are constants of `engineSpec`, instantiated at the bottom as `engine` (the
+// default main: what is proved) and `engineNarrow` (a one-wide pool). Both feed the
+// model-based tests (engine/tests/test_mbt.py), which replay `quint run --mbt` traces on
+// the real engine and compare its state with the trace&#x27;s after every step — so every
+// action here ends at a pause of the engine (_mbt.py&#x27;s _ENDS_AT).
 //
 //   quint run    engine.qnt --invariant=allInvariants --max-samples=3000 --max-steps=25
 //   quint run    engine.qnt --invariant=&#x27;not(witnessOutOfOrder)&#x27;   # expect violation = reachable
-//   quint verify engine.qnt --invariant=allInvariants --max-steps=4
+//   quint verify engine.qnt --invariant=allInvariants --max-steps=5
+//   quint run    engine.qnt --main=engineNarrow --mbt --out-itf=&#x27;t{seq}.itf.json&#x27; --n-traces=10
 
-module engine {
+module engineSpec {
   import graph.* from &quot;./graph&quot;
 
-  pure val MAX_SUBMISSIONS = 2   // host-originated commands
-  pure val MAX_LOG = 6           // a policy cycle can be genuinely infinite; bound it
-  pure val MAX_CRASHES = 2
-  pure val MAX_FAILS = 1         // element raises (or a pool worker dies)
-  pure val POOL_WORKERS = 2      // one pool lane, this wide
+  // The bounds, instantiated at the bottom of this file: `engine` (what is proved) and
+  // `engineNarrow` (a one-wide pool, for the model-based tests).
+  const MAX_SUBMISSIONS: int     // host-originated commands
+  const MAX_LOG: int             // a policy cycle can be genuinely infinite; bound it
+  const MAX_CRASHES: int
+  const MAX_FAILS: int           // element raises (or a pool worker dies)
+  const POOL_WORKERS: int        // one pool lane, this wide
 
   type Row = { cmd: Command, status: str }        // status: queued | running | done | failed
-  type Job = { idx: int, view: View }             // a pool job: table row + what it could read
 
   // --- State: the store (durable) -----------------------------------------
   var log: List[Event]           // events table
@@ -283,19 +612,35 @@ module engine {
   var models: View               // the read model
   var folded: int                // ghost: models == fold of log[0, folded)
   var current: List[int]         // the inline unit the host thread is running (0 or 1 row)
-  var inflight: Set[Job]         // pool jobs dispatched and not yet committed
+  var inflight: Set[int]         // table rows of pool jobs dispatched, not yet committed
+  var pending: List[Command]     // what the event being settled dispatched, not yet enqueued
+  var foldSeq: str -&gt; List[int]  // ghost: each model&#x27;s events, in the order folded since open
   // --- Configuration (fixed after init) ----------------------------------
   var g: Graph
   var pooled: Set[str]           // procedures placed on the pool lane
+  var orderFree: Set[str]        // models declared order-independent (their folds commute)
   var rule3: bool                // does the placement obey topology rule 3?
+                                 // (g.readOnly, also drawn at init, is the deployment&#x27;s
+                                 // read-only models)
   // --- Ghosts ------------------------------------------------------------
   var submitted: int
   var crashes: int
   var fails: int
   var reran: int                 // claims of a row already `running` (recovery)
   var ignored: int               // policy enqueues the store ignored (re-settle)
+  var misreads: int              // decisions taken on a model folded out of append order
 
-  pure def isReaderProc(gr: Graph, p: str): bool = gr.reads.get(p) != Set()
+  // init draws the configuration; initWith takes it, so a `run` can script a scenario.
+  action initWith(gr: Graph, pl: Set[str], free: Set[str]): bool = all {
+    g&#x27; = gr,
+    pooled&#x27; = pl,
+    orderFree&#x27; = free,
+    rule3&#x27; = pl.forall(p =&gt; not(readsMutable(gr, p))),
+    log&#x27; = [], table&#x27; = [], cursor&#x27; = 0,
+    models&#x27; = seedView(gr), folded&#x27; = 0, current&#x27; = [], inflight&#x27; = Set(), pending&#x27; = [],
+    foldSeq&#x27; = MODELS.mapBy(m =&gt; []),
+    submitted&#x27; = 0, crashes&#x27; = 0, fails&#x27; = 0, reran&#x27; = 0, ignored&#x27; = 0, misreads&#x27; = 0,
+  }
 
   action init = {
     nondet reads = READS.oneOf()
@@ -304,22 +649,54 @@ module engine {
     nondet reacts = REACTS.oneOf()
     nondet dispatches = DISPATCHES.oneOf()
     nondet interactive = INTERACTIVE.oneOf()
+    nondet ro = readOnlyCandidates(folds).oneOf()
+    nondet dom = DOMAIN_OF.oneOf()
     nondet pl = PROCS.powerset().oneOf()
-    val gr = { reads: reads, emits: emits, folds: folds, reacts: reacts, dispatches: dispatches, interactive: interactive }
-    all {
-      g&#x27; = gr,
-      pooled&#x27; = pl,
-      rule3&#x27; = pl.forall(p =&gt; not(isReaderProc(gr, p))),
-      log&#x27; = [], table&#x27; = [], cursor&#x27; = 0,
-      models&#x27; = emptyView, folded&#x27; = 0, current&#x27; = [], inflight&#x27; = Set(),
-      submitted&#x27; = 0, crashes&#x27; = 0, fails&#x27; = 0, reran&#x27; = 0, ignored&#x27; = 0,
-    }
+    nondet free = MODELS.powerset().oneOf()
+    val gr = { reads: reads, emits: emits, folds: folds, reacts: reacts, dispatches: dispatches, interactive: interactive, readOnly: ro, domainOf: dom }
+    initWith(gr, pl, free)
   }
 
   // --- Helpers -------------------------------------------------------------
   val settled = cursor == log.length() and folded == cursor
-  val busyIdx = inflight.map(j =&gt; j.idx)
+  val busyIdx = inflight
+  val hostIdle = current == [] and inflight == Set() and settled
   val poolRoom = inflight.size() &lt; POOL_WORKERS
+
+  // The store an event lives in, and its place there (its seq - 1).
+  def storeOf(i: int): str = domainOfEvent(g, log[i])
+  def storeIndex(i: int): int = log.indices().filter(j =&gt; j &lt; i and storeOf(j) == storeOf(i)).size()
+  // A store&#x27;s reaction cursor: how many of its events are settled.
+  def storeCursor(d: str): int = log.indices().filter(i =&gt; i &lt; cursor and storeOf(i) == d).size()
+  // What a reopen refolds: every store&#x27;s events up to that store&#x27;s own cursor, over the
+  // seed — never the global prefix, which no store records.
+  def refoldStores: View =
+    MODELS.mapBy(m =&gt; seedView(g).get(m).union(log.indices().filter(i =&gt;
+      g.folds.get(m).contains(log[i].kind) and storeIndex(i) &lt; storeCursor(storeOf(i)))))
+
+  // ...and the ORDER it refolds them in: store by store (DOMAIN_LIST), each in its own
+  // order — which is append order only if the model&#x27;s events come from one store.
+  def refoldOrder: str -&gt; List[int] =
+    MODELS.mapBy(m =&gt; DOMAIN_LIST.foldl([], (acc, d) =&gt; range(0, LOG_CAP).foldl(acc, (a, i) =&gt;
+      if (i &lt; log.length() and storeOf(i) == d and storeIndex(i) &lt; storeCursor(d) and g.folds.get(m).contains(log[i].kind))
+        a.append(i)
+      else a)))
+
+  // The stores whose events a model folds: the domains of the procedures that emit them.
+  def storesFolding(m: str): Set[str] =
+    PROCS.filter(p =&gt; g.emits.get(p).intersect(g.folds.get(m)) != Set()).map(p =&gt; g.domainOf.get(p))
+  // Rule 7 (candidate): a model fed by more than one store is declared order-independent.
+  val rule7 = MODELS.forall(m =&gt; orderFree.contains(m) or storesFolding(m).size() &lt;= 1)
+
+  pure def ascending(l: List[int]): bool = l.indices().forall(k =&gt; k == 0 or l[k - 1] &lt; l[k])
+  // Would `elem` decide on a model whose fold order no run without a reopen could have
+  // produced? (Order-free models are immune: their folds commute.)
+  def misorderedFor(fs: str -&gt; List[int], elem: str): bool =
+    g.reads.get(elem).exists(m =&gt; not(orderFree.contains(m)) and not(ascending(fs.get(m))))
+
+  // No log outgrows this: a claim needs log.length() &lt; MAX_LOG, and one block appends at
+  // most one event per kind. (A constant, so Apalache can unroll a range over it.)
+  pure val LOG_CAP = MAX_LOG + MAX_DEGREE + 1
 
   pure def ids(t: List[Row]): Set[CmdId] = t.indices().map(i =&gt; t[i].cmd.id)
   pure def setStatus(t: List[Row], i: int, s: str): List[Row] =
@@ -348,17 +725,21 @@ module engine {
     }
   }
 
-  action unchangedConfig = all { g&#x27; = g, pooled&#x27; = pooled, rule3&#x27; = rule3 }
+  action unchangedConfig = all { g&#x27; = g, pooled&#x27; = pooled, rule3&#x27; = rule3, orderFree&#x27; = orderFree }
 
   // --- Host submits a command ----------------------------------------------
   action submit = {
     nondet p = PROCS.oneOf()
+    submitProc(p)
+  }
+  action submitProc(p: str): bool = {
     all {
+      hostIdle,
       submitted &lt; MAX_SUBMISSIONS,
       table&#x27; = table.append({ cmd: { id: { origin: &quot;host&quot;, at: submitted, target: p }, proc: p, view: emptyView }, status: &quot;queued&quot; }),
       submitted&#x27; = submitted + 1,
       log&#x27; = log, cursor&#x27; = cursor, models&#x27; = models, folded&#x27; = folded, current&#x27; = current, inflight&#x27; = inflight,
-      crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, unchangedConfig,
+      crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, pending&#x27; = pending, foldSeq&#x27; = foldSeq, misreads&#x27; = misreads, unchangedConfig,
     }
   }
 
@@ -373,14 +754,12 @@ module engine {
       table&#x27; = setStatus(table, i, &quot;running&quot;),
       reran&#x27; = if (table[i].status == &quot;running&quot;) reran + 1 else reran,
       if (pooled.contains(table[i].cmd.proc))
-        // A pool child gets no read model. Under rule 3 the procedure reads nothing, so
-        // the snapshot is irrelevant; without it, this is the freshest view it could have.
-        all { inflight&#x27; = inflight.union(Set({ idx: i, view: models })), current&#x27; = current }
+        all { inflight&#x27; = inflight.union(Set(i)), current&#x27; = current }
       else
         all { current&#x27; = [i], inflight&#x27; = inflight },
     },
     log&#x27; = log, cursor&#x27; = cursor, models&#x27; = models, folded&#x27; = folded,
-    submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, ignored&#x27; = ignored, unchangedConfig,
+    submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, ignored&#x27; = ignored, pending&#x27; = pending, foldSeq&#x27; = foldSeq, misreads&#x27; = misreads, unchangedConfig,
   }
 
   // --- The inline unit: run against the live read model, append + ack ------
@@ -388,9 +767,11 @@ module engine {
     current.length() == 1,
     val i = current[0]
     appendAndAck(i, models),
+    misreads&#x27; = if (misorderedFor(foldSeq, table[current[0]].cmd.proc)) misreads + 1 else misreads,
+    foldSeq&#x27; = foldSeq,
     current&#x27; = [],
     cursor&#x27; = cursor, models&#x27; = models, folded&#x27; = folded, inflight&#x27; = inflight,
-    submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, unchangedConfig,
+    submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, pending&#x27; = pending, unchangedConfig,
   }
 
   // --- A pool job finishes; the host thread commits it (only when settled) ---
@@ -400,11 +781,12 @@ module engine {
     inflight != Set(),
     nondet j = inflight.oneOf()
     all {
-      appendAndAck(j.idx, j.view),
+      // The child read its own copy of each read-only model, and nothing else.
+      appendAndAck(j, seedView(g)),
       inflight&#x27; = inflight.exclude(Set(j)),
     },
     current&#x27; = current, cursor&#x27; = cursor, models&#x27; = models, folded&#x27; = folded,
-    submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, unchangedConfig,
+    submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, pending&#x27; = pending, foldSeq&#x27; = foldSeq, misreads&#x27; = misreads, unchangedConfig,
   }
 
   // --- An element raises (or a pool worker dies): attempt failed, nothing appended
@@ -414,7 +796,7 @@ module engine {
     table&#x27; = setStatus(table, current[0], &quot;failed&quot;),
     current&#x27; = [], fails&#x27; = fails + 1,
     log&#x27; = log, cursor&#x27; = cursor, models&#x27; = models, folded&#x27; = folded, inflight&#x27; = inflight,
-    submitted&#x27; = submitted, crashes&#x27; = crashes, reran&#x27; = reran, ignored&#x27; = ignored, unchangedConfig,
+    submitted&#x27; = submitted, crashes&#x27; = crashes, reran&#x27; = reran, ignored&#x27; = ignored, pending&#x27; = pending, foldSeq&#x27; = foldSeq, misreads&#x27; = misreads, unchangedConfig,
   }
   action failPool = all {
     current == [],
@@ -423,67 +805,86 @@ module engine {
     inflight != Set(),
     nondet j = inflight.oneOf()
     all {
-      table&#x27; = setStatus(table, j.idx, &quot;failed&quot;),
+      table&#x27; = setStatus(table, j, &quot;failed&quot;),
       inflight&#x27; = inflight.exclude(Set(j)),
     },
     fails&#x27; = fails + 1,
     log&#x27; = log, cursor&#x27; = cursor, models&#x27; = models, folded&#x27; = folded, current&#x27; = current,
-    submitted&#x27; = submitted, crashes&#x27; = crashes, reran&#x27; = reran, ignored&#x27; = ignored, unchangedConfig,
+    submitted&#x27; = submitted, crashes&#x27; = crashes, reran&#x27; = reran, ignored&#x27; = ignored, pending&#x27; = pending, foldSeq&#x27; = foldSeq, misreads&#x27; = misreads, unchangedConfig,
   }
 
   // --- The host retries a failed command: a new attempt, never automatic ----
   action retry = {
     nondet i = table.indices().oneOf()
     all {
+      hostIdle,
       table.length() &gt; 0,
       table[i].status == &quot;failed&quot;,
       table&#x27; = setStatus(table, i, &quot;queued&quot;),
       log&#x27; = log, cursor&#x27; = cursor, models&#x27; = models, folded&#x27; = folded, current&#x27; = current, inflight&#x27; = inflight,
-      submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, unchangedConfig,
+      submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, pending&#x27; = pending, foldSeq&#x27; = foldSeq, misreads&#x27; = misreads, unchangedConfig,
     }
   }
 
-  // --- Settle one event: fold, then its policies enqueue (INSERT OR IGNORE) --
+  // --- Settle one event: fold, then run its policies (in memory) ------------
   action settleFold = all {
     current == [],
     folded == cursor,
     cursor &lt; log.length(),
     val e = log[cursor]
     val v2 = applyEvent(g, models, e, cursor)
-    val dispatched = runPolicies(g, e, cursor, v2)
-    val r = dispatched.foldl({ t: table, dup: 0 }, (acc, c) =&gt;
-      if (ids(acc.t).contains(c.id)) { t: acc.t, dup: acc.dup + 1 }
-      else { t: acc.t.append({ cmd: c, status: &quot;queued&quot; }), dup: acc.dup })
+    val fs2 = MODELS.mapBy(m =&gt;
+      if (g.folds.get(m).contains(e.kind)) foldSeq.get(m).append(cursor) else foldSeq.get(m))
+    val deciders = POLICIES.filter(y =&gt; g.reacts.get(y).contains(e.kind) and g.dispatches.get(y) != Set())
     all {
       models&#x27; = v2,
       folded&#x27; = folded + 1,
-      table&#x27; = r.t,
-      ignored&#x27; = ignored + r.dup,
+      pending&#x27; = runPolicies(g, e, cursor, v2),
+      foldSeq&#x27; = fs2,
+      misreads&#x27; = if (deciders.exists(y =&gt; misorderedFor(fs2, y))) misreads + 1 else misreads,
     },
-    log&#x27; = log, cursor&#x27; = cursor, current&#x27; = current, inflight&#x27; = inflight,
-    submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, unchangedConfig,
+    log&#x27; = log, table&#x27; = table, cursor&#x27; = cursor, current&#x27; = current, inflight&#x27; = inflight,
+    submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored,
+    unchangedConfig,
+  }
+
+  // --- ... enqueue what they dispatched, one transaction each (INSERT OR IGNORE)
+  action enqueue = all {
+    pending != [],
+    val c = pending.head()
+    if (ids(table).contains(c.id)) all { table&#x27; = table, ignored&#x27; = ignored + 1 }
+    else all { table&#x27; = table.append({ cmd: c, status: &quot;queued&quot; }), ignored&#x27; = ignored },
+    pending&#x27; = pending.tail(),
+    log&#x27; = log, cursor&#x27; = cursor, models&#x27; = models, folded&#x27; = folded, current&#x27; = current, inflight&#x27; = inflight,
+    submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, foldSeq&#x27; = foldSeq, misreads&#x27; = misreads, unchangedConfig,
   }
 
   // --- ... and only then the cursor moves past it ---------------------------
   action advance = all {
     folded == cursor + 1,
+    pending == [],
     cursor&#x27; = folded,
     log&#x27; = log, table&#x27; = table, models&#x27; = models, folded&#x27; = folded, current&#x27; = current, inflight&#x27; = inflight,
-    submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, unchangedConfig,
+    submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, pending&#x27; = pending, foldSeq&#x27; = foldSeq, misreads&#x27; = misreads, unchangedConfig,
   }
 
   // --- Crash and reopen: memory is gone, the store is not -------------------
-  // _recover refolds a fresh read model to the cursor; settling past it is the
-  // ordinary settle steps, which claims wait for.
+  // _recover refolds a fresh read model store by store, each to its own cursor, over the
+  // read-only models the host seeds into it; settling past it is the ordinary settle
+  // steps, which claims wait for. (They take log[cursor]: the engine settles store by
+  // store, which is the same event because only one store is ever unsettled.)
   action crash = all {
     crashes &lt; MAX_CRASHES,
-    models&#x27; = foldPrefix(g, log, cursor),
+    models&#x27; = refoldStores,
+    foldSeq&#x27; = refoldOrder,
     folded&#x27; = cursor,
     current&#x27; = [],
     inflight&#x27; = Set(),
+    pending&#x27; = [],
     crashes&#x27; = crashes + 1,
     log&#x27; = log, table&#x27; = table, cursor&#x27; = cursor,
-    submitted&#x27; = submitted, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, unchangedConfig,
+    submitted&#x27; = submitted, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, misreads&#x27; = misreads,
+    unchangedConfig,
   }
 
   val idle = current == [] and inflight == Set() and settled and
@@ -493,12 +894,47 @@ module engine {
     submitted == MAX_SUBMISSIONS,
     log&#x27; = log, table&#x27; = table, cursor&#x27; = cursor, models&#x27; = models, folded&#x27; = folded,
     current&#x27; = current, inflight&#x27; = inflight,
-    submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, unchangedConfig,
+    submitted&#x27; = submitted, crashes&#x27; = crashes, fails&#x27; = fails, reran&#x27; = reran, ignored&#x27; = ignored, pending&#x27; = pending, foldSeq&#x27; = foldSeq, misreads&#x27; = misreads, unchangedConfig,
+  }
+
+  // --- Exploration bias for the reopen harm (engineReopen; `quint run --init=initCrossStore
+  // --step=reopenStep`). Every behaviour these produce is one `init`/`step` can produce;
+  // they only skip the ones that cannot reach the harm: graphs with no model fed by two
+  // stores and read by someone, and reopens before anything is folded.
+  action initCrossStore = {
+    nondet reads = READS.oneOf()
+    nondet emits = EMITS.oneOf()
+    nondet folds = FOLDS.oneOf()
+    nondet reacts = REACTS.oneOf()
+    nondet dispatches = DISPATCHES.oneOf()
+    nondet interactive = INTERACTIVE.oneOf()
+    nondet dom = DOMAIN_OF.oneOf()
+    nondet pl = PROCS.powerset().oneOf()
+    nondet free = MODELS.powerset().oneOf()
+    nondet k = KINDS.oneOf()
+    nondet reader = ELEMS.oneOf()
+    // Built, not filtered: the first two procedures both emit k, from different stores,
+    // and k feeds m1, which `reader` reads. Every other relation is drawn as init draws it.
+    val a = PROC_LIST[0]
+    val b = PROC_LIST[1]
+    val m = &quot;m1&quot;
+    val gr = {
+      reads: reads.set(reader, reads.get(reader).union(Set(m))),
+      emits: emits.set(a, emits.get(a).union(Set(k))).set(b, emits.get(b).union(Set(k))),
+      folds: folds.set(m, folds.get(m).union(Set(k))),
+      reacts: reacts, dispatches: dispatches, interactive: interactive, readOnly: Set(),
+      domainOf: dom.set(a, &quot;d1&quot;).set(b, &quot;d2&quot;),
+    }
+    initWith(gr, pl, free)
+  }
+  action reopenStep = any {
+    submit, claim, runInline, completePool, settleFold, enqueue, advance, quiescent,
+    all { log.length() &gt;= 2, crash },
   }
 
   action step = any {
     submit, claim, runInline, completePool, failInline, failPool, retry,
-    settleFold, advance, crash, quiescent,
+    settleFold, enqueue, advance, crash, quiescent,
   }
 
   // --- Invariants ----------------------------------------------------------
@@ -559,18 +995,56 @@ module engine {
   // E11. Process memory points only at rows that are really running.
   val memorySound = all {
     current.indices().forall(k =&gt; table[current[k]].status == &quot;running&quot;),
-    inflight.forall(j =&gt; table[j.idx].status == &quot;running&quot;),
+    inflight.forall(j =&gt; table[j].status == &quot;running&quot;),
     current.indices().forall(k =&gt; not(busyIdx.contains(current[k]))),
     inflight.size() &lt;= POOL_WORKERS,
+    pending != [] implies folded == cursor + 1,
   }
 
   // E12. Nothing waits behind an empty engine: when idle, every command finished.
   val noLostWork = (idle and log.length() &lt; MAX_LOG) implies
     table.indices().forall(i =&gt; table[i].status == &quot;done&quot; or table[i].status == &quot;failed&quot;)
 
+  // E13. Read-only models never change: nothing folds one, the read model holds exactly
+  //      the seed through every append, settle and crash, and every decision that read
+  //      one — inline, pooled, or a policy&#x27;s — read exactly the seed. Unconditional: it
+  //      does not lean on rule 3, so a pool child&#x27;s own copy is as good as the host&#x27;s.
+  val readOnlyConstant = g.readOnly.forall(m =&gt; all {
+    g.folds.get(m) == Set(),
+    models.get(m) == SEED,
+    log.indices().forall(i =&gt; all {
+      g.reads.get(log[i].cause.target).contains(m) implies log[i].view.get(m) == SEED,
+      if (log[i].cause.origin == &quot;host&quot;) true
+      else g.reads.get(log[i].cause.origin).contains(m) implies log[i].dispatchView.get(m) == SEED,
+    }),
+  })
+
+  // E14. At most one store is unsettled, and its unsettled events are the last appended
+  //      anywhere: the per-store cursors a crash leaves are exactly the global prefix.
+  //      (What makes refoldStores, and settling store by store, the global order&#x27;s.)
+  val oneStoreUnsettled =
+    log.indices().forall(i =&gt; i &gt;= cursor implies storeOf(i) == storeOf(cursor))
+
+  // E15. The fold-order ghost is the read model, ordered: each model&#x27;s foldSeq holds
+  //      exactly its folded events, each once.
+  val foldSeqSound = MODELS.forall(m =&gt; all {
+    foldSeq.get(m).indices().map(k =&gt; foldSeq.get(m)[k]).union(seedView(g).get(m)) == models.get(m),
+    foldSeq.get(m).indices().map(k =&gt; foldSeq.get(m)[k]).size() == foldSeq.get(m).length(),
+  })
+  // E16. Live, every model folds in append order: the harm needs a reopen.
+  val liveFoldsInOrder = crashes == 0 implies MODELS.forall(m =&gt; ascending(foldSeq.get(m)))
+  // E17. Under rule 7, every model that is not order-free holds its events in append
+  //      order, across any number of reopens: a one-store model refolds in its store&#x27;s
+  //      order, and a live settle only ever appends the newest event.
+  val foldsInLogOrder = rule7 implies
+    MODELS.forall(m =&gt; orderFree.contains(m) or ascending(foldSeq.get(m)))
+  // E18. ...so under rule 7 no decision is ever taken on a model folded out of order.
+  val readsInLogOrder = rule7 implies misreads == 0
+
   val allInvariants = all {
     modelsAreFold, cursorSound, blocksWellFormed, effectsOnce, ackAtomic, causal,
     freshReads, freshDispatch, freshQueue, dispatchComplete, idsDistinct, memorySound, noLostWork,
+    readOnlyConstant, oneStoreUnsettled, foldSeqSound, liveFoldsInOrder, foldsInLogOrder, readsInLogOrder,
   }
 
   // --- Witnesses (should be REACHABLE: `--invariant=not(w)` must violate) ---
@@ -594,8 +1068,84 @@ module engine {
   // Every failure was retried by the host and the run still finished clean.
   val witnessRetried    = fails &gt; 0 and idle and table.indices().forall(i =&gt; table[i].status == &quot;done&quot;)
   val witnessBound      = log.length() &gt;= MAX_LOG
-  // Rule 3 is NECESSARY: pool a reader and it decides on a stale model.
+  // Both stores hold events, and a policy of one domain dispatched a command another
+  // domain&#x27;s procedure ran.
+  val witnessTwoStores = log.indices().exists(i =&gt; log.indices().exists(k =&gt; storeOf(i) != storeOf(k)))
+  val witnessCrossDomain = log.indices().exists(i =&gt;
+    log[i].cause.origin != &quot;host&quot; and g.domainOf.get(log[i].cause.origin) != storeOf(i))
+  // THE HARM: a reopen refolded a model fed by two stores out of append order, and a
+  // procedure or policy decided on it. (Necessarily not rule 7.)
+  val witnessReorderedRead = misreads &gt; 0
+  // Rule 7&#x27;s declaration at work: an order-free model really was refolded out of order,
+  // and that is fine, because its folds commute.
+  val witnessOrderFreeReordered = rule7 and orderFree.exists(m =&gt; not(ascending(foldSeq.get(m))))
+  // Rule 3 admits a reader of read-only models to a pool, and it ran there.
+  val witnessPooledReadOnly = rule3 and log.indices().exists(i =&gt;
+    pooled.contains(log[i].cause.target) and g.reads.get(log[i].cause.target) != Set())
+  // Rule 3 is NECESSARY: pool a reader of a mutable model and it decides on a stale one.
   val witnessStalePool  = not(rule3) and not(freshReadsOf(g, log))
+}
+
+// What the suite proves and simulates: `quint run engine.qnt` selects it by default.
+module engine {
+  import graph.* from &quot;./graph&quot;
+  import engineSpec(MAX_SUBMISSIONS = 2, MAX_LOG = 6, MAX_CRASHES = 2, MAX_FAILS = 1, POOL_WORKERS = 2).*
+
+  // --- The reopen harm, as a scenario (`quint test engine.qnt --main=engine`) -------
+  // p2 (the plugin, d2) emits e1; p1 (the core, d1) emits e1 then e2; model m1 folds e1;
+  // policy y1 reacts to e2, reads m1 and dispatches. p2 runs first, so m1 folds position
+  // 0 (plugin store) then 1 (core store). The engine settles p1&#x27;s e1, then crashes before
+  // settling its e2. The reopen refolds the core store first — m1 = [1, 0] — and then
+  // settles e2: y1 decides on m1 folded out of append order. With an order-sensitive
+  // projection, that is a value no run without the crash (or any restart) would give y1.
+  pure val HARM_GRAPH: Graph = {
+    reads: Map(&quot;p1&quot; -&gt; Set(), &quot;p2&quot; -&gt; Set(), &quot;y1&quot; -&gt; Set(&quot;m1&quot;)),
+    emits: Map(&quot;p1&quot; -&gt; Set(&quot;e1&quot;, &quot;e2&quot;), &quot;p2&quot; -&gt; Set(&quot;e1&quot;)),
+    folds: Map(&quot;m1&quot; -&gt; Set(&quot;e1&quot;), &quot;m2&quot; -&gt; Set()),
+    reacts: Map(&quot;y1&quot; -&gt; Set(&quot;e2&quot;)),
+    dispatches: Map(&quot;y1&quot; -&gt; Set(&quot;p2&quot;)),
+    interactive: Set(),
+    readOnly: Set(),
+    domainOf: Map(&quot;p1&quot; -&gt; &quot;d1&quot;, &quot;p2&quot; -&gt; &quot;d2&quot;, &quot;y1&quot; -&gt; &quot;d1&quot;),
+  }
+
+  action harmScenario(gr: Graph, free: Set[str]): bool =
+    initWith(gr, Set(), free)
+      .then(submitProc(&quot;p2&quot;)).then(submitProc(&quot;p1&quot;))
+      .then(claim).then(runInline).then(settleFold).then(advance)   // p2: m1 = [0]
+      .then(claim).then(runInline).then(settleFold).then(advance)   // p1&#x27;s e1: m1 = [0, 1]
+      .then(crash)                                                  // reopen: m1 = [1, 0]
+      .then(settleFold)                                             // p1&#x27;s e2: y1 reads m1
+
+  // The harm: y1 decided on a reordered m1. Rule 7 does not hold.
+  run reopenReordersTest =
+    harmScenario(HARM_GRAPH, Set())
+      .expect(all { foldSeq.get(&quot;m1&quot;) == [1, 0], witnessReorderedRead, not(rule7), allInvariants })
+
+  // Declared order-independent: the same reorder happens, and harms nothing.
+  run orderFreeAbsorbsTest =
+    harmScenario(HARM_GRAPH, Set(&quot;m1&quot;))
+      .expect(all { foldSeq.get(&quot;m1&quot;) == [1, 0], misreads == 0, witnessOrderFreeReordered, allInvariants })
+
+  // Both procedures in one store: the reopen refolds in append order.
+  run oneStoreKeepsOrderTest =
+    harmScenario({ ...HARM_GRAPH, domainOf: Map(&quot;p1&quot; -&gt; &quot;d1&quot;, &quot;p2&quot; -&gt; &quot;d1&quot;, &quot;y1&quot; -&gt; &quot;d1&quot;) }, Set())
+      .expect(all { foldSeq.get(&quot;m1&quot;) == [0, 1], misreads == 0, rule7, allInvariants })
+}
+
+// Reopens, and nothing else rare: no element failures, one crash, a one-wide pool. The
+// reopen harm (witnessReorderedRead) takes ~13 steps of exactly the right kind, beyond
+// Apalache&#x27;s depth and rare under sampling; here the sampler spends its steps on runs,
+// settles and the one reopen, so rule 7&#x27;s invariants are sampled where they can fail.
+module engineReopen {
+  import engineSpec(MAX_SUBMISSIONS = 2, MAX_LOG = 6, MAX_CRASHES = 1, MAX_FAILS = 0, POOL_WORKERS = 1).*
+}
+
+// A one-wide pool and a third submission: the model-based tests (engine/tests/test_mbt.py)
+// draw traces from here too, because at width 2 a full pool with more pool work queued
+// behind it is rare, and that is where a lane&#x27;s capacity is tested.
+module engineNarrow {
+  import engineSpec(MAX_SUBMISSIONS = 3, MAX_LOG = 6, MAX_CRASHES = 2, MAX_FAILS = 1, POOL_WORKERS = 1).*
 }
 </pre></details>
 </section><section>
@@ -606,127 +1156,127 @@ module engine {
 <td><code>zeroLag</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I1 no lag: cursor == log.length()</td>
-<td class="num">3.8s</td>
+<td class="num">2.4s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>modelsAreFold</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I2 carried models are a refold of the log (the rebuild guarantee)</td>
-<td class="num">4.0s</td>
+<td class="num">3.3s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>blocksWellFormed</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I3 every run leaves one complete, contiguous, ordered block</td>
-<td class="num">6.7s</td>
+<td class="num">4.4s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>effectsOnce</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I3&#x27; exactly-once effects for GUARDABLE procedures, when the application guards</td>
-<td class="num">5.4s</td>
+<td class="num">3.4s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>causal</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I4 policy-dispatched effects follow a trigger the policy reacts to</td>
-<td class="num">4.0s</td>
+<td class="num">2.8s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>freshReads</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I5 every procedure read the fold of everything before its block</td>
-<td class="num">7.3s</td>
+<td class="num">6.3s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>freshDispatch</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I6 every dispatching policy read the fold through its trigger</td>
-<td class="num">4.7s</td>
+<td class="num">3.8s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>freshQueue</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I6&#x27; the same, for commands still queued</td>
-<td class="num">6.5s</td>
+<td class="num">4.5s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>dispatchComplete</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I7 every reacting policy of every event has dispatched</td>
-<td class="num">3.4s</td>
+<td class="num">3.0s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>emitComplete</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I7&#x27; every command that ran left its block</td>
-<td class="num">3.5s</td>
+<td class="num">3.0s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>queueIdsDistinct</code></td>
 <td class="kind">invariant · simulation</td>
 <td>I8 one DB row per command</td>
-<td class="num">3.8s</td>
+<td class="num">2.7s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>witnessCascade</code></td>
 <td class="kind">witness · reachability</td>
 <td>a policy-dispatched command ran</td>
-<td class="num">1.5s</td>
+<td class="num">1.1s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessReader</code></td>
 <td class="kind">witness · reachability</td>
 <td>a procedure observed a non-empty model</td>
-<td class="num">1.3s</td>
+<td class="num">1.1s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessPolicyReader</code></td>
 <td class="kind">witness · reachability</td>
 <td>a policy observed a non-empty model</td>
-<td class="num">1.3s</td>
+<td class="num">1.2s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessPriority</code></td>
 <td class="kind">witness · reachability</td>
 <td>an interactive command was claimed ahead of the queue head</td>
-<td class="num">1.3s</td>
+<td class="num">1.1s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessBound</code></td>
 <td class="kind">witness · reachability</td>
 <td>the log bound was reached (cascades are bounded, not absent)</td>
-<td class="num">1.5s</td>
+<td class="num">1.1s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessRedelivered</code></td>
 <td class="kind">witness · reachability</td>
 <td>a claimed row was recovered and re-queued</td>
-<td class="num">1.3s</td>
+<td class="num">1.1s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessGuardNoop</code></td>
 <td class="kind">witness · reachability</td>
 <td>a guarding procedure saw its own block and no-op&#x27;d its redelivery</td>
-<td class="num">1.5s</td>
+<td class="num">1.1s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessUnguardable</code></td>
 <td class="kind">witness · reachability</td>
 <td>a guarding application still double-appended: the procedure was not guardable</td>
-<td class="num">1.6s</td>
+<td class="num">1.1s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessDoubleAppend</code></td>
 <td class="kind">witness · reachability</td>
 <td>an unguarded redelivery appended a second block (executor.py:49-56)</td>
-<td class="num">1.6s</td>
+<td class="num">1.1s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>allInvariants</code></td>
 <td class="kind">Apalache · bounded</td>
 <td>Apalache: all invariants, every graph × guard, 4 steps</td>
-<td class="num">213.9s</td>
+<td class="num">524.2s</td>
 <td><span class="pill pass">holds</span></td></tr></tbody></table></div>
 <section class="review">
 <h3>Adversarial review</h3>
@@ -908,7 +1458,7 @@ module st {
     nondet interactive = INTERACTIVE.oneOf()
     nondet gd = Set(true, false).oneOf()
     all {
-      g&#x27; = { reads: reads, emits: emits, folds: folds, reacts: reacts, dispatches: dispatches, interactive: interactive },
+      g&#x27; = { reads: reads, emits: emits, folds: folds, reacts: reacts, dispatches: dispatches, interactive: interactive, readOnly: Set(), domainOf: ONE_DOMAIN },
       guarded&#x27; = gd,
       queue&#x27; = [], log&#x27; = [], cursor&#x27; = 0, models&#x27; = emptyView, ran&#x27; = Set(), submitted&#x27; = 0, noops&#x27; = 0,
     }
@@ -1074,13 +1624,13 @@ module st {
 <td><code>substrateIsFold</code></td>
 <td class="kind">invariant · simulation</td>
 <td>each model == its owner&#x27;s fold up to the owner&#x27;s high-water mark</td>
-<td class="num">4.6s</td>
+<td class="num">4.9s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>cursorBelowHwm</code></td>
 <td class="kind">invariant · simulation</td>
 <td>a rewound cursor never exceeds what was folded</td>
-<td class="num">4.1s</td>
+<td class="num">3.7s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>blocksWellFormed</code></td>
@@ -1104,7 +1654,7 @@ module st {
 <td><code>routed</code></td>
 <td class="kind">invariant · simulation</td>
 <td>a command sits only in its procedure&#x27;s owner lane / pending slot</td>
-<td class="num">4.3s</td>
+<td class="num">4.6s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>dispatchComplete</code></td>
@@ -1116,13 +1666,13 @@ module st {
 <td><code>emitComplete</code></td>
 <td class="kind">invariant · simulation</td>
 <td>every command that ran left its block</td>
-<td class="num">3.9s</td>
+<td class="num">4.3s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>rule6Guarantee</code></td>
 <td class="kind">invariant · simulation</td>
 <td>T1: rule 6 ⇒ model committed through the cause before the run; no policy dispatched behind its trigger</td>
-<td class="num">4.2s</td>
+<td class="num">3.9s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>noFaultFreshDispatch</code></td>
@@ -1134,91 +1684,91 @@ module st {
 <td><code>singleGroupIsSt</code></td>
 <td class="kind">invariant · simulation</td>
 <td>T2: one group ⇒ st&#x27;s fresh reads</td>
-<td class="num">4.6s</td>
+<td class="num">4.1s</td>
 <td><span class="pill pass">holds</span></td></tr>
 <tr>
 <td><code>witnessClaimWindow</code></td>
 <td class="kind">witness · reachability</td>
 <td>a rule-6-LEGAL split read behind the tail (the claim→execute window, groups.py:44-50)</td>
-<td class="num">1.6s</td>
+<td class="num">1.4s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessWriteSkew</code></td>
 <td class="kind">witness · reachability</td>
 <td>WRITE SKEW under rule 6: two decisions, neither saw the other — no serial order explains both</td>
-<td class="num">1.8s</td>
+<td class="num">1.5s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessStaleRead</code></td>
 <td class="kind">witness · reachability</td>
 <td>a rule-6-violating split broke even the weak guarantee</td>
-<td class="num">1.5s</td>
+<td class="num">1.4s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessStalePolicy</code></td>
 <td class="kind">witness · reachability</td>
 <td>a rule-6-violating policy read stale or ahead</td>
-<td class="num">2.1s</td>
+<td class="num">1.4s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessLegalLag</code></td>
 <td class="kind">witness · reachability</td>
 <td>a legal multi-group split with real inter-group lag</td>
-<td class="num">1.7s</td>
+<td class="num">1.5s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessCrossGroup</code></td>
 <td class="kind">witness · reachability</td>
 <td>a policy in one group dispatched to a procedure in another</td>
-<td class="num">1.5s</td>
+<td class="num">1.3s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessRedelivered</code></td>
 <td class="kind">witness · reachability</td>
 <td>an at-least-once redelivery occurred</td>
-<td class="num">1.6s</td>
+<td class="num">1.5s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessRewound</code></td>
 <td class="kind">witness · reachability</td>
 <td>a cursor was lost and rewound</td>
-<td class="num">1.6s</td>
+<td class="num">1.3s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessRedispatch</code></td>
 <td class="kind">witness · reachability</td>
 <td>a rewound cursor re-dispatched an already-run command</td>
-<td class="num">1.5s</td>
+<td class="num">1.4s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessDoubleAppend</code></td>
 <td class="kind">witness · reachability</td>
 <td>an unguarded replay appended a second block</td>
-<td class="num">1.5s</td>
+<td class="num">1.4s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessUnguardable</code></td>
 <td class="kind">witness · reachability</td>
 <td>a guarding application still double-appended: procedure not guardable</td>
-<td class="num">1.5s</td>
+<td class="num">1.4s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessGuardMissed</code></td>
 <td class="kind">witness · reachability</td>
 <td>a guarding, guardable procedure double-appended because rule 6 was broken</td>
-<td class="num">1.8s</td>
+<td class="num">1.4s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>witnessOneGroupRun</code></td>
 <td class="kind">witness · reachability</td>
 <td>the one-group (st) topology was exercised</td>
-<td class="num">1.8s</td>
+<td class="num">1.3s</td>
 <td><span class="pill pass">reachable</span></td></tr>
 <tr>
 <td><code>allInvariants</code></td>
 <td class="kind">Apalache · bounded</td>
 <td>Apalache: all invariants, every graph × placement × guard, 3 steps</td>
-<td class="num">13.3s</td>
+<td class="num">12.2s</td>
 <td><span class="pill pass">holds</span></td></tr></tbody></table></div>
 <section class="review">
 <h3>Adversarial review</h3>
@@ -1426,7 +1976,7 @@ module groups {
     nondet gd = Set(true, false).oneOf()
     nondet placement = PLACEMENTS.oneOf()
     all {
-      g&#x27; = { reads: reads, emits: emits, folds: folds, reacts: reacts, dispatches: dispatches, interactive: interactive },
+      g&#x27; = { reads: reads, emits: emits, folds: folds, reacts: reacts, dispatches: dispatches, interactive: interactive, readOnly: Set(), domainOf: ONE_DOMAIN },
       guarded&#x27; = gd,
       owner&#x27; = placement,
       log&#x27; = [], substrate&#x27; = emptyView,
