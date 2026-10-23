@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pytest
 import yaml
-from dizzy.feat_schema import FeatureDefinition
 from pydantic import ValidationError
 
+from dizzy_topology.feat import FeatureDefinition
 from dizzy_topology.topology_loader import _SINGULAR, load_topology, validate_topology
 from dizzy_topology.topology_schema import Selector, Topology
 
@@ -21,6 +21,16 @@ def _write(tmp_path: Path, content: str) -> Path:
 
 
 # --- schema drift ---------------------------------------------------------------------
+
+# DIZZY's feat schema at the pinned commit (`just dizzy` fetches it). These tests are
+# where this package meets the feat format it reads without importing DIZZY.
+_DIZZY_FEAT_SCHEMA = Path(__file__).parents[2] / ".dizzy/dizzy/src/dizzy/def/feat.yaml"
+
+
+def _dizzy_feat_classes() -> dict:
+    assert _DIZZY_FEAT_SCHEMA.exists(), f"{_DIZZY_FEAT_SCHEMA} is missing: run `just dizzy`"
+    return yaml.safe_load(_DIZZY_FEAT_SCHEMA.read_text())["classes"]
+
 
 # Every feature-file section that is NOT a placeable element, and why. The pairing with
 # _SINGULAR below is the point: a section is placeable or it is excluded here, and the
@@ -50,7 +60,7 @@ def test_every_feat_section_is_placed_or_deliberately_excluded() -> None:
     cheap outcome — someone reads the two sets and decides which side the new section is
     on. The expensive outcome is silent misplacement in generated deployment wiring.
     """
-    declared = set(FeatureDefinition.model_fields)
+    declared = set(_dizzy_feat_classes()["FeatureDefinition"]["attributes"])
     placeable = set(_SINGULAR)
     accounted = placeable | set(_NOT_PLACEABLE)
 
@@ -68,6 +78,25 @@ def test_every_feat_section_is_placed_or_deliberately_excluded() -> None:
     )
     # Disjoint, or a section could be quietly listed as both.
     assert not (placeable & set(_NOT_PLACEABLE))
+
+
+def test_the_feat_reader_reads_fields_dizzy_declares() -> None:
+    """`feat.py` ignores keys it does not model, so a field DIZZY renamed would read as
+    its default (no queries, no model) and placement would go quietly wrong. Every field
+    the reader models must still be one DIZZY's schema declares, on the same class."""
+    classes = _dizzy_feat_classes()
+    sections = classes["FeatureDefinition"]["attributes"]
+    missing = []
+    for section, field in FeatureDefinition.model_fields.items():
+        if section not in sections:
+            missing.append(section)
+            continue
+        dizzy_class = sections[section]["range"]
+        model = field.annotation.__args__[0]
+        assert model.__name__ == dizzy_class, (section, model.__name__, dizzy_class)
+        declared = set(classes[dizzy_class]["attributes"])
+        missing += [f"{dizzy_class}.{name}" for name in model.model_fields if name not in declared]
+    assert not missing, f"feat.py reads {missing}, which DIZZY's feat schema does not declare"
 
 
 # --- load ---------------------------------------------------------------------------

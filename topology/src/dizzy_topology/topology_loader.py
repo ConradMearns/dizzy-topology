@@ -1,13 +1,15 @@
 """Topology loader — YAML ingestion, Pydantic validation, and cross-reference checks."""
 
+import logging
 from fnmatch import fnmatchcase
 from pathlib import Path
 
 import yaml
-from dizzy.feat_schema import FeatureDefinition
-from dizzy.logger import logger
 
+from dizzy_topology.feat import FeatureDefinition
 from dizzy_topology.topology_schema import ConsumerGroup, GroupDefaults, Selector, Topology
+
+logger = logging.getLogger("dizzy_topology")
 
 # The kinds a topology places, in declaration order. Queries are absent by construction:
 # their placement is a question about the read substrate, not about the log (rule 4).

@@ -13,10 +13,9 @@ import textwrap
 from pathlib import Path
 
 import pytest
-from dizzy.feat_loader import load_feat
-from dizzy.feat_schema import FeatureDefinition
 from syrupy.assertion import SnapshotAssertion
 
+from dizzy_topology.feat import FeatureDefinition, load_feat
 from dizzy_topology.profiler import (
     aggregate,
     bottleneck_totals,

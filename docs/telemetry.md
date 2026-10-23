@@ -1,6 +1,6 @@
 # Telemetry
 
-The topology engine traces itself the way the Simple Engine does (`ext/dizzy/docs/design/simple-engine.md`
+The topology engine traces itself the way the Simple Engine does (DIZZY's `docs/design/simple-engine.md`
 §9), and adds what lanes and pools introduce. There is one trace per engine run, rooted
 at `dizzy.run`, with span ids derived from the run's session and the log's ids. Every
 finished span goes to `<data>/telemetry/<run>.jsonl`, and to an OTLP/HTTP collector when
@@ -121,7 +121,7 @@ reports reaches a decision.
   derived from what spans already hold. Add them when a dashboard needs them.
 - **Logs**, deliberately. Errors are on spans already (status, `dizzy.error`). A
   procedure's own logging isn't captured.
-- **The profiler.** `dizzy-topology profile` still reads v2's `JsonlBusSink` records. It
+- **The profiler.** `dizzy-topology profile` still reads `JsonlBusSink` records. It
   should read these spans instead, since everything it computes is in them, with lanes
   and pool waits added (`dizzy-topology-964a`).
 

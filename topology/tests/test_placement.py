@@ -2,10 +2,10 @@ import json
 import textwrap
 from pathlib import Path
 
-from dizzy.feat_schema import FeatureDefinition
 from typer.testing import CliRunner
 
 from dizzy_topology.cli import app
+from dizzy_topology.feat import FeatureDefinition
 from dizzy_topology.placement import FORMAT, resolve_placement
 from dizzy_topology.topology_loader import validate_topology
 from dizzy_topology.topology_schema import Topology

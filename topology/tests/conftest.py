@@ -1,8 +1,8 @@
 from pathlib import Path
 
 import pytest
-from dizzy.feat_loader import load_feat
-from dizzy.feat_schema import FeatureDefinition
+
+from dizzy_topology.feat import FeatureDefinition, load_feat
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 

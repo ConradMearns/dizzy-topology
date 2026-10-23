@@ -20,8 +20,8 @@ from collections.abc import Collection
 from dataclasses import dataclass, field
 from datetime import datetime
 
-from dizzy.feat_schema import FeatureDefinition
-from dizzy.validation import pascal_case as _pascal
+from dizzy_topology.feat import FeatureDefinition
+from dizzy_topology.feat import pascal_case as _pascal
 
 # The bucket split of the bottleneck statement. Projections and policies observe the
 # stream and so never leave the fold lane; a procedure joins them the moment it declares

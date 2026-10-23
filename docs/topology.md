@@ -1,15 +1,11 @@
 # Deployment topology — design notes
 
 !!! warning "Experimental"
-    This describes work on the `engine-topology` branch. The single-machine half
-    ships: `validate_topology` runs inside `dizzy generate wiring` and fails the
-    build, the wiring emits a placement table and the two builders that bind it,
-    and `dizzy.engine.st.executor.LaneExecutor` serves it. The multi-node half is
-    not deployed: `engine/groups.py` implements a group worker and
-    `engine/cursors.py` durable cursor stores, but no wiring emits one package per
-    group, nothing constructs either of them, and the only transport is the
-    in-process doorbell. The open question at the bottom is open, and it is
-    deliberately not in the site nav.
+    The single-machine half runs: `dizzy-topology place` validates a topology and
+    resolves it to `placement.json`, and `TopologyEngine` serves it with inline and
+    pool lanes. The multi-node half (consumer groups, transports, per-group cursors)
+    is not built. The README's *Status* says what runs. The open question at the
+    bottom is open.
 
 A feature-file says what a system *is*. It does not say where any of it runs, and
 it should not — which elements share a process is a property of a deployment, not

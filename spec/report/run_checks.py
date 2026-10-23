@@ -161,7 +161,7 @@ meta = dict(
   generated=time.strftime("%Y-%m-%d %H:%M:%S"),
   quint=subprocess.run([QUINT, "--version"], capture_output=True, text=True).stdout.strip(),
   samples=SAMPLES,
-  dizzy=subprocess.run(["git", "-C", str(ROOT.parent / "ext" / "dizzy"), "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip(),
+  dizzy=subprocess.run(["git", "-C", str(ROOT.parent / ".dizzy"), "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip(),
 )
 (OUT / "results.json").write_text(json.dumps(dict(meta=meta, checks=results), indent=2))
 print(f"\n{sum(r['passed'] for r in results)}/{len(results)} passed → report/results.json")

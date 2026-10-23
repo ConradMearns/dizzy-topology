@@ -78,5 +78,3 @@ element body under `lib/python-uv/<kind>/<name>/src/`, and `run.py`. Everything 
 generated: `gen_def/`, `gen_int/`, each element's `pyproject.toml`, `wiring/`, the
 vendored `dizzy-kit/`, `dizzy-engine/` and `dizzy-topology-engine/`, `placement.json` and
 `uv.lock`. `generate libraries` keeps a body that already exists.
-
-Ported from DIZZY's `engine-topology-v2` branch, where it ran on the old `LaneExecutor`.

@@ -1,7 +1,7 @@
 // specs/engine.qnt — Spec 4: the topology engine (engine/src/dizzy_topology_engine),
 // over an ARBITRARY feature graph and an arbitrary rule-3 placement.
 //
-// The topology engine is the Simple Engine (ext/dizzy/docs/design/simple-engine.md)
+// The topology engine is the Simple Engine (DIZZY's docs/design/simple-engine.md)
 // with lanes: an inline lane served on the host thread, and a pool lane whose
 // procedures run in worker processes while the host thread keeps claiming. Unlike
 // st.qnt (the pre-Simple-Engine `dizzy.engine.st`), the store's transaction

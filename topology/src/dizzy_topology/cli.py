@@ -1,21 +1,17 @@
 """``dizzy-topology`` — the build-time verbs: check a topology, resolve it to placement
 data for the engine, install the engine into a generated app, and profile a captured run.
-
-Ported from the ``engine-topology-v2`` branch of DIZZY, where the check ran inside
-``dizzy generate wiring`` and ``profile`` was a ``dizzy`` verb.
 """
 
 import json
+import logging
 from pathlib import Path
 from typing import Annotated
 
 import typer
 import yaml
-from dizzy.feat_loader import load_feat, validate_feat
-from dizzy.feat_schema import FeatureDefinition
-from dizzy.logger import logger, setup_logging
 from pydantic import ValidationError
 
+from dizzy_topology.feat import FeatureDefinition, load_feat, validate_feat
 from dizzy_topology.placement import resolve_placement
 from dizzy_topology.profiler import parse_records, render_profile
 from dizzy_topology.topology_loader import load_topology, validate_topology
@@ -23,11 +19,15 @@ from dizzy_topology.topology_schema import Topology
 from dizzy_topology.vendor import VendorError, vendor
 
 app = typer.Typer(no_args_is_help=True)
+logger = logging.getLogger("dizzy_topology")
 
 
 @app.callback()
 def _setup() -> None:
-    setup_logging()
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(message)s"))
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
 
 
 def _load_valid_feat(feat_file: Path) -> FeatureDefinition:

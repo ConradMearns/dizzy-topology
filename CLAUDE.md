@@ -2,24 +2,27 @@
 
 Deployment topology for DIZZY features, as two packages in one uv workspace, plus the
 engine's formal specification in `spec/` (Quint; merged in from `dizzy-quint`). Read
-`README.md` first: it has the layout, how the engine works, and the migration status from
-DIZZY's `engine-topology-v2` branch. `docs/topology.md` is the design.
+`README.md` first: it has the layout, how the engine works, and the status of each
+piece. `docs/topology.md` is the design.
 
 ## Boundaries (the reason this repo exists)
 
-- **`topology/` (`dizzy_topology`) is build time.** It depends on DIZZY and may import
-  any of it (`feat_schema`, `feat_loader`, `validation`, `logger`). What it hands to run
-  time is data: `placement.json` (`dizzy-topology place`).
+- **`topology/` (`dizzy_topology`) is build time.** It depends on no DIZZY package
+  (`topology/tests/test_boundary.py` enforces this). It reads the slice of a feat a
+  placement needs itself (`feat.py`) and ignores the rest. DIZZY owns the feat format
+  and validates it. Two drift guards in `test_topology_loader.py` hold `feat.py` to
+  DIZZY's feat schema at the pin. What it hands to run time is data: `placement.json`
+  (`dizzy-topology place`).
 - **`engine/` (`dizzy_topology_engine`) is run time, a dependency of apps built on
   DIZZY.** It may import only `dizzy_kit` and `dizzy_engine`, which `dizzy generate`
   vendors into every app. It never imports DIZZY or `dizzy_topology`
   (`engine/tests/test_boundary.py` enforces this). It never reads a feat or a
   topology.yaml, only a placement.
-- **The engine builds on the Simple Engine** (`ext/dizzy/docs/design/simple-engine.md`;
+- **The engine builds on the Simple Engine** (`.dizzy/docs/design/simple-engine.md`;
   §10 names this package). It keeps the same store format, ids and `Domain` tables. An
   inline lane is the Simple Engine's own `_unit`, inherited. Every store write happens on
   the thread that calls `run()`; pool children are pure.
-- DIZZY's rules apply here too (`ext/dizzy/CLAUDE.md`, "The rule"): no shadow state, no
+- DIZZY's rules apply here too (`.dizzy/CLAUDE.md`, "The rule"): no shadow state, no
   hidden reactions (so no automatic retry), and an engine interprets a feat and is never
   one itself.
 - `topology/src/dizzy_topology/topology_schema.py` is generated. Edit
@@ -69,21 +72,27 @@ store transactions. **Change one, change the other in the same commit.**
 ## Issue tracking
 
 `sd` (Seeds) at the repo root: the roadmap merged from dizzy-quint (ids `dizzy-quint-*`)
-plus this repo's own. DIZZY's tracker is separate: `just dizzy-seeds ...`.
+plus this repo's own. DIZZY's tracker is separate and lives in DIZZY's repo.
 
-## DIZZY submodule (`ext/dizzy`) and `vendor/`
+## DIZZY (`.dizzy/`) and `vendor/`: development and tests only
 
-DIZZY is a git submodule at `ext/dizzy`. Its commit pointer is the version pin.
+Neither package depends on DIZZY. This repo needs it for two things: the engine's
+tests run on DIZZY's run-time packages, and `just foogle` / `just assay` run
+`dizzy generate`. The pin is `dizzy_rev` in the `justfile`, a commit on PNNL/dizzy.
 
-- After cloning, or if `ext/dizzy` is empty: `just dizzy-init` (also runs `just vendor`).
-- `vendor/python/{dizzy-kit,dizzy-engine}` are copied from the submodule by `just vendor`,
-  as `dizzy generate wiring` copies them into an app. They are gitignored. **Re-run
-  `just vendor` after bumping `ext/dizzy`.** They can't be workspace members in place: uv
-  stops at `ext/dizzy` (a non-workspace project) and their `workspace = true` sources fail.
-- Before editing DIZZY: `just dizzy-dev` (checks out a branch, so commits don't land on a
-  detached HEAD). Push and re-pin: `just dizzy-push`, then commit the pointer here.
-  **Always push the submodule before pushing this repo.**
-- DIZZY's own issues go in its tracker: `just dizzy-seeds ...`.
+- `just dizzy` fetches DIZZY at the pin into `.dizzy/` and copies
+  `vendor/python/{dizzy-kit,dizzy-engine}` out of it, as `dizzy generate wiring` copies
+  them into an app. Both are gitignored. `just test`, `lint`, `foogle` and `assay` run
+  it first. It is a no-op when both are at the pin. Run it after cloning and after
+  bumping `dizzy_rev`.
+- The run-time packages can't be git sources: their `workspace = true` sources fail
+  outside a workspace. That is why they're copied in as workspace members.
+- `dizzy generate` runs in DIZZY's own locked env (`uv run --project .dizzy`), never in
+  this workspace.
+- To change DIZZY alongside this repo: commit in a DIZZY checkout, point `dizzy_rev` at
+  the commit and fetch with `DIZZY_REPO=<path to the checkout> just dizzy`. **Push the
+  commit to PNNL/dizzy before pushing a re-pin here.** Without it nobody else can fetch
+  the pin.
 
 ## Quality gates
 

@@ -1,18 +1,27 @@
 # dizzy-topology
 
-Deployment topology for [DIZZY](https://github.com/ConradMearns/dizzy) features: **where**
+Deployment topology for [DIZZY](https://github.com/PNNL/dizzy) features: **where**
 a feature's elements run, never **what** they do (that is the feature-file). Two packages,
 one on each side of the build/run line, and the formal specification that proves the
 engine correct:
 
 | Package | When | Depends on | What it does |
 |---|---|---|---|
-| `topology/` → `dizzy-topology` | build time | DIZZY | Validates a `topology.yaml` against the feature-file, resolves it to `placement.json`, installs the engine into a generated app (`vendor`), profiles a captured run. |
+| `topology/` → `dizzy-topology` | build time | Nothing of DIZZY: it reads the slice of a feature-file it needs itself (`feat.py`; a test enforces it). | Validates a `topology.yaml` against the feature-file, resolves it to `placement.json`, installs the engine into a generated app (`vendor`), profiles a captured run. |
 | `engine/` → `dizzy-topology-engine` | run time | `dizzy_kit`, `dizzy_engine` (what `dizzy generate` vendors into every app). **Never DIZZY** (a test enforces it). | The topology engine: the Simple Engine with lanes and process pools. |
 | `spec/` | — | Quint (+ Apalache) | The engine's formal specification (`spec/specs/engine.qnt`) and the earlier `st`/`groups` specs, merged in from `dizzy-quint` with its history. See [`spec/README.md`](spec/README.md). |
 
 The design is in [`docs/topology.md`](docs/topology.md). The Simple Engine spec it
-builds on is `ext/dizzy/docs/design/simple-engine.md`, whose §10 names this package.
+builds on is DIZZY's [`docs/design/simple-engine.md`](https://github.com/PNNL/dizzy/blob/main/docs/design/simple-engine.md),
+whose §10 names this package.
+
+DIZZY itself is needed only to develop and test this repo: the engine's tests run on
+DIZZY's run-time packages, and `just foogle` / `just assay` run `dizzy generate`.
+`just dizzy` fetches DIZZY at the commit pinned in the `justfile` (`dizzy_rev`) into
+`.dizzy/`, and copies its run-time packages into `vendor/python/` as `dizzy generate
+wiring` copies them into an app. `just test`, `just foogle` and `just assay` run it
+first. Set `DIZZY_REPO` to fetch from elsewhere, e.g. a local checkout of DIZZY you are
+changing alongside this repo.
 
 ## Using it in a DIZZY Python app
 
@@ -20,18 +29,18 @@ builds on is `ext/dizzy/docs/design/simple-engine.md`, whose §10 names this pac
 below from a clean copy. Set this repo up once:
 
 ```bash
-git clone --recurse-submodules <this repo> && cd dizzy-topology
-just dizzy-init && uv sync
+git clone <this repo> && cd dizzy-topology
+just dizzy && uv sync
 ```
 
 **1. Generate the app**, as for any DIZZY Python app. The app runs inside the uv
-workspace this writes at `<app>/lib/python-uv/`. (`D` is this repo; both tools run from
-its environment.)
+workspace this writes at `<app>/lib/python-uv/`. (`D` is this repo. Any DIZZY with the
+Simple Engine works; this uses the pinned one `just dizzy` fetched.)
 
 ```bash
-uv run --project $D dizzy generate static    app.feat.yaml <app>
-uv run --project $D dizzy generate libraries app.feat.yaml <app>
-uv run --project $D dizzy generate wiring    app.feat.yaml <app>
+uv run --project $D/.dizzy dizzy generate static    app.feat.yaml <app>
+uv run --project $D/.dizzy dizzy generate libraries app.feat.yaml <app>
+uv run --project $D/.dizzy dizzy generate wiring    app.feat.yaml <app>
 ```
 
 **2. Install the engine into it.** DIZZY's runtime packages aren't on a package index:
@@ -234,12 +243,12 @@ Known, deliberate or not yet done, in one place. Each links to where it's explai
   on a lane's first claim (*Telemetry*).
 - **Only part of a topology runs.** Consumer groups, `max_in_flight`, `transport`,
   `cursors:` and `retry:` are validated but not executed. `retry:` conflicts with the
-  Simple Engine's no-automatic-retry rule (*Migration*, below).
+  Simple Engine's no-automatic-retry rule (*Status*, below).
 
 **Telemetry** ([`docs/telemetry.md`](docs/telemetry.md))
 - **Two metrics, no logs:** the queue counters only, with no unit-count or duration
   metrics (spans hold those). A procedure's own logging isn't captured.
-- **The profiler still reads v2's capture format,** not these spans
+- **The profiler still reads `JsonlBusSink` records,** not these spans
   (`dizzy-topology-964a`).
 - **Worker times assume one machine's clock.** A worker's process start is exact only on
   Linux.
@@ -248,14 +257,12 @@ Known, deliberate or not yet done, in one place. Each links to where it's explai
   internals.** A change to that tracer in DIZZY could break them, and the telemetry tests
   would show it.
 
-**Not migrated from v2:** the tutorial (it teaches the old `LaneExecutor`), consumer
-groups, and v2's feat validation rules, which belong upstream in DIZZY.
-
 ## Checks
 
-- `just test` — the validator, placement and profiler suites (ported from v2), and the
+- `just test` — the validator, placement and profiler suites, and the
   engine suite: inline matches the Simple Engine exactly, pools, priority, recovery,
-  failure and retry, workers dying with their host, and the import boundary.
+  failure and retry, workers dying with their host, and both import boundaries. Two
+  drift guards hold the feat reader to DIZZY's feat schema at the pin.
   It also replays the spec's traces on the engine (`test_mbt.py`, needs `quint` on
   `PATH`; skipped without it).
 - `just spec-engine` — simulate `engine.qnt`, then prove it to depth 5 (~1 min).
@@ -270,30 +277,24 @@ groups, and v2's feat validation rules, which belong upstream in DIZZY.
   model, also across crash runs. It puts `poke_snarf`, a reader of the read-only
   `gronk_values`, on a pool, and checks that the reference file refuses a write.
 
-## Migration from `engine-topology-v2`
+## Status
 
-That branch forked DIZZY at `2262b04` (0.1.1). Since then main has **replaced the engine
-the branch extended** (`dizzy.engine.loop`, `st`, `mp`, the DAG store, `HostApp`) with the
-Simple Engines. So the runtime half is being **re-founded** on the Simple Engine store
-format, not copied over.
+What runs, what is only validated, and what is open. The run-time half is built on the
+Simple Engine store format.
 
-| v2 piece | Status |
+| Piece | Status |
 |---|---|
-| `def/topology.yaml`, `topology_schema.py`, `topology_loader.py` (rules 1–6, waivers) + tests | **Migrated** → `topology/` |
-| Lane placement (`LANES`/`COMMAND_PLACEMENT` emitted into the wiring) | **Migrated** as `dizzy-topology place` → `placement.json`. Keyed on command feat name, not class name. DIZZY's wiring generator is untouched. |
-| `st/executor.py` LaneExecutor: inline + pool lanes, one writer, crash → re-run | **Re-founded** as `TopologyEngine` |
-| Two-level command priority (`st/command_queue`) | **Re-founded** (claim order) |
+| `topology.yaml` schema and validator (rules 1–6, waivers) | **Done:** `topology/` |
+| Lane placement | **Done:** `dizzy-topology place` → `placement.json`, keyed on the command's feat name. DIZZY's wiring generator is untouched. |
+| Inline and pool lanes, one writer, crash → re-run | **Done:** `TopologyEngine` |
+| Two-level command priority | **Done** (claim order) |
 | Queue intent dedup, receipts, typed no-result outcomes | **Covered by the Simple Engine:** derived/host-supplied command ids, the `attempts` table, `declined` + reason |
-| `cursors.py` cursor store | **Covered by the Simple Engine** `cursors` table, for the one cursor per domain it has |
-| `groups.py` consumer-group worker (per-group cursors, doorbell transports). v2 itself never wired it. | **Not started.** Needs per-group cursors on the shared store. |
+| Durable cursors | **Covered by the Simple Engine** `cursors` table, for the one cursor per domain it has |
+| Consumer groups (per-group cursors, doorbell transports) | **Not started.** Needs per-group cursors on the shared store. `spec/specs/groups.qnt` is their design spec. |
 | `max_in_flight`, `transport`, `cursors:` topology fields | **Validated but not executed** yet |
 | `retry:` topology field (automatic retry with backoff) | **Open question.** Conflicts with Simple Engine §11.2 and DIZZY's rule that a retry is a declared reaction. |
-| `profiler.py` + `profile` verb | **Migrated**, but its input (`JsonlBusSink` records) has no producer on main. The engine's trace spans (`telemetry/*.jsonl`, now with lanes, pool waits and worker starts) should replace it (`dizzy-topology-964a`). |
-| `dizzy-quint` (Quint specs of `st` and `groups`) | **Merged** into `spec/` with history. `st.qnt` is kept as the baseline. `groups.qnt` is the design spec for consumer groups when they are re-founded. New: `engine.qnt` and the conformance bridge. |
-| Telemetry (`JsonlBusSink`, lane records) | **Re-founded** on the Simple Engine's trace (§9): lanes, pooled units claim to settle, worker time, pools and workers, and each lane's queue as up/down counters ([`docs/telemetry.md`](docs/telemetry.md)). |
+| `profile` verb | **Works**, but its input (`JsonlBusSink` records) has no producer in DIZZY. It should read the engine's trace spans (`telemetry/*.jsonl`, with lanes, pool waits and worker starts) instead (`dizzy-topology-964a`). |
+| Telemetry | **Done** on the Simple Engine's trace (§9): lanes, pooled units claim to settle, worker time, pools and workers, and each lane's queue as up/down counters ([`docs/telemetry.md`](docs/telemetry.md)). |
 | Telemetry injection into elements, query-access shapes | **Not started.** |
-| Feat validation rules (unique names per section, one procedure per command, command class collisions) | **Belongs upstream** in DIZZY's `validate_feat`. Not on main. |
-| `examples/assay` | **Migrated** to `examples/assay`: current DIZZY, this engine, installed with `dizzy-topology vendor`, plus a read-only reference panel. `just assay`. |
-| Tutorial | **Not migrated.** It teaches the old engine's `LaneExecutor`. |
-
-Read the v2 sources with `git -C ext/dizzy show origin/engine-topology-v2:<path>`.
+| Feat validation rules (unique names per section, one procedure per command, command class collisions) | **Belong upstream** in DIZZY's `validate_feat`. |
+| `examples/assay` | **Done:** current DIZZY, this engine, installed with `dizzy-topology vendor`, plus a read-only reference panel. `just assay`. |

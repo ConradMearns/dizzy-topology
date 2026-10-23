@@ -8,10 +8,9 @@ Placement is generated data and never a hand-written callable: a callable is a s
 place the deployment is described, and it drifts from the topology silently.
 
 Keyed on the command's FEAT NAME, because that is what the Simple Engine store records
-in ``commands.type`` and what the kit's ``Domain`` dispatches by. (On
-``engine-topology-v2`` it was the command class name, read off ``type(command)``.) A
-command's lane is its procedure's group: a command is not in the log, so the only thing
-that gives it a home is who runs it.
+in ``commands.type`` and what the kit's ``Domain`` dispatches by. A command's lane is its
+procedure's group: a command is not in the log, so the only thing that gives it a home is
+who runs it.
 """
 
 from __future__ import annotations
@@ -19,8 +18,7 @@ from __future__ import annotations
 from fnmatch import fnmatchcase
 from typing import Any
 
-from dizzy.feat_schema import FeatureDefinition
-
+from dizzy_topology.feat import FeatureDefinition
 from dizzy_topology.topology_loader import _inherited, group_of
 from dizzy_topology.topology_schema import Topology
 

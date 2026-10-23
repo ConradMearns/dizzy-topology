@@ -1,14 +1,14 @@
-foogle_golden := "ext/dizzy/examples/foogle_shindig/conformance/log.jsonl"
+foogle_golden := ".dizzy/examples/foogle_shindig/conformance/log.jsonl"
 
 # Run the test suite
-test:
+test: dizzy
     uv run pytest
 
 # Re-snapshot intentionally changed output
 test-update:
     uv run pytest --snapshot-update
 
-lint:
+lint: dizzy
     uv run ruff check .
 
 # The Simple Engine conformance scenario (DIZZY's foogle_shindig) on the topology engine:
@@ -18,28 +18,28 @@ foogle: foogle-gen
     uv run --project .build/foogle/lib/python-uv python engine/conformance/foogle.py {{foogle_golden}}
     uv run --project .build/foogle/lib/python-uv python engine/conformance/foogle.py {{foogle_golden}} .build/foogle/placement.json
 
-# Generate foogle_shindig from the pinned submodule into .build/, install the engine into
-# it (as an app would), and place it
-foogle-gen:
+# Generate foogle_shindig from the pinned DIZZY into .build/, install the engine into it
+# (as an app would), and place it. `dizzy generate` runs in DIZZY's own locked env.
+foogle-gen: dizzy
     rm -rf .build/foogle
     mkdir -p .build
-    cp -r ext/dizzy/examples/foogle_shindig .build/foogle
-    uv run dizzy generate static .build/foogle/foogle_shindig.feat.yaml .build/foogle
-    uv run dizzy generate libraries .build/foogle/foogle_shindig.feat.yaml .build/foogle
-    uv run dizzy generate wiring .build/foogle/foogle_shindig.feat.yaml .build/foogle
+    cp -r .dizzy/examples/foogle_shindig .build/foogle
+    uv run --project .dizzy dizzy generate static .build/foogle/foogle_shindig.feat.yaml .build/foogle
+    uv run --project .dizzy dizzy generate libraries .build/foogle/foogle_shindig.feat.yaml .build/foogle
+    uv run --project .dizzy dizzy generate wiring .build/foogle/foogle_shindig.feat.yaml .build/foogle
     uv run dizzy-topology vendor .build/foogle
     uv run dizzy-topology place .build/foogle/foogle_shindig.feat.yaml engine/conformance/foogle.topology.yaml -o .build/foogle/placement.json
 
 # The worked example: a DIZZY Python app (examples/assay) generated from scratch, the
 # topology engine installed into it with `dizzy-topology vendor`, then run all inline and
 # under its topology. Both runs must reach the same summary.
-assay:
+assay: dizzy
     rm -rf .build/assay
     mkdir -p .build
     cp -r examples/assay .build/assay
-    uv run dizzy generate static .build/assay/assay.feat.yaml .build/assay
-    uv run dizzy generate libraries .build/assay/assay.feat.yaml .build/assay
-    uv run dizzy generate wiring .build/assay/assay.feat.yaml .build/assay
+    uv run --project .dizzy dizzy generate static .build/assay/assay.feat.yaml .build/assay
+    uv run --project .dizzy dizzy generate libraries .build/assay/assay.feat.yaml .build/assay
+    uv run --project .dizzy dizzy generate wiring .build/assay/assay.feat.yaml .build/assay
     uv run dizzy-topology vendor .build/assay
     uv run dizzy-topology place .build/assay/assay.feat.yaml .build/assay/topology.yaml -o .build/assay/placement.json
     uv run --project .build/assay/lib/python-uv python .build/assay/run.py
@@ -92,35 +92,33 @@ spec-full:
 
 # Regenerate the pydantic topology schema from its LinkML source
 gen-topology-pydantic:
-    uv run gen-pydantic topology/src/dizzy_topology/def/topology.yaml > topology/src/dizzy_topology/topology_schema.py
+    uvx --from 'linkml==1.11.1' gen-pydantic topology/src/dizzy_topology/def/topology.yaml > topology/src/dizzy_topology/topology_schema.py
 
 
-# DIZZY submodule (ext/dizzy)
+# DIZZY, for development and tests only: the engine's tests need DIZZY's run-time
+# packages, and `just foogle` / `just assay` need its `dizzy generate`. Neither package
+# depends on DIZZY. Bump `dizzy_rev` to re-pin. DIZZY_REPO points the fetch elsewhere,
+# e.g. a local checkout while changing DIZZY alongside this repo.
 
-# Fetch/refresh the DIZZY submodule at the pinned revision (run after cloning)
-dizzy-init:
-    git submodule update --init --recursive ext/dizzy
-    just vendor
+dizzy_rev := "1527342d14a64f0677a644a4c9b23e139ac4e83e"
+dizzy_repo := env("DIZZY_REPO", "https://github.com/PNNL/dizzy")
 
-# Copy DIZZY's Python runtime packages (dizzy-kit, dizzy-engine) out of the pinned
-# submodule into vendor/python/, as `dizzy generate wiring` does for an app. Re-run
-# after bumping ext/dizzy.
-vendor:
-    rm -rf vendor/python
-    mkdir -p vendor/python
-    cp -r ext/dizzy/dizzy/src/dizzy/runtimes/python/dizzy-kit vendor/python/
-    cp -r ext/dizzy/dizzy/src/dizzy/runtimes/python/dizzy-engine vendor/python/
-
-# Switch the submodule to a working branch before editing (avoids detached HEAD)
-dizzy-dev branch="main":
-    cd ext/dizzy && git checkout {{branch}}
-
-# Run seeds against DIZZY's own tracker, e.g. `just dizzy-seeds ready`
-dizzy-seeds *args:
-    cd ext/dizzy && sd {{args}}
-
-# Push DIZZY changes upstream, then stage the new pointer here to re-pin
-dizzy-push:
-    cd ext/dizzy && git push
-    git add ext/dizzy
-    @echo "DIZZY pushed. Submodule pointer staged — commit it here to re-pin."
+# Fetch DIZZY at the pin into .dizzy/ and copy its Python runtime packages (dizzy-kit,
+# dizzy-engine) into vendor/python/, as `dizzy generate wiring` does for an app. Run after
+# cloning and after bumping `dizzy_rev`; a no-op when both are already at the pin.
+dizzy:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ "$(git -C .dizzy rev-parse HEAD 2>/dev/null)" != "{{dizzy_rev}}" ]; then
+      rm -rf .dizzy
+      git init -q .dizzy
+      git -C .dizzy fetch -q --depth 1 "{{dizzy_repo}}" "{{dizzy_rev}}"
+      git -C .dizzy -c advice.detachedHead=false checkout -q FETCH_HEAD
+    fi
+    if [ "$(cat vendor/.dizzy_rev 2>/dev/null)" != "{{dizzy_rev}}" ]; then
+      rm -rf vendor/python
+      mkdir -p vendor/python
+      cp -r .dizzy/dizzy/src/dizzy/runtimes/python/dizzy-kit vendor/python/
+      cp -r .dizzy/dizzy/src/dizzy/runtimes/python/dizzy-engine vendor/python/
+      echo "{{dizzy_rev}}" > vendor/.dizzy_rev
+    fi
